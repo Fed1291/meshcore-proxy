@@ -1,0 +1,200 @@
+<svg class="app" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 470" role="img" aria-label="A channel chat window: the header with the channel and its region, a day separator, a received message with its sender, a reply of ours with the message it answers, its delivery line, and the box to write with the send button">
+<style>
+
+
+:root {
+  --bg: #f7f7f4; --panel: #ffffff; --ink: #1d1f21; --dim: #6b6f75; --line: #dcdcd6;
+  --accent: #b7791f; --accent-soft: #fbf1dc; --cyan: #127a8a; --cyan-soft: #e1f2f4;
+  --good: #2f8a3e; --good-soft: #e5f3e7; --warn: #b7791f; --bad: #c0392b; --bad-soft: #fbe6e3;
+  --violet: #6b4fbb; --violet-soft: #eee9fa;
+  --term: #15171a; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #3a3f45;
+  --code-bg: #efefea;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+    --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+    --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+    --violet: #a993f0; --violet-soft: #231d36;
+    --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+    --code-bg: #24272b;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+a { color: var(--cyan); }
+code, kbd, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: .92em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+kbd { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 5px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); white-space: nowrap; }
+main { max-width: 1000px; margin: 0 auto; padding: 0 16px 64px; }
+
+
+header.top { padding: 24px 0 14px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); margin: 0; }
+nav.tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; scrollbar-width: thin; }
+nav.tabs button { font: inherit; font-size: .95rem; color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: 8px 14px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button .n { display: inline-block; width: 1.4em; color: var(--accent); font-weight: 700; }
+section.panel { padding-top: 26px; }
+.js section.panel:not(.on) { display: none; }
+
+
+h2 { font-size: 1.5rem; margin: 0 0 4px; }
+h3 { font-size: 1.12rem; margin: 30px 0 8px; padding-left: 10px; border-left: 4px solid var(--accent); }
+h4 { font-size: 1rem; margin: 20px 0 6px; }
+p { margin: 8px 0; }
+.sub { color: var(--dim); margin: 0 0 14px; }
+.good { color: var(--good); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+
+
+.note, .tip, .alert { border-left: 4px solid; padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+.note { background: var(--accent-soft); border-color: var(--accent); }
+.tip { background: var(--good-soft); border-color: var(--good); }
+.alert { background: var(--bad-soft); border-color: var(--bad); }
+.note b:first-child, .tip b:first-child, .alert b:first-child { margin-right: 4px; }
+
+
+.where { display: inline-block; font: 600 .72rem/1 "IBM Plex Sans", "Segoe UI", sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 999px; vertical-align: middle; }
+.where.pi { background: var(--cyan-soft); color: var(--cyan); }
+.where.pc { background: var(--accent-soft); color: var(--accent); }
+.where.phone { background: var(--violet-soft); color: var(--violet); }
+
+
+.cmd { position: relative; margin: 8px 0; }
+.cmd pre { background: var(--term); color: var(--term-ink); padding: 12px 70px 12px 14px; border-radius: 8px;
+  overflow-x: auto; margin: 0; line-height: 1.5; }
+.cmd pre .c { color: var(--term-dim); }
+.cmd button.copy { position: absolute; top: 8px; right: 8px; font: 600 .75rem "IBM Plex Sans", sans-serif;
+  background: #2a2e33; color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+.cmd button.copy:hover { border-color: var(--accent); }
+.cmd button.copy.done { color: #111; background: var(--good); border-color: var(--good); }
+
+
+ol.steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+ol.steps > li { counter-increment: step; position: relative; padding: 14px 16px 14px 60px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); color: #111; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps > li > h4 { margin: 3px 0 6px; }
+ol.steps > li > h4 .where { margin-left: 6px; }
+
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card b { display: block; margin-bottom: 4px; }
+.card p { margin: 0; color: var(--dim); font-size: .94rem; }
+
+
+.wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--code-bg); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.w { white-space: normal; }
+
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips a { font-family: "IBM Plex Mono", monospace; font-size: .85rem; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); padding: 3px 10px; border-radius: 4px; }
+.chips a:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+figure { margin: 16px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--dim); font-size: .88rem; margin-top: 6px; }
+footer { margin-top: 56px; color: var(--dim); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+
+.s-term { fill: var(--term); }
+.s-box { fill: none; stroke: var(--term-line); stroke-width: 1.5; }
+.s-t { fill: var(--term-ink); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-td { fill: var(--term-dim); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-ta { fill: var(--accent); font: 600 13px "IBM Plex Mono", Consolas, monospace; }
+.s-tc { fill: var(--cyan); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-tab { fill: var(--accent); }
+.s-tabt { fill: #111; font: 700 12px "IBM Plex Mono", Consolas, monospace; }
+.s-good { fill: var(--good); } .s-warn { fill: var(--warn); } .s-bad { fill: var(--bad); }
+
+.s-goodt { fill: var(--good); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-warnt { fill: var(--warn); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-badt { fill: var(--bad); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-lc { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.s-ink { fill: var(--ink); font: 600 14px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-dim { fill: var(--dim); font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-line { stroke: var(--dim); stroke-width: 2; fill: none; }
+.s-acc { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.s-node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+.s-hub { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.s-pill { fill: #6b4fbb; } .s-pillt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+.s-reg { fill: #b04fa0; } .s-regt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+
+svg.app { border-radius: 10px; border: 1px solid var(--line); }
+.a-bg { fill: #16181d; } .a-panel { fill: #1c1f26; } .a-card { fill: #242831; } .a-hover { fill: #2c313c; }
+.a-edge { fill: none; stroke: #333844; stroke-width: 1; }
+.a-sel { fill: #4f8cff; fill-opacity: .22; stroke: #4f8cff; stroke-width: 1.2; }
+.a-acc { fill: #4f8cff; } .a-good { fill: #4cb87a; } .a-warn { fill: #e8a317; } .a-bad { fill: #e66767; }
+.a-s1 { fill: #3987e5; } .a-s2 { fill: #199e70; } .a-s3 { fill: #d95926; } .a-s4 { fill: #c98500; }
+.a-chat { fill: #6f9fd8; } .a-rpt { fill: #5fae8e; } .a-room { fill: #c9a35a; }
+.a-line { fill: none; stroke: #c98500; stroke-width: 1.6; } .a-grid { stroke: #333844; stroke-width: 1; }
+.a-t { fill: #e6e8ee; font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-b { fill: #e6e8ee; font: 600 13.5px "IBM Plex Sans Condensed", "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-big { fill: #e6e8ee; font: 600 20px "IBM Plex Sans Condensed", "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-h { fill: #e6e8ee; font: 600 19px "IBM Plex Sans Condensed", "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-m { fill: #8d94a5; font: 11.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-f { fill: #5a6070; font: 11px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tg { fill: #4cb87a; font: 11.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tw { fill: #e8a317; font: 11.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-ta { fill: #4f8cff; font: 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tc { fill: #6f9fd8; font: 600 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tr { fill: #5fae8e; font: 600 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-dark { fill: #16181d; font: 600 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  ol.steps > li { padding-left: 52px; }
+  ol.steps > li::before { left: 12px; }
+}
+
+</style>
+
+  <rect class="a-panel" x="0" y="0" width="1000" height="470"/>
+  
+  <rect class="a-bg" x="0" y="0" width="1000" height="62"/>
+  <circle cx="34" cy="31" r="20" fill="#3987e5" fill-opacity=".22"/><text x="34" y="38" text-anchor="middle" style="fill:#3987e5;font:600 20px 'IBM Plex Sans',sans-serif">#</text>
+  <text class="a-b" x="64" y="27" style="font-size:16px">#local</text>
+  <rect class="a-card" x="64" y="35" width="92" height="18" rx="9"/><text class="a-m" x="76" y="48">region · eu-se ▾</text>
+  <rect class="a-edge" x="958" y="20" width="20" height="22" rx="3"/><path d="M962 26 h12 M962 26 v14 h12 v-14 M966 30 v6 M970 30 v6" stroke="#8d94a5" stroke-width="1.4" fill="none"/>
+  
+  <rect class="a-card" x="470" y="76" width="60" height="20" rx="10"/><text class="a-m" x="500" y="90" text-anchor="middle">Today</text>
+  
+  <circle cx="34" cy="122" r="15" fill="#c98500" fill-opacity=".85"/><text class="a-dark" x="34" y="127" text-anchor="middle">V</text>
+  <rect class="a-card" x="58" y="106" width="360" height="74" rx="14"/><rect class="a-edge" x="58" y="106" width="360" height="74" rx="14"/>
+  <text x="72" y="126" style="fill:#c98500;font:600 12.5px 'IBM Plex Sans',sans-serif">Valley node</text>
+  <text class="a-t" x="72" y="146">Anyone near the ridge tonight? Testing the new antenna.</text>
+  <text class="a-f" x="72" y="168">19:42</text><text class="a-tg" x="108" y="168">2 hops</text><text class="a-tg" x="152" y="168">6.5 dB</text><text class="a-m" x="202" y="168">2-byte ids</text><text class="a-m" x="268" y="168">heard 3×</text>
+  
+  <text class="a-m" x="584" y="206">↩ to Valley node</text>
+  <rect x="584" y="212" width="300" height="34" rx="14" fill="#242831" fill-opacity=".55"/>
+  <text x="598" y="232" style="fill:#e6e8ee;fill-opacity:.55;font:12px 'IBM Plex Sans',sans-serif">Anyone near the ridge tonight? Testing the…</text>
+  <rect x="584" y="236" width="396" height="110" rx="14" fill="#2a3d63" stroke="#4f8cff" stroke-opacity=".45"/>
+  <text class="a-t" x="598" y="260">Yes, from 9 pm, I'll be on the north side.</text>
+  <text class="a-f" x="598" y="282">19:44</text>
+  <path d="M600 298 l4 4 l8 -8 M610 302 l8 -8" stroke="#4cb87a" stroke-width="1.8" fill="none"/>
+  <text class="a-tg" x="624" y="302">Sent · heard by 3 repeaters</text><text class="a-m" x="790" y="302">›</text>
+  <text class="a-m" x="598" y="320">Strongest: Hilltop RPT · 9.0 dB</text>
+  <text class="a-m" x="598" y="337">by flood · 2-byte ids</text>
+  
+  <rect class="a-bg" x="0" y="396" width="1000" height="74"/>
+  <text class="a-m" x="20" y="414">Channel · everyone with its key reads it</text>
+  <rect class="a-panel" x="20" y="424" width="900" height="34" rx="17"/><rect class="a-edge" x="20" y="424" width="900" height="34" rx="17"/>
+  <text class="a-f" x="38" y="446">Write a message…</text><text class="a-f" x="900" y="446" text-anchor="end">0/133</text>
+  <circle class="a-acc" cx="954" cy="441" r="18"/><path d="M946 433 l18 8 l-18 8 l3 -8 z" fill="#16181d"/>
+</svg>

@@ -1,0 +1,193 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" role="img" aria-label="The companion radio is connected by Bluetooth, USB or TCP to mcproxy. mcproxy serves the regular MeshCore apps on TCP port 5000, and the apps built around the proxy, web pages and scripts on the data API, HTTPS port 5080">
+<style>
+
+
+:root {
+  --bg: #f7f7f4; --panel: #ffffff; --ink: #1d1f21; --dim: #6b6f75; --line: #dcdcd6;
+  --accent: #b7791f; --accent-soft: #fbf1dc; --cyan: #127a8a; --cyan-soft: #e1f2f4;
+  --good: #2f8a3e; --good-soft: #e5f3e7; --warn: #b7791f; --bad: #c0392b; --bad-soft: #fbe6e3;
+  --violet: #6b4fbb; --violet-soft: #eee9fa;
+  --term: #15171a; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #3a3f45;
+  --code-bg: #efefea;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+    --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+    --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+    --violet: #a993f0; --violet-soft: #231d36;
+    --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+    --code-bg: #24272b;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+a { color: var(--cyan); }
+code, kbd, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: .92em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+kbd { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 5px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); white-space: nowrap; }
+main { max-width: 1000px; margin: 0 auto; padding: 0 16px 64px; }
+
+
+header.top { padding: 24px 0 14px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); margin: 0; }
+nav.tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; scrollbar-width: thin; }
+nav.tabs button { font: inherit; font-size: .95rem; color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: 8px 14px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button .n { display: inline-block; width: 1.4em; color: var(--accent); font-weight: 700; }
+section.panel { padding-top: 26px; }
+.js section.panel:not(.on) { display: none; }
+
+
+h2 { font-size: 1.5rem; margin: 0 0 4px; }
+h3 { font-size: 1.12rem; margin: 30px 0 8px; padding-left: 10px; border-left: 4px solid var(--accent); }
+h4 { font-size: 1rem; margin: 20px 0 6px; }
+p { margin: 8px 0; }
+.sub { color: var(--dim); margin: 0 0 14px; }
+.good { color: var(--good); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+
+
+.note, .tip, .alert { border-left: 4px solid; padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+.note { background: var(--accent-soft); border-color: var(--accent); }
+.tip { background: var(--good-soft); border-color: var(--good); }
+.alert { background: var(--bad-soft); border-color: var(--bad); }
+.note b:first-child, .tip b:first-child, .alert b:first-child { margin-right: 4px; }
+
+
+.where { display: inline-block; font: 600 .72rem/1 "IBM Plex Sans", "Segoe UI", sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 999px; vertical-align: middle; }
+.where.pi { background: var(--cyan-soft); color: var(--cyan); }
+.where.pc { background: var(--accent-soft); color: var(--accent); }
+.where.phone { background: var(--violet-soft); color: var(--violet); }
+
+
+.cmd { position: relative; margin: 8px 0; }
+.cmd pre { background: var(--term); color: var(--term-ink); padding: 12px 70px 12px 14px; border-radius: 8px;
+  overflow-x: auto; margin: 0; line-height: 1.5; }
+.cmd pre .c { color: var(--term-dim); }
+.cmd button.copy { position: absolute; top: 8px; right: 8px; font: 600 .75rem "IBM Plex Sans", sans-serif;
+  background: #2a2e33; color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+.cmd button.copy:hover { border-color: var(--accent); }
+.cmd button.copy.done { color: #111; background: var(--good); border-color: var(--good); }
+
+
+ol.steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+ol.steps > li { counter-increment: step; position: relative; padding: 14px 16px 14px 60px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); color: #111; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps > li > h4 { margin: 3px 0 6px; }
+ol.steps > li > h4 .where { margin-left: 6px; }
+
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card b { display: block; margin-bottom: 4px; }
+.card p { margin: 0; color: var(--dim); font-size: .94rem; }
+
+
+.wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--code-bg); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.w { white-space: normal; }
+
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips a { font-family: "IBM Plex Mono", monospace; font-size: .85rem; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); padding: 3px 10px; border-radius: 4px; }
+.chips a:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+figure { margin: 16px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--dim); font-size: .88rem; margin-top: 6px; }
+footer { margin-top: 56px; color: var(--dim); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+
+.s-term { fill: var(--term); }
+.s-box { fill: none; stroke: var(--term-line); stroke-width: 1.5; }
+.s-t { fill: var(--term-ink); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-td { fill: var(--term-dim); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-ta { fill: var(--accent); font: 600 13px "IBM Plex Mono", Consolas, monospace; }
+.s-tc { fill: var(--cyan); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-tab { fill: var(--accent); }
+.s-tabt { fill: #111; font: 700 12px "IBM Plex Mono", Consolas, monospace; }
+.s-good { fill: var(--good); } .s-warn { fill: var(--warn); } .s-bad { fill: var(--bad); }
+
+.s-goodt { fill: var(--good); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-warnt { fill: var(--warn); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-badt { fill: var(--bad); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-lc { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.s-ink { fill: var(--ink); font: 600 14px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-dim { fill: var(--dim); font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-line { stroke: var(--dim); stroke-width: 2; fill: none; }
+.s-acc { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.s-node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+.s-hub { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.s-pill { fill: #6b4fbb; } .s-pillt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+.s-reg { fill: #b04fa0; } .s-regt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+
+svg.con { border-radius: 10px; border: 1px solid var(--line); }
+.c-bg { fill: #0c0c0c; } .c-box { fill: none; stroke: #8a8a8a; stroke-width: 1; }
+.c-t, .c-b, .c-d, .c-y, .c-h, .c-g, .c-r, .c-c, .c-lb, .c-m, .c-lm, .c-k, .c-w, .c-kc, .c-kr, .c-kp, .c-ks {
+  font: 12px "Cascadia Mono", Consolas, "IBM Plex Mono", ui-monospace, monospace; white-space: pre; }
+.c-t { fill: #cccccc; } .c-b { fill: #f2f2f2; font-weight: 700; } .c-d { fill: #8a8a8a; }
+.c-y { fill: #c19c00; } .c-h { fill: #c19c00; font-weight: 700; } .c-g { fill: #16c60c; } .c-r { fill: #e74856; }
+.c-c { fill: #3a96dd; } .c-lb { fill: #3b78ff; font-weight: 700; } .c-m { fill: #c33ec3; } .c-lm { fill: #d670d6; font-weight: 700; }
+.c-k { fill: #0c0c0c; font-weight: 700; } .c-w { fill: #ffffff; font-weight: 700; }
+.c-kc { fill: #87af87; } .c-kr { fill: #87afd7; } .c-kp { fill: #af87af; } .c-ks { fill: #d7af87; }
+.c-fy { fill: #c19c00; } .c-fsel { fill: #cccccc; } .c-fb { fill: #0037da; } .c-fg { fill: #13a10e; } .c-fgr { fill: #767676; }
+.c-fm { fill: #c33ec3; } .c-fr { fill: #e74856; } .c-dc { fill: #3a96dd; } .c-dg { fill: #16c60c; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  ol.steps > li { padding-left: 52px; }
+  ol.steps > li::before { left: 12px; }
+}
+
+</style>
+
+  <rect class="s-node" x="20" y="130" width="150" height="80" rx="10"/>
+  <text class="s-ink" x="95" y="165" text-anchor="middle">Companion</text>
+  <text class="s-dim" x="95" y="185" text-anchor="middle">MeshCore radio</text>
+  <path class="s-line" d="M170 157 H 320" stroke-dasharray="6 5"/>
+  <text class="s-dim" x="245" y="147" text-anchor="middle">Bluetooth</text>
+  <path class="s-line" d="M170 185 H 320"/>
+  <text class="s-dim" x="245" y="205" text-anchor="middle">or USB cable, or TCP</text>
+  <rect class="s-hub" x="320" y="55" width="250" height="230" rx="12"/>
+  <text class="s-ink" x="445" y="86" text-anchor="middle">mcproxy</text>
+  <text class="s-dim" x="445" y="106" text-anchor="middle">a small Linux machine</text>
+  <rect class="s-node" x="340" y="122" width="210" height="30" rx="6"/>
+  <text class="s-dim" x="445" y="142" text-anchor="middle">relays every command</text>
+  <rect class="s-node" x="340" y="160" width="210" height="30" rx="6"/>
+  <text class="s-dim" x="445" y="180" text-anchor="middle">records: messages, nodes, mesh</text>
+  <rect class="s-node" x="340" y="198" width="210" height="30" rx="6"/>
+  <text class="s-dim" x="445" y="218" text-anchor="middle">console and commands: works alone</text>
+  
+  <path class="s-acc" d="M570 110 C 630 110, 630 60, 690 60"/>
+  <path class="s-acc" d="M570 110 C 630 110, 630 128, 690 128"/>
+  <text class="s-ink" x="636" y="34" text-anchor="middle" style="font-size:12.5px">TCP 5000</text>
+  <text class="s-dim" x="636" y="48" text-anchor="middle" style="font-size:11px">MeshCore protocol</text>
+  <rect class="s-node" x="690" y="38" width="195" height="44" rx="8"/>
+  <text class="s-ink" x="787" y="65" text-anchor="middle">MeshCore apps</text>
+  <rect class="s-node" x="690" y="106" width="195" height="44" rx="8"/>
+  <text class="s-ink" x="787" y="133" text-anchor="middle">Home Assistant, CLI…</text>
+  
+  <path class="s-lc" d="M570 240 C 630 240, 630 214, 690 214"/>
+  <path class="s-lc" d="M570 240 C 630 240, 630 282, 690 282"/>
+  <text class="s-ink" x="636" y="320" text-anchor="middle" style="font-size:12.5px">HTTPS 5080</text>
+  <text class="s-dim" x="636" y="334" text-anchor="middle" style="font-size:11px">data API</text>
+  <rect class="s-node" x="690" y="192" width="195" height="44" rx="8"/>
+  <text class="s-ink" x="787" y="219" text-anchor="middle">mcproxy desk / Android</text>
+  <rect class="s-node" x="690" y="260" width="195" height="44" rx="8"/>
+  <text class="s-ink" x="787" y="287" text-anchor="middle">web pages, scripts</text>
+</svg>

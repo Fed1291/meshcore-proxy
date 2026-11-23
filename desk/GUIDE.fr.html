@@ -1,0 +1,786 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide de mcproxy desk</title>
+<style>
+:root {
+  --bg: #f7f7f4; --panel: #ffffff; --ink: #1d1f21; --dim: #6b6f75; --line: #dcdcd6;
+  --accent: #b7791f; --accent-soft: #fbf1dc; --cyan: #127a8a; --cyan-soft: #e1f2f4;
+  --good: #2f8a3e; --good-soft: #e5f3e7; --warn: #b7791f; --bad: #c0392b; --bad-soft: #fbe6e3;
+  --violet: #6b4fbb; --violet-soft: #eee9fa;
+  --term: #15171a; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #3a3f45;
+  --code-bg: #efefea;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+    --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+    --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+    --violet: #a993f0; --violet-soft: #231d36;
+    --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+    --code-bg: #24272b;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+  --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+  --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+  --violet: #a993f0; --violet-soft: #231d36;
+  --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+  --code-bg: #24272b;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+a { color: var(--cyan); }
+code, kbd, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: .92em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+kbd { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 5px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); white-space: nowrap; }
+main { max-width: 1000px; margin: 0 auto; padding: 0 16px 64px; }
+
+header.top { padding: 24px 0 14px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); margin: 0; }
+.lang { float: right; margin: 0 0 0 16px; color: var(--dim); font-size: .95rem; }
+nav.tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; scrollbar-width: none; }
+nav.tabs::-webkit-scrollbar { display: none; }
+@media (min-width: 601px) { nav.tabs { flex-wrap: wrap; } }
+nav.tabs button { font: inherit; font-size: .95rem; color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: 8px 10px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button .n { display: inline-block; width: 1.4em; color: var(--accent); font-weight: 700; }
+section.panel { padding-top: 26px; }
+.js section.panel:not(.on) { display: none; }
+
+h2 { font-size: 1.5rem; margin: 0 0 4px; }
+h3 { font-size: 1.12rem; margin: 30px 0 8px; padding-left: 10px; border-left: 4px solid var(--accent); }
+h4 { font-size: 1rem; margin: 20px 0 6px; }
+p { margin: 8px 0; }
+.sub { color: var(--dim); margin: 0 0 14px; }
+.good { color: var(--good); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+
+.note, .tip, .alert { border-left: 4px solid; padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+.note { background: var(--accent-soft); border-color: var(--accent); }
+.tip { background: var(--good-soft); border-color: var(--good); }
+.alert { background: var(--bad-soft); border-color: var(--bad); }
+.note b:first-child, .tip b:first-child, .alert b:first-child { margin-right: 4px; }
+
+.where { display: inline-block; font: 600 .72rem/1 "IBM Plex Sans", "Segoe UI", sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 999px; vertical-align: middle; }
+.where.pi { background: var(--cyan-soft); color: var(--cyan); }
+.where.pc { background: var(--accent-soft); color: var(--accent); }
+.where.phone { background: var(--violet-soft); color: var(--violet); }
+
+.cmd { position: relative; margin: 8px 0; }
+.cmd pre { background: var(--term); color: var(--term-ink); padding: 12px 70px 12px 14px; border-radius: 8px;
+  overflow-x: auto; margin: 0; line-height: 1.5; }
+.cmd pre .c { color: var(--term-dim); }
+.cmd button.copy { position: absolute; top: 8px; right: 8px; font: 600 .75rem "IBM Plex Sans", sans-serif;
+  background: #2a2e33; color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+.cmd button.copy:hover { border-color: var(--accent); }
+.cmd button.copy.done { color: #111; background: var(--good); border-color: var(--good); }
+
+ol.steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+ol.steps > li { counter-increment: step; position: relative; padding: 14px 16px 14px 60px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); color: #111; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps > li > h4 { margin: 3px 0 6px; }
+ol.steps > li > h4 .where { margin-left: 6px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card b { display: block; margin-bottom: 4px; }
+.card p { margin: 0; color: var(--dim); font-size: .94rem; }
+
+.wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--code-bg); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.w { white-space: normal; }
+#trouble td:first-child { white-space: normal; min-width: 180px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips a { font-family: "IBM Plex Mono", monospace; font-size: .85rem; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); padding: 3px 10px; border-radius: 4px; }
+.chips a:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+figure { margin: 16px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--dim); font-size: .88rem; margin-top: 6px; }
+footer { margin-top: 56px; color: var(--dim); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+.s-term { fill: var(--term); }
+.s-box { fill: none; stroke: var(--term-line); stroke-width: 1.5; }
+.s-t { fill: var(--term-ink); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-td { fill: var(--term-dim); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-ta { fill: var(--accent); font: 600 13px "IBM Plex Mono", Consolas, monospace; }
+.s-tc { fill: var(--cyan); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-tab { fill: var(--accent); }
+.s-tabt { fill: #111; font: 700 12px "IBM Plex Mono", Consolas, monospace; }
+.s-good { fill: var(--good); } .s-warn { fill: var(--warn); } .s-bad { fill: var(--bad); }
+.s-goodt { fill: var(--good); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-warnt { fill: var(--warn); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-badt { fill: var(--bad); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-lc { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.s-ink { fill: var(--ink); font: 600 14px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-dim { fill: var(--dim); font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-line { stroke: var(--dim); stroke-width: 2; fill: none; }
+.s-acc { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.s-node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+.s-hub { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.s-pill { fill: #6b4fbb; } .s-pillt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+.s-reg { fill: #b04fa0; } .s-regt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+figure.app svg { border-radius: 10px; border: 1px solid var(--line); }
+.a-bg { fill: #16181d; } .a-panel { fill: #1c1f26; } .a-card { fill: #242831; } .a-hover { fill: #2c313c; }
+.a-edge { fill: none; stroke: #333844; stroke-width: 1; }
+.a-sel { fill: #4f8cff; fill-opacity: .22; stroke: #4f8cff; stroke-width: 1.2; }
+.a-acc { fill: #4f8cff; } .a-good { fill: #4cb87a; } .a-warn { fill: #e8a317; } .a-bad { fill: #e66767; }
+.a-s1 { fill: #3987e5; } .a-s2 { fill: #199e70; } .a-s3 { fill: #d95926; } .a-s4 { fill: #c98500; }
+.a-chat { fill: #6f9fd8; } .a-rpt { fill: #5fae8e; } .a-room { fill: #c9a35a; }
+.a-line { fill: none; stroke: #c98500; stroke-width: 1.6; } .a-grid { stroke: #333844; stroke-width: 1; }
+.a-t { fill: #e6e8ee; font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-b { fill: #e6e8ee; font: 600 13.5px "IBM Plex Sans Condensed", "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-big { fill: #e6e8ee; font: 600 20px "IBM Plex Sans Condensed", "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-h { fill: #e6e8ee; font: 600 19px "IBM Plex Sans Condensed", "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-m { fill: #8d94a5; font: 11.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-f { fill: #5a6070; font: 11px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tg { fill: #4cb87a; font: 11.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tw { fill: #e8a317; font: 11.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-ta { fill: #4f8cff; font: 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tc { fill: #6f9fd8; font: 600 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tr { fill: #5fae8e; font: 600 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-dark { fill: #16181d; font: 600 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  ol.steps > li { padding-left: 52px; }
+  ol.steps > li::before { left: 12px; }
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js');</script>
+<main>
+
+<header class="top">
+  <p class="lang"><a href="GUIDE.html" lang="en">English</a> · Français</p>
+  <h1>mc<span>proxy</span> desk</h1>
+  <p class="lead">L'app desk, sur votre ordinateur, montre en direct tout ce que votre mcproxy sait : le compagnon, le mesh, les canaux et vos chats.</p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Sections du guide">
+  <button role="tab" data-tab="overview"><span class="n">1</span>Aperçu</button>
+  <button role="tab" data-tab="connect"><span class="n">2</span>Connecter</button>
+  <button role="tab" data-tab="using"><span class="n">3</span>Utiliser</button>
+  <button role="tab" data-tab="trouble"><span class="n">4</span>Problèmes</button>
+</nav>
+
+<section class="panel" id="overview" role="tabpanel">
+<h2>Aperçu</h2>
+
+<p>mcproxy tourne sur une petite machine à côté de votre radio compagnon MeshCore et enregistre tout ce qu'elle entend. L'app desk
+se connecte à l'<b>API de données</b> du proxy par votre réseau et montre tout cela : l'état de la radio, chaque noeud entendu,
+le mesh en graphe, les canaux, et des fenêtres de chat pour écrire. Elle ne parle qu'au proxy, jamais directement
+à la radio.</p>
+<div class="note"><b>Facultative</b> mcproxy est le programme principal et se suffit à lui-même, avec sa console et ses commandes. L'app desk est une vue de plus sur les mêmes données. Les apps officielles MeshCore peuvent se connecter au même proxy, port <code>5000</code>, en même temps.</div>
+
+<figure>
+<svg viewBox="0 0 900 220" role="img" aria-label="Radio compagnon connectée à mcproxy sur la machine du proxy, qui sert l'app desk en HTTPS, port 5080">
+  <rect class="s-node" x="20" y="70" width="150" height="80" rx="10"/>
+  <text class="s-ink" x="95" y="105" text-anchor="middle">Companion</text>
+  <text class="s-dim" x="95" y="125" text-anchor="middle">MeshCore radio</text>
+  <path class="s-line" d="M170 110 H 320" stroke-dasharray="6 5"/>
+  <text class="s-dim" x="245" y="100" text-anchor="middle">Bluetooth or USB</text>
+  <rect class="s-hub" x="320" y="45" width="240" height="130" rx="12"/>
+  <text class="s-ink" x="440" y="80" text-anchor="middle">mcproxy</text>
+  <text class="s-dim" x="440" y="102" text-anchor="middle">on the proxy machine</text>
+  <rect class="s-node" x="342" y="118" width="196" height="30" rx="6"/>
+  <text class="s-dim" x="440" y="138" text-anchor="middle">records: messages, nodes, mesh</text>
+  <path class="s-acc" d="M560 110 H 700"/>
+  <text class="s-dim" x="630" y="100" text-anchor="middle">HTTPS 5080</text>
+  <rect class="s-node" x="700" y="80" width="180" height="60" rx="8"/>
+  <text class="s-ink" x="790" y="106" text-anchor="middle">mcproxy desk</text>
+  <text class="s-dim" x="790" y="126" text-anchor="middle">on your computer</text>
+</svg>
+<figcaption>L'app desk lit tout dans l'API de données du proxy. Les réglages gardés sur la radio sont montrés tels que la radio les donne.</figcaption>
+</figure>
+
+<h3>Fonctions</h3>
+<div class="cards">
+  <div class="card"><b>Aperçu en direct</b><p>La batterie, le bruit et la liaison du compagnon, les apps connectées, le stockage et la file du proxy.</p></div>
+  <div class="card"><b>Chaque noeud</b><p>Une page par noeud : signal, annonces, routes, et pour un répéteur ses stats, sa santé et ses voisins.</p></div>
+  <div class="card"><b>Le mesh</b><p>Paquets par heure et par type, heures les plus chargées, qui vous apporte des paquets, à quel rythme les répéteurs s'annoncent.</p></div>
+  <div class="card"><b>Explorer</b><p>Le mesh autour de vous, ou en relief 3D, avec les paquets rejoués le long de leurs chemins.</p></div>
+  <div class="card"><b>Les chats</b><p>Fenêtres de canaux et de messages directs, avec réponses, coches de remise et régions.</p></div>
+  <div class="card"><b>Live et logs</b><p>Le flux d'événements décodés du proxy, et le log de son service.</p></div>
+</div>
+
+<h3>Il faut</h3>
+<div class="wrap"><table>
+<tr><th>Élément</th><th>Détails</th></tr>
+<tr><td>Un proxy</td><td class="w">mcproxy en marche, avec son API de données active (par défaut, port <code>5080</code>). Voir le guide du proxy, onglet « Apps et API ».</td></tr>
+<tr><td>Un ordinateur</td><td class="w">Sur le même réseau que la machine du proxy, avec l'app desk. La vue en relief utilise la carte graphique s'il y en a une.</td></tr>
+<tr><td>Internet</td><td class="w">Seulement pour la vue en relief d'Explorer (tuiles d'altitude, téléchargées une fois et gardées). Tout le reste vient du proxy.</td></tr>
+</table></div>
+
+<h3>Où est gardée chaque chose</h3>
+<p>Chaque réglage de l'app dit où il est gardé, par une petite icône (le texte s'affiche au survol) :</p>
+<div class="wrap"><table>
+<tr><th>Libellé</th><th>Signification</th></tr>
+<tr><td>Sur la radio</td><td class="w">Stocké sur le compagnon lui-même : identique dans toutes les apps qui y sont connectées, les apps MeshCore aussi (contacts, favoris, chemins, canaux, région par défaut, taille d'id, ajout automatique).</td></tr>
+<tr><td>Enregistré par le proxy</td><td class="w">L'historique, les statistiques et l'archive que la radio ne peut pas garder. Visible seulement des apps connectées par le proxy.</td></tr>
+<tr><td>Gardé sur le proxy</td><td class="w">Un réglage du proxy (copies des messages, masquage de vos textes, région d'un canal, noeuds suivis) : le changement vaut pour toutes les apps connectées par lui.</td></tr>
+<tr><td>Cette app seulement</td><td class="w">Chats vidés, messages masqués, marques de lecture, filtres, disposition. Jamais envoyé au proxy. Supprimer un message ou une conversation est différent : il est retiré du proxy pour toutes les apps.</td></tr>
+</table></div>
+
+<h3 id="colours">Couleurs</h3>
+<p>Les valeurs sont colorées selon leur qualité, partout dans l'app, dans la console du proxy et dans l'app Android.</p>
+<div class="wrap"><table>
+<tr><th>Valeur</th><th><span class="good">Bon</span></th><th><span class="warn">Moyen</span></th><th><span class="bad">Mauvais</span></th><th>Signification</th></tr>
+<tr><td>SNR</td><td>≥ 5 dB</td><td>−5 à 5 dB</td><td>&lt; −5 dB</td><td class="w">De combien un paquet dépassait le bruit de fond. LoRa décode encore en dessous de 0.</td></tr>
+<tr><td>RSSI</td><td>≥ −100 dBm</td><td>−115 à −100</td><td>&lt; −115 dBm</td><td class="w">Force brute à la réception.</td></tr>
+<tr><td>Bruit de fond</td><td>≤ −110 dBm</td><td>−110 à −95</td><td>&gt; −95 dBm</td><td class="w">Le bruit ambiant à votre radio : plus il est bas, mieux c'est.</td></tr>
+<tr><td>Batterie</td><td>≥ 3,9 V</td><td>3,6 à 3,9 V</td><td>&lt; 3,6 V</td><td class="w">Tension de la cellule au lithium.</td></tr>
+</table></div>
+</section>
+
+<section class="panel" id="connect" role="tabpanel">
+<h2>Connecter</h2>
+<p class="sub">L'app ouvre sa page <b>Connexion et réglages</b> au premier démarrage, et chaque fois qu'un certificat est à confirmer. L'adresse, le jeton et le certificat approuvé sont gardés pour les sessions suivantes.</p>
+
+<ol class="steps">
+<li>
+  <h4>Obtenir l'adresse et l'empreinte <span class="where pi">sur la machine du proxy</span></h4>
+  <div class="cmd"><pre>mcproxy api</pre></div>
+  <p>Affiche l'adresse (par ex. <code>https://192.168.1.50:5080/api/v1</code>), l'empreinte du certificat, et si un jeton est défini.
+  Le côté proxy est dans le guide du proxy, onglet « Apps et API ».</p>
+</li>
+<li>
+  <h4>L'entrer <span class="where pc">sur votre ordinateur</span></h4>
+  <p>Sur la page Connexion et réglages (l'icône aux curseurs en haut à droite, ou la pastille d'adresse), dans la carte <b>Proxy</b> : <b>Adresse API</b>
+  <code>https://192.168.1.50:5080</code>, et le <b>jeton</b> seulement si le proxy définit <code>[api] token</code>. Puis <b>Connecter</b>
+  (ou <kbd>Entrée</kbd>).</p>
+  <p>La carte montre ensuite <b>Connecté</b> et « mcproxy &lt;version&gt; · API v1 · radio connectée (&lt;nom du noeud&gt;) ».</p>
+</li>
+<li>
+  <h4>Vérifier le certificat</h4>
+  <p>À la première connexion, l'app montre l'empreinte du certificat. <b>Comparez-la avec celle de l'étape 1</b>,
+  puis <b>Approuver</b>. L'app la retient pour cette adresse.</p>
+  <div class="alert"><b>Empreinte changée</b> Si l'app signale plus tard « Le certificat du proxy a changé », elle montre l'empreinte présentée maintenant et celle approuvée avant. Choisissez <b>Approuver le nouveau</b> seulement après avoir réinstallé le proxy ou renouvelé son certificat. Sinon, un autre appareil répond à cette adresse : choisissez Annuler.</div>
+</li>
+</ol>
+
+<figure class="app">
+<svg viewBox="0 0 1000 650" role="img" aria-label="La page Connexion et réglages : la carte Proxy avec son état, son adresse, son jeton, les adresses récentes et les boutons, la carte Certificat avec l'empreinte retenue, la carte Cette app avec la langue, Ajouter une langue et Champs de l'API, et la carte À propos">
+  <rect class="a-bg" x="0" y="0" width="1000" height="650"/>
+  <rect x="16" y="14" width="26" height="26" rx="6" fill="#e2261e"/><path d="M29 19 v16 M21 27 h16" stroke="#fff" stroke-width="4.5"/>
+  <text class="a-b" x="50" y="33" style="font-size:17px">mcproxy</text><text class="a-m" x="120" y="33" style="font-size:13px">desk</text><text class="a-f" x="152" y="33">by FED1291</text>
+  <g class="a-edge"><rect x="220" y="13" width="84" height="28" rx="5"/><rect x="310" y="13" width="66" height="28" rx="5"/><rect x="382" y="13" width="78" height="28" rx="5"/><rect x="466" y="13" width="88" height="28" rx="5"/><rect x="560" y="13" width="56" height="28" rx="5"/><rect x="622" y="13" width="60" height="28" rx="5"/></g>
+  <g fill="none" stroke="#8d94a5" stroke-width="1.4">
+    <rect x="228" y="21" width="5" height="5"/><rect x="235" y="21" width="5" height="5"/><rect x="228" y="28" width="5" height="5"/><rect x="235" y="28" width="5" height="5"/>
+    <circle cx="322" cy="22" r="2.5"/><circle cx="317" cy="32" r="2.5"/><circle cx="327" cy="32" r="2.5"/><path d="M322 24.5 L317 29.5 M322 24.5 L327 29.5"/>
+    <path d="M390 21 l5 -2 l5 2 l5 -2 v13 l-5 2 l-5 -2 l-5 2 z M395 19 v13 M400 21 v13"/>
+    <path d="M568 27 h3 l2 -6 l3 12 l2 -6 h3"/>
+    <rect x="630" y="20" width="10" height="13" rx="1.5"/><path d="M633 24 h4 M633 27 h4 M633 30 h4"/>
+  </g>
+  <text class="a-m" x="474" y="32" style="font-size:14px">#</text>
+  <g class="a-t"><text x="244" y="32">Overview</text><text x="334" y="32">Mesh</text><text x="408" y="32">Explore</text><text x="486" y="32">Channels</text><text x="584" y="32">Live</text><text x="646" y="32">Logs</text></g>
+  <rect class="a-card" x="700" y="15" width="158" height="24" rx="12"/><circle class="a-good" cx="714" cy="27" r="4"/>
+  <text class="a-t" x="724" y="31">192.168.1.50:5080</text><text class="a-m" x="830" y="31">· live</text>
+  <text class="a-m" x="866" y="31">mcproxy · up 3 d 18 h</text>
+  <path d="M974 21 h14 M974 27 h14 M974 33 h14" stroke="#8d94a5" stroke-width="1.4"/><circle cx="984" cy="21" r="2" fill="#16181d" stroke="#8d94a5"/><circle cx="978" cy="27" r="2" fill="#16181d" stroke="#8d94a5"/><circle cx="984" cy="33" r="2" fill="#16181d" stroke="#8d94a5"/>
+  <path class="a-grid" d="M0 54.5 H 1000"/>
+  <text class="a-h" x="24" y="94">Connection &amp; settings</text><text class="a-m" x="232" y="94">Which mcproxy this app shows, and how it looks.</text>
+  <rect class="a-panel" x="24" y="112" width="500" height="340" rx="6"/><rect class="a-edge" x="24" y="112" width="500" height="340" rx="6"/>
+  <path d="M44 128 v5 M50 128 v5 M41 133 h12 v3 a6 6 0 0 1 -12 0 z M47 142 v4" stroke="#4f8cff" stroke-width="1.5" fill="none"/>
+  <text class="a-b" x="62" y="142">Proxy</text>
+  <rect x="436" y="128" width="72" height="20" rx="3" fill="#4cb87a" fill-opacity=".14" stroke="#4cb87a" stroke-opacity=".6"/><text class="a-tg" x="472" y="142" text-anchor="middle">Connected</text>
+  <text class="a-m" x="40" y="168">mcproxy · API v1 · radio connected (Ridge Base)</text>
+  <path class="a-grid" d="M40 184 H 508"/>
+  <text class="a-b" x="40" y="208">API address</text>
+  <rect class="a-bg" x="40" y="218" width="468" height="26" rx="4"/><rect class="a-edge" x="40" y="218" width="468" height="26" rx="4"/>
+  <text class="a-t" x="50" y="235">https://192.168.1.50:5080</text>
+  <text class="a-m" x="40" y="262">Usually https://&lt;Pi address&gt;:5080. Type http:// only if the proxy runs without TLS.</text>
+  <text class="a-b" x="40" y="292">Token (only if the proxy sets [api] token)</text>
+  <rect class="a-bg" x="40" y="302" width="468" height="26" rx="4"/><rect class="a-edge" x="40" y="302" width="468" height="26" rx="4"/>
+  <text class="a-t" x="50" y="320" style="letter-spacing:1px">••••••••••••••••••••••••••••••••••••••••••••</text>
+  <text class="a-m" x="40" y="346">Only when the proxy sets [api] token; leave empty otherwise.</text>
+  <text class="a-m" x="40" y="378">Recent</text>
+  <rect class="a-sel" x="84" y="364" width="166" height="20" rx="4"/><text class="a-t" x="92" y="378">https://192.168.1.50:5080</text>
+  <rect class="a-hover" x="258" y="364" width="148" height="20" rx="4"/><text class="a-t" x="266" y="378">https://10.0.0.20:5080</text>
+  <path class="a-grid" d="M40 400 H 508"/>
+  <rect class="a-hover" x="214" y="412" width="124" height="28" rx="4"/><text class="a-t" x="276" y="431" text-anchor="middle">Open the overview</text>
+  <rect class="a-hover" x="344" y="412" width="80" height="28" rx="4"/><text class="a-t" x="384" y="431" text-anchor="middle">Disconnect</text>
+  <rect class="a-acc" x="430" y="412" width="78" height="28" rx="4"/><text class="a-t" x="469" y="431" text-anchor="middle" style="fill:#fff">Connect</text>
+  <rect class="a-panel" x="24" y="464" width="500" height="170" rx="6"/><rect class="a-edge" x="24" y="464" width="500" height="170" rx="6"/>
+  <circle cx="47" cy="488" r="7.5" fill="none" stroke="#4f8cff" stroke-width="1.5"/><path d="M43.5 488 l2.5 2.5 l4.5 -5" stroke="#4f8cff" stroke-width="1.5" fill="none"/>
+  <text class="a-b" x="62" y="493">Certificate</text>
+  <text class="a-m" x="40" y="518">Pinned the first time you trusted it. It should match what `mcproxy api`</text>
+  <text class="a-m" x="40" y="534">prints on the Pi.</text>
+  <path class="a-grid" d="M40 550 H 508"/>
+  <text class="a-m" x="40" y="572">Certificate pinned</text>
+  <rect class="a-bg" x="40" y="582" width="468" height="42" rx="4"/><rect class="a-edge" x="40" y="582" width="468" height="42" rx="4"/>
+  <rect x="49" y="592" width="9" height="10" rx="1.5" fill="none" stroke="#8d94a5" stroke-width="1.3"/><rect x="53" y="596" width="9" height="10" rx="1.5" fill="#16181d" stroke="#8d94a5" stroke-width="1.3"/>
+  <text class="a-t" x="72" y="599" style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">3F:9A:1C:7E:52:D0:8B:44:E1:06:A9:3D:5C:72:BF:18:</text>
+  <text class="a-t" x="72" y="616" style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">90:2A:C4:61:7D:E5:0F:B3:28:94:6E:A1:D7:5B:C2:71</text>
+  <rect class="a-panel" x="536" y="112" width="440" height="388" rx="6"/><rect class="a-edge" x="536" y="112" width="440" height="388" rx="6"/>
+  <path d="M552 131 h16 M552 138 h16 M552 145 h16" stroke="#4f8cff" stroke-width="1.4"/><path d="M563 128 v6 M557 135 v6 M563 142 v6" stroke="#4f8cff" stroke-width="1.4"/>
+  <text class="a-b" x="576" y="142">This app</text>
+  <path class="a-grid" d="M552 160 H 960"/>
+  <text class="a-b" x="552" y="192">Language</text>
+  <g class="a-m"><text x="552" y="214">English and French are in</text><text x="552" y="230">the program. Other</text><text x="552" y="246">languages: one file each,</text><text x="552" y="262">&lt;folder&gt;\locales\&lt;code&gt;\</text><text x="552" y="278">desk.ftl. The model to</text><text x="552" y="294">translate, written again at</text><text x="552" y="310">each start with this</text><text x="552" y="326">version's texts and never</text><text x="552" y="342">read back:</text><text x="552" y="358">&lt;folder&gt;\locales\en\</text><text x="552" y="374">desk.ftl</text></g>
+  <rect class="a-bg" x="740" y="266" width="220" height="26" rx="4"/><rect class="a-edge" x="740" y="266" width="220" height="26" rx="4"/>
+  <path d="M754.5 285 l1.2 -3.4 a6 6 0 1 1 2.4 2.2 z" fill="none" stroke="#8d94a5" stroke-width="1.3"/>
+  <text class="a-t" x="774" y="284">System (en-US)</text><path d="M940 277 l4 5 l4 -5 z" fill="#e6e8ee"/>
+  <rect class="a-hover" x="552" y="388" width="130" height="24" rx="4"/><path d="M561 400 h10 M566 395 v10" stroke="#8d94a5" stroke-width="1.4"/>
+  <text class="a-t" x="578" y="404">Add a language</text>
+  <path class="a-grid" d="M552 424 H 960"/>
+  <text class="a-b" x="552" y="450">Show API fields</text>
+  <rect class="a-hover" x="928" y="456" width="32" height="16" rx="8"/><circle cx="937" cy="464" r="6" fill="#e6e8ee"/>
+  <text class="a-m" x="552" y="470">Every number shows the API field it comes from</text>
+  <text class="a-m" x="552" y="486">(handy when writing your own client).</text>
+  <rect class="a-panel" x="536" y="512" width="440" height="122" rx="6"/><rect class="a-edge" x="536" y="512" width="440" height="122" rx="6"/>
+  <circle cx="560" cy="536" r="8" fill="none" stroke="#4f8cff" stroke-width="1.5"/><text x="560" y="540.5" text-anchor="middle" style="fill:#4f8cff;font:600 11px 'IBM Plex Sans',sans-serif">?</text>
+  <text class="a-b" x="576" y="541">About</text>
+  <path class="a-grid" d="M552 558 H 960"/>
+  <text class="a-m" x="552" y="588">Author</text><text class="a-t" x="652" y="588">by FED1291</text>
+  <text class="a-m" x="552" y="616">Settings file</text><text class="a-t" x="652" y="616">&lt;folder&gt;\mcproxy-desk.toml</text>
+</svg>
+<figcaption>La page Connexion et réglages, connectée à un proxy. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+
+<h3>Sur la page Connexion et réglages</h3>
+<div class="wrap"><table>
+<tr><th>Carte</th><th>Contenu</th></tr>
+<tr><td>Proxy</td><td class="w">L'état en badge (Connecté / Connexion / Sans réponse / Hors ligne), la réponse du proxy, l'adresse, le jeton (masqué à la saisie), jusqu'à 4 adresses récentes, et Connecter / Déconnecter / Voir l'aperçu.</td></tr>
+<tr><td>Certificat</td><td class="w">L'empreinte retenue, avec une icône pour la copier. « HTTP simple : rien n'est chiffré » si vous avez entré <code>http://</code>.</td></tr>
+<tr><td>Cette app</td><td class="w"><a href="#language">Langue</a>, Ajouter une langue, Champs de l'API.</td></tr>
+<tr><td>À propos</td><td class="w">La version de l'app, son auteur et son fichier de réglages.</td></tr>
+</table></div>
+<div class="note"><b>HTTP simple</b> Utilisez <code>https://</code> ; le proxy crée son propre certificat au premier démarrage. Utilisez <code>http://</code> seulement si le proxy tourne sans TLS.</div>
+
+<h3 id="language">Langue</h3>
+<p>L'app est en français et en anglais et suit la langue du système ; la liste de la carte <b>Cette app</b> en choisit une autre. Le log du proxy est toujours en anglais.</p>
+<p><b>Ajouter une langue</b> demande son code (<code>de</code>, <code>pt-BR</code>) et son propre nom. <b>Créer</b> fait <code>locales\de\desk.ftl</code> à côté de l'app, avec les textes anglais,
+et ouvre son dossier. Traduisez le texte après chaque <code>=</code>, gardez les noms qui le précèdent et les <code>{ $variables }</code>, puis choisissez la langue dans la liste.
+Après un changement dans le fichier, la choisir à nouveau le relit. Un fichier déjà présent n'est jamais écrasé ; un fichier fait par quelqu'un d'autre va au même endroit.</p>
+<p>Le fichier est un simple texte UTF-8 d'au plus 1 Mo. Un texte absent, avec une erreur ou bien plus long que l'anglais s'affiche en anglais.
+La carte dit combien de textes manquent et quelles lignes n'ont pas été comprises. Une langue régionale comme <code>pt-BR</code> prend dans <code>pt</code> ce qui lui manque.</p>
+<div class="note"><b>Le modèle anglais</b> L'app écrit <code>locales\en\desk.ftl</code> à chaque démarrage, comme base à traduire. Ses modifications, ou un fichier <code>fr</code> à cet endroit, ne sont pas utilisées.</div>
+</section>
+
+<section class="panel" id="using" role="tabpanel">
+<h2>Utiliser</h2>
+
+<div class="chips">
+  <a href="#u-layout">Disposition</a><a href="#u-sidebar">Barre latérale</a><a href="#u-overview">Aperçu</a><a href="#u-mesh">Mesh</a>
+  <a href="#u-explore">Explorer</a><a href="#u-channels">Canaux</a><a href="#u-chat">Chat</a><a href="#u-regions">Régions</a>
+  <a href="#u-node">Page d'un noeud</a><a href="#u-console">Console</a><a href="#u-live">Live</a><a href="#u-logs">Journal</a>
+</div>
+
+<h3 id="u-layout">La fenêtre</h3>
+<figure class="app">
+<svg viewBox="0 0 1000 600" role="img" aria-label="La fenêtre desk sur sa page Aperçu : la barre du haut avec les onglets et la pastille de connexion, la barre latérale avec le compagnon et la liste des noeuds, la page avec ses tuiles, ses réglages et ses graphiques">
+  <rect class="a-bg" x="0" y="0" width="1000" height="600"/>
+  <rect class="a-bg" x="0" y="0" width="1000" height="48"/><path class="a-grid" d="M0 47.5 H 1000"/>
+  <rect x="12" y="11" width="24" height="24" rx="6" fill="#e2261e"/><path d="M24 15.5 v15 M16.5 23 h15" stroke="#fff" stroke-width="4.2"/>
+  <text class="a-b" x="43" y="29" style="font-size:16px">mcproxy</text><text class="a-m" x="109" y="29">desk</text><text class="a-f" x="138" y="29">by FED1291</text>
+  <rect class="a-sel" x="206" y="10" width="84" height="27" rx="5"/>
+  <g class="a-edge"><rect x="296" y="10" width="64" height="27" rx="5"/><rect x="366" y="10" width="76" height="27" rx="5"/><rect x="448" y="10" width="86" height="27" rx="5"/><rect x="540" y="10" width="54" height="27" rx="5"/><rect x="600" y="10" width="58" height="27" rx="5"/></g>
+  <g fill="none" stroke="#8d94a5" stroke-width="1.3">
+    <rect x="213" y="17" width="5" height="5" stroke="#e6e8ee"/><rect x="220" y="17" width="5" height="5" stroke="#e6e8ee"/><rect x="213" y="24" width="5" height="5" stroke="#e6e8ee"/><rect x="220" y="24" width="5" height="5" stroke="#e6e8ee"/>
+    <circle cx="308" cy="18" r="2.3"/><circle cx="303" cy="28" r="2.3"/><circle cx="313" cy="28" r="2.3"/><path d="M308 20.3 L303 25.7 M308 20.3 L313 25.7"/>
+    <path d="M373 18 l5 -2 l5 2 l5 -2 v12 l-5 2 l-5 -2 l-5 2 z M378 16 v12 M383 18 v12"/>
+    <path d="M547 23 h3 l2 -6 l3 12 l2 -6 h3"/>
+    <rect x="607" y="16" width="10" height="13" rx="1.5"/><path d="M610 20 h4 M610 23 h4 M610 26 h4"/>
+  </g>
+  <text class="a-m" x="455" y="29" style="font-size:14px">#</text>
+  <text class="a-t" x="230" y="28">Overview</text>
+  <g class="a-m"><text x="320" y="28">Mesh</text><text x="392" y="28">Explore</text><text x="468" y="28">Channels</text><text x="564" y="28">Live</text><text x="622" y="28">Logs</text></g>
+  <rect class="a-card" x="680" y="12" width="158" height="24" rx="12"/><circle class="a-good" cx="694" cy="24" r="4"/>
+  <text class="a-t" x="704" y="28">192.168.1.50:5080</text><text class="a-m" x="810" y="28">· live</text>
+  <text class="a-m" x="846" y="28">mcproxy · up 3 d 18 h</text>
+  <path d="M974 18 h14 M974 24 h14 M974 30 h14" stroke="#8d94a5" stroke-width="1.3"/><circle cx="984" cy="18" r="2" fill="#16181d" stroke="#8d94a5"/><circle cx="978" cy="24" r="2" fill="#16181d" stroke="#8d94a5"/><circle cx="984" cy="30" r="2" fill="#16181d" stroke="#8d94a5"/>
+  <rect class="a-panel" x="0" y="48" width="250" height="552"/>
+  <rect class="a-sel" x="8" y="58" width="234" height="66" rx="6"/>
+  <text class="a-m" x="18" y="76">Our companion</text><circle class="a-good" cx="178" cy="72" r="3.5"/><text class="a-tg" x="186" y="76">connected</text>
+  <text class="a-b" x="18" y="96">Base Station</text>
+  <rect class="a-edge" x="18" y="104" width="22" height="10" rx="2"/><rect class="a-good" x="20" y="106" width="16" height="6"/>
+  <text class="a-tg" x="46" y="114">87 %</text><text class="a-m" x="78" y="114">4.02 V · noise −112 dBm</text>
+  <rect class="a-card" x="8" y="134" width="234" height="24" rx="5"/><text class="a-f" x="20" y="150">Filter nodes</text>
+  <rect class="a-sel" x="8" y="166" width="54" height="22" rx="5"/><text class="a-t" x="16" y="181">All 312</text>
+  <rect class="a-card" x="66" y="166" width="38" height="22" rx="5"/><text class="a-warn" x="72" y="181" style="font-size:12px">★</text><text class="a-m" x="85" y="181">12</text>
+  <rect class="a-card" x="108" y="166" width="42" height="22" rx="5"/><rect x="114" y="171" width="9" height="12" rx="1.5" fill="none" stroke="#8d94a5" stroke-width="1.2"/><text class="a-m" x="128" y="181">140</text>
+  <rect class="a-card" x="154" y="166" width="42" height="22" rx="5"/><circle class="a-chat" cx="164" cy="177" r="4.5"/><text class="a-m" x="172" y="181">168</text>
+  <rect class="a-card" x="200" y="166" width="42" height="22" rx="5"/><circle class="a-rpt" cx="210" cy="177" r="4.5"/><text class="a-m" x="218" y="181">96</text>
+  <rect class="a-card" x="8" y="196" width="113" height="22" rx="5"/><text class="a-m" x="16" y="211">Heard in 24 h ▾</text>
+  <rect class="a-card" x="129" y="196" width="113" height="22" rx="5"/><text class="a-m" x="137" y="211">Last heard first ▾</text>
+  <rect class="a-chat" x="14" y="232" width="22" height="22" rx="5" fill-opacity=".25"/><text class="a-t" x="44" y="243">Valley node</text><text class="a-m" x="44" y="258">2 min ago · SNR 6.5 · via Hilltop</text><circle class="a-good" cx="232" cy="246" r="3.5"/>
+  <rect class="a-rpt" x="14" y="272" width="22" height="22" rx="5" fill-opacity=".25"/><text class="a-t" x="44" y="283">Hilltop RPT</text><text class="a-m" x="44" y="298">3 min ago · SNR 9.0 · direct</text><text class="a-warn" x="214" y="287">★</text><circle class="a-good" cx="232" cy="286" r="3.5"/>
+  <rect class="a-room" x="14" y="312" width="22" height="22" rx="5" fill-opacity=".25"/><text class="a-t" x="44" y="323">Ridge Room</text><text class="a-m" x="44" y="338">40 min ago · SNR 1.5 · 2 hops</text><circle class="a-warn" cx="232" cy="326" r="3.5"/>
+  <rect class="a-rpt" x="14" y="352" width="22" height="22" rx="5" fill-opacity=".25"/><text class="a-t" x="44" y="363">Town RPT</text><text class="a-m" x="44" y="378">1 h ago · SNR −2.0 · via Hilltop</text><circle class="a-warn" cx="232" cy="366" r="3.5"/>
+  <rect class="a-chat" x="14" y="392" width="22" height="22" rx="5" fill-opacity=".25"/><text class="a-t" x="44" y="403">Lakeside</text><text class="a-m" x="44" y="418">5 h ago · SNR 4.0 · 1 hop</text><circle class="a-bad" cx="232" cy="406" r="3.5"/>
+  <text class="a-h" x="266" y="78">Overview</text><text class="a-m" x="356" y="78">Base Station · key 3fa9c1… · over BLE AA:BB:CC:DD:EE:FF</text>
+  <g>
+    <rect class="a-card" x="266" y="92" width="138" height="66" rx="5"/><rect class="a-good" x="266" y="92" width="3" height="66"/>
+    <text class="a-m" x="278" y="110">Battery</text><text class="a-big" x="278" y="136">4.02 V</text><text class="a-m" x="278" y="152">read 1 min ago</text>
+    <rect class="a-card" x="412" y="92" width="138" height="66" rx="5"/><rect class="a-acc" x="412" y="92" width="3" height="66"/>
+    <text class="a-m" x="424" y="110">Radio link</text><text class="a-big" x="424" y="136">Up 3 d 4 h</text><text class="a-m" x="424" y="152">0 reconnects</text>
+    <rect class="a-card" x="558" y="92" width="138" height="66" rx="5"/><rect class="a-s1" x="558" y="92" width="3" height="66"/>
+    <text class="a-m" x="570" y="110">Packets this hour</text><text class="a-big" x="570" y="136">214</text><text class="a-m" x="570" y="152">4,980 in 24 h</text>
+    <rect class="a-card" x="704" y="92" width="138" height="66" rx="5"/><rect class="a-s2" x="704" y="92" width="3" height="66"/>
+    <text class="a-m" x="716" y="110">Nodes heard</text><text class="a-big" x="716" y="136">87</text><text class="a-m" x="716" y="152">31 repeaters</text>
+    <rect class="a-card" x="850" y="92" width="138" height="66" rx="5"/><rect class="a-s4" x="850" y="92" width="3" height="66"/>
+    <text class="a-m" x="862" y="110">Connected apps</text><text class="a-big" x="862" y="136">3</text><text class="a-m" x="862" y="152">desk, phone, CLI</text>
+  </g>
+  <text class="a-b" x="266" y="186">On the radio</text><text class="a-m" x="358" y="186">140 / 350 contacts</text>
+  <rect class="a-card" x="870" y="172" width="118" height="22" rx="5"/><text class="a-t" x="929" y="187" text-anchor="middle">Advert (flood)</text>
+  <rect class="a-card" x="266" y="200" width="358" height="34" rx="5"/><text class="a-t" x="278" y="221">Path id size</text>
+  <rect class="a-hover" x="526" y="207" width="28" height="20" rx="4"/><text class="a-m" x="540" y="221" text-anchor="middle">1 B</text>
+  <rect class="a-sel" x="558" y="207" width="28" height="20" rx="4"/><text class="a-t" x="572" y="221" text-anchor="middle">2 B</text>
+  <rect class="a-hover" x="590" y="207" width="28" height="20" rx="4"/><text class="a-m" x="604" y="221" text-anchor="middle">3 B</text>
+  <rect class="a-card" x="632" y="200" width="356" height="34" rx="5"/><text class="a-t" x="644" y="221">Replace the oldest contact when full</text>
+  <rect class="a-acc" x="950" y="208" width="30" height="16" rx="8"/><circle cx="972" cy="216" r="6" fill="#fff"/>
+  <text class="a-b" x="266" y="262">History</text>
+  <rect class="a-sel" x="324" y="249" width="34" height="20" rx="4"/><text class="a-t" x="341" y="263" text-anchor="middle">24 h</text>
+  <rect class="a-hover" x="362" y="249" width="30" height="20" rx="4"/><text class="a-m" x="377" y="263" text-anchor="middle">7 d</text>
+  <rect class="a-card" x="266" y="278" width="358" height="200" rx="5"/>
+  <text class="a-b" x="278" y="298">Packets heard per hour</text>
+  <path class="a-grid" d="M300 456 H 612 M300 380 H 612"/>
+  <text class="a-m" x="292" y="460" text-anchor="end">0</text><text class="a-m" x="292" y="384" text-anchor="end">200</text>
+  <g class="a-s1">
+    <rect x="304" y="420" width="9" height="36"/><rect x="316" y="428" width="9" height="28"/><rect x="328" y="434" width="9" height="22"/><rect x="340" y="438" width="9" height="18"/>
+    <rect x="352" y="436" width="9" height="20"/><rect x="364" y="426" width="9" height="30"/><rect x="376" y="408" width="9" height="48"/><rect x="388" y="390" width="9" height="66"/>
+    <rect x="400" y="372" width="9" height="84"/><rect x="412" y="366" width="9" height="90"/><rect x="424" y="376" width="9" height="80"/><rect x="436" y="360" width="9" height="96"/>
+    <rect x="448" y="352" width="9" height="104"/><rect x="460" y="368" width="9" height="88"/><rect x="472" y="374" width="9" height="82"/><rect x="484" y="362" width="9" height="94"/>
+    <rect x="496" y="346" width="9" height="110"/><rect x="508" y="340" width="9" height="116"/><rect x="520" y="354" width="9" height="102"/><rect x="532" y="366" width="9" height="90"/>
+    <rect x="544" y="384" width="9" height="72"/><rect x="556" y="398" width="9" height="58"/><rect x="568" y="410" width="9" height="46"/><rect x="580" y="404" width="9" height="52"/><rect x="592" y="396" width="9" height="60"/>
+  </g>
+  <text class="a-m" x="352" y="472" text-anchor="middle">00:00</text><text class="a-m" x="448" y="472" text-anchor="middle">08:00</text><text class="a-m" x="544" y="472" text-anchor="middle">16:00</text>
+  <rect class="a-card" x="632" y="278" width="356" height="200" rx="5"/>
+  <text class="a-b" x="644" y="298">Average SNR per hour</text>
+  <path class="a-grid" d="M664 456 H 976 M664 406 H 976 M664 356 H 976"/>
+  <text class="a-m" x="656" y="460" text-anchor="end">0</text><text class="a-m" x="656" y="410" text-anchor="end">3</text><text class="a-m" x="656" y="360" text-anchor="end">6</text>
+  <path class="a-line" d="M668 400 L682 392 L696 410 L710 396 L724 384 L738 398 L752 376 L766 388 L780 370 L794 382 L808 362 L822 378 L836 386 L850 372 L864 394 L878 380 L892 402 L906 388 L920 376 L934 392 L948 384 L962 398 L974 390"/>
+  <text class="a-m" x="716" y="472" text-anchor="middle">00:00</text><text class="a-m" x="812" y="472" text-anchor="middle">08:00</text><text class="a-m" x="908" y="472" text-anchor="middle">16:00</text>
+  <rect class="a-card" x="266" y="488" width="722" height="104" rx="5"/>
+  <text class="a-b" x="278" y="508">What the mesh carries</text><text class="a-m" x="420" y="508">4,980 packets in 24 h, by type</text>
+  <rect class="a-s4" x="278" y="518" width="300" height="10"/><rect class="a-s1" x="578" y="518" width="150" height="10"/><rect class="a-chat" x="728" y="518" width="110" height="10"/><rect class="a-s2" x="838" y="518" width="80" height="10"/><rect class="a-s3" x="918" y="518" width="58" height="10"/>
+  <circle class="a-s4" cx="284" cy="548" r="4"/><text class="a-t" x="294" y="552">Requests</text><text class="a-t" x="430" y="552">2,071</text><text class="a-m" x="474" y="552">41.6 %</text>
+  <circle class="a-s1" cx="284" cy="572" r="4"/><text class="a-t" x="294" y="576">Channel messages</text><text class="a-t" x="430" y="576">1,035</text><text class="a-m" x="474" y="576">20.8 %</text>
+  <circle class="a-chat" cx="560" cy="548" r="4"/><text class="a-t" x="570" y="552">Direct messages</text><text class="a-t" x="706" y="552">762</text><text class="a-m" x="744" y="552">15.3 %</text>
+  <circle class="a-s2" cx="560" cy="572" r="4"/><text class="a-t" x="570" y="576">Adverts</text><text class="a-t" x="706" y="576">531</text><text class="a-m" x="744" y="576">10.7 %</text>
+</svg>
+<figcaption>La fenêtre : barre du haut, barre latérale (le compagnon et les noeuds) et la page (ici l'Aperçu). Données d'exemple, interface en anglais.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Élément</th><th>Rôle</th></tr>
+<tr><td>Zoom</td><td class="w"><kbd>Ctrl</kbd>+<kbd>+</kbd> / <kbd>Ctrl</kbd>+<kbd>-</kbd> changent la taille de toute la fenêtre.</td></tr>
+<tr><td>Onglets</td><td class="w">Aperçu, Mesh, Explorer, Canaux, Live, Journal. Une page ouverte depuis un onglet (un noeud, par exemple) garde cet onglet allumé ; le fil d'Ariane au-dessus de la page ramène en arrière.</td></tr>
+<tr><td>Pastille d'adresse</td><td class="w">L'état de la connexion : <span class="good">en ligne</span>, <span class="warn">connexion</span> ou <span class="warn">reconnexion</span> (mises à jour en direct interrompues), <span class="bad">hors ligne</span> (proxy injoignable). Survolez-la pour la raison ; cliquez dessus pour la page Connexion et réglages, qui montre le même état.</td></tr>
+<tr><td>Version</td><td class="w">« mcproxy &lt;version&gt; · marche 3 j 4 h » : la version du proxy et sa durée de marche.</td></tr>
+<tr><td>Icône aux curseurs</td><td class="w">La page Connexion et réglages.</td></tr>
+<tr><td>Retour</td><td class="w">Le bouton retour de la souris, ou <kbd>Alt</kbd>+<kbd>←</kbd>.</td></tr>
+<tr><td>Graphiques</td><td class="w">Chaque page a sa période (heures ou jours). Déplacez avec le bouton du milieu, zoomez avec <kbd>Ctrl</kbd>+molette, double-cliquez pour revenir à la vue d'origine.</td></tr>
+</table></div>
+<div class="tip"><b>Champs de l'API</b> Avec <i>Champs de l'API</i> activé (Connexion et réglages, Cette app), chaque nombre montre le champ de l'API dont il vient. C'est utile pour écrire un autre client.</div>
+
+<h3 id="u-sidebar">Barre latérale : les noeuds</h3>
+<div class="wrap"><table>
+<tr><th>Élément</th><th>Rôle</th></tr>
+<tr><td>Mon compagnon</td><td class="w">Nom, connecté / <span class="bad">radio coupée</span>, batterie (charge estimée d'après la tension), température, bruit, et comment le proxy le joint, par une icône : Bluetooth (bleu), USB (blanc) ou port réseau (vert) ; survolez-la pour le port ou l'adresse. Survolez le nom pour sa carte électronique. Clic : l'Aperçu.</td></tr>
+<tr><td>Messages reçus</td><td class="w">Affiché sous le compagnon quand des messages directs pour vous ne sont pas lus : chaque expéditeur dans une ligne en évidence, avec le nombre de non lus, l'heure et le dernier texte, les plus récents d'abord. Les expéditeurs qui ne sont pas des contacts y sont aussi (un proxy plus ancien ne les donne pas). Un clic ouvre le chat ; les messages sont lus dès que sa fenêtre est au premier plan. Les marques de lecture sont gardées dans cette app seulement. Les 500 derniers messages directs sont comptés, sauf ceux d'avant le premier démarrage de l'app. Les répéteurs et les capteurs n'y sont pas : ils ont une console.</td></tr>
+<tr><td>Filtrer</td><td class="w">Chercher par nom ou par clé.</td></tr>
+<tr><td>Pastilles</td><td class="w">Tous ; Miens (clé) ; Favoris (étoile) ; Sur la radio (puce) ; Chat, Répéteur, Salon, Capteur (seulement les sortes présentes) ; Archivé. Chacune montre son nombre ; survolez-la pour son nom. <kbd>Ctrl</kbd>+clic pour les combiner (les répéteurs favoris, par exemple).</td></tr>
+<tr><td>Miens</td><td class="w">Vos propres noeuds, quelle que soit la période : chaque ligne montre votre rôle et quand le noeud a été entendu, et, après une connexion admin, un bouton qui ouvre sa console. Un noeud entre dans la liste par une connexion admin, ou par <b>Mien</b> sur sa page ou dans sa console. Désactivé, il reste hors de la liste même avec une connexion admin. Le proxy garde la liste par compagnon : vos autres apps montrent la même. La pastille apparaît dès que la liste a un noeud. Le ★ est à part : c'est le favori du compagnon.</td></tr>
+<tr><td>Derniers chats</td><td class="w">Avec la pastille Chat activée, les cinq contacts aux messages directs les plus récents, envoyés ou reçus, viennent d'abord, au-dessus d'un séparateur. Ils restent listés quelle que soit la période ; la recherche et les autres pastilles s'appliquent toujours. Un clic ouvre le chat, ou la page du noeud quand le contact n'est plus sur la radio.</td></tr>
+<tr><td>Période et ordre</td><td class="w">Entendu : 24 h, 7 j, 30 j, ou Déjà entendu (les favoris sont toujours listés) ; Derniers entendus d'abord, A–Z, ou Taille d'id (grande d'abord).</td></tr>
+<tr><td>Une ligne</td><td class="w">Nom, icône de la sorte avec la taille d'id dessous (<code>1B</code> <code>2B</code> <code>3B</code> : la taille des ids de chemin avec laquelle le noeud émet), dernière fois entendu, une icône de puce pour les contacts sur la radio, une clé pleine pour vos propres noeuds, et le ★ (cliquez dessus pour changer le favori du compagnon ; en retirer un demande d'abord confirmation). Les noeuds archivés sont sous la pastille Archivé. Clic sur la ligne : la <a href="#u-node">page du noeud</a>.</td></tr>
+</table></div>
+<p>Faites glisser le bord de la barre latérale pour l'élargir.</p>
+
+<h3 id="u-overview">Aperçu</h3>
+<p>L'état du compagnon et du proxy.</p>
+<div class="wrap"><table>
+<tr><th>Élément</th><th>Contenu</th></tr>
+<tr><td>En-tête</td><td class="w">Le nom du compagnon, sa clé, comment il est relié (USB, Bluetooth ou réseau) et sa carte : nom, puce et firmware, par ex. « RAK WisBlock 4631 · nRF52840 · v1.17.1 ».</td></tr>
+<tr><td>Tuiles</td><td class="w">Batterie, liaison radio (durée, reprises, trames reçues / envoyées), paquets de l'heure, noeuds captés, apps connectées.</td></tr>
+<tr><td>Historique compagnon</td><td class="w">Batterie, température et bruit de fond sur la période.</td></tr>
+<tr><td>Cartes du mesh</td><td class="w"><i>Paquets entendus par heure</i>, <i>SNR moyen par heure</i>, et <i>Ce que porte le mesh</i>, avec un choix : <b>Par type</b>, ou <b>Messages</b>, qui met les paquets de messages (directs et de canaux) face aux paquets de trafic mesh (tout le reste). L'anneau montre la part des paquets de messages dans l'ensemble. À côté, la somme est écrite : paquets de messages + paquets de trafic mesh = tous les paquets, chacun avec sa part du tout. Le rapport suit (1 : 2,3 signifie 2,3 paquets de trafic mesh par paquet de message). Ce sont des paquets : chaque copie entendue compte, donc un message relayé par plusieurs répéteurs compte plusieurs fois ; le nombre de messages distincts stockés est indiqué à côté des paquets de messages. Dessous : de quoi est fait chaque côté, et la part des paquets de messages par heure face à sa moyenne.</td></tr>
+<tr><td>Sur la radio</td><td class="w">Envoyer une annonce (zéro saut ou flood ; une fois confirmée par le proxy, des ondes vertes partent du bouton pendant environ 3 s), la taille d'id, « Remplacer l'ancien si plein », ce que le compagnon ajoute à ses contacts, et la <a href="#u-regions">région par défaut</a>. Enregistré sur la radio.</td></tr>
+<tr><td>Messages sur le proxy</td><td class="w">Copier vos messages de canaux / vos DM aux autres appareils, masquer vos messages dans le log du proxy. Gardé sur le proxy.</td></tr>
+<tr><td>Apps connectées</td><td class="w">Chaque app connectée au proxy : adresse, app, depuis quand, trames reçues et envoyées, en attente.</td></tr>
+<tr><td>Noeuds suivis</td><td class="w">Affiché quand le proxy demande leur état à des noeuds toutes les 12 heures : chacun avec son dernier résultat et sa date. Un clic ouvre le noeud.</td></tr>
+<tr><td>Stockage et file</td><td class="w">Ce que le proxy garde (paquets, noeuds, messages, archive, appareils, copie des contacts de la radio, ACK gardés, taille de la base) et pour combien de temps ; la file des commandes.</td></tr>
+<tr><td>Période</td><td class="w">24 h, 7 j ou 30 j, pour toute la page.</td></tr>
+</table></div>
+<div class="note"><b>Avertissements</b> « Contacts presque pleins » (à partir de 95 %) et « Contacts pleins » : <b>Remplacer l'ancien si plein</b> active ce réglage, ou lancez <code>mcproxy prune</code> sur la machine du proxy. « Le compagnon émet des ids courts » quand les répéteurs alentour en utilisent de plus grands : <b>Régler à N o</b> règle la taille sur la radio.</div>
+
+<h3 id="u-mesh">Mesh</h3>
+<p>Les statistiques de tous les paquets entendus par la radio.</p>
+<div class="wrap"><table>
+<tr><th>Élément</th><th>Contenu</th></tr>
+<tr><td>Période</td><td class="w">24 h, 7 j, 30 j ou 180 j.</td></tr>
+<tr><td>Tuiles</td><td class="w">Paquets, SNR moyen, RSSI moyen, répéteurs en direct, messages.</td></tr>
+<tr><td>Paquets par heure</td><td class="w">Un graphique des paquets entendus, avec leur SNR moyen.</td></tr>
+<tr><td>Par type</td><td class="w">annonce, dm, canal, ack, chemin, requête, trace… avec leur SNR moyen ; survolez une ligne pour sa part.</td></tr>
+<tr><td>Répéteurs qui les amènent</td><td class="w">Le dernier saut avant vous, les 15 premiers. Les ids inconnus sont en gris ; un id qui correspond à plusieurs répéteurs est en ambre. Clic : sa page.</td></tr>
+<tr><td>Journée type</td><td class="w">Paquets par heure de la journée, heure locale : un jour de semaine moyen et un jour de week-end moyen sur les 30 derniers jours, avec aujourd'hui par-dessus (l'heure en cours en creux). Au-dessus du graphique : les heures les plus chargées et les plus calmes, et la dernière heure comparée à une heure habituelle.</td></tr>
+<tr><td>Messages par heure</td><td class="w">Les canaux et les auteurs les plus actifs (sans les textes). « canal inconnu » : des messages dont le canal ne peut pas être déterminé ; ils ne sont dans le chat d'aucun canal.</td></tr>
+<tr><td>Rythme des annonces</td><td class="w">Le minuteur d'annonces de chaque répéteur, retrouvé d'après ses annonces : toutes les 47 h, par exemple, avec combien d'annonces étaient dans le rythme et combien de fois le minuteur a été relancé (redémarrage, nouvel intervalle). Un graphique en barres par intervalle (≤ 1 h … &gt; 24 h), puis les répéteurs, les plus rapides d'abord, et « Gens » : les annonces envoyées à la main.</td></tr>
+</table></div>
+
+<h3 id="u-explore">Explorer</h3>
+<p>Le mesh tel que le proxy l'a reconstitué, avec les paquets rejoués le long de leurs chemins.</p>
+<div class="wrap"><table>
+<tr><th>Vue</th><th>Contenu</th></tr>
+<tr><td>Alentours</td><td class="w">La vue au démarrage. Votre compagnon au centre, les répéteurs qu'il entend en direct sur l'anneau, et derrière chacun les noeuds entendus par lui.</td></tr>
+<tr><td>Relief</td><td class="w">Les noeuds sur le vrai relief en 3D, les paquets volant entre eux. Plan / Côté / 3D, noms, grille, limites. Glisser pour tourner, <kbd>Maj</kbd>+glisser, glisser du bouton droit ou flèches pour déplacer, molette pour zoomer.</td></tr>
+</table></div>
+<div class="wrap"><table>
+<tr><th>Commande</th><th>Effet</th></tr>
+<tr><td>Période du graphe</td><td class="w">24 h, 7 j, 30 j ou tout : quels noeuds et quels liens sont dessinés.</td></tr>
+<tr><td>Passé / Live</td><td class="w">Passé (au démarrage) rejoue la dernière heure, les 6 ou les 24 dernières heures à 1×, 10×, 60× ou 300× ; le bouton de rechargement relit la période. Live dessine les paquets à leur arrivée. <i>Éclat</i> règle la luminosité des traces, dans toutes les vues.</td></tr>
+<tr><td>Paquets affichés</td><td class="w">Cliquez sur un type pour le masquer ou le montrer ; <kbd>Ctrl</kbd>+clic pour ce type seul, et encore pour tous les types.</td></tr>
+<tr><td>Un paquet</td><td class="w">Cliquez dessus : son trajet, saut par saut, avec la certitude de chaque saut.</td></tr>
+<tr><td>Colonne de côté</td><td class="w">Le noeud choisi avec <i>Voir sa page</i>, la <i>Légende</i>, et les nombres.</td></tr>
+<tr><td>Sous la vue</td><td class="w"><i>Trafic par minute</i>, <i>Types</i>, <i>Répéteurs qui les amènent</i> (cliquez sur l'un d'eux pour l'ouvrir).</td></tr>
+<tr><td>Détacher</td><td class="w">Ouvre la vue dans sa propre fenêtre (un deuxième écran, par exemple) ; <i>Ramener ici</i> la fait revenir.</td></tr>
+<tr><td>Ids partagés</td><td class="w">Les ids qui correspondent à plus d'un répéteur : les deux peuvent relayer les paquets destinés à l'un d'eux.</td></tr>
+<tr><td>Cache relief</td><td class="w">Dans la vue Relief : combien de Mo de tuiles d'altitude garder sur le disque (2 à 2000).</td></tr>
+</table></div>
+<div class="note"><b>Données du relief</b> La vue en relief demande un accès à internet une fois par zone : les altitudes viennent des tuiles AWS Terrarium. Seules les coordonnées des tuiles sont demandées ; aucune donnée sur vous ou sur le mesh n'est envoyée.</div>
+
+<h3 id="u-channels">Canaux</h3>
+<div class="wrap"><table>
+<tr><th>Élément</th><th>Rôle</th></tr>
+<tr><td>Liste des canaux</td><td class="w">Chaque canal avec sa sorte (public, hashtag, privé) et son nombre de messages, trié par ce nombre, et sa pastille de <a href="#u-regions">région</a> quand une région s'applique ; le bouton aux curseurs d'une ligne règle la région. Seuls les canaux du compagnon connecté sont listés, y compris ceux sans messages. Période : 24 h, 7 j ou 30 j.</td></tr>
+<tr><td>Un canal</td><td class="w">Des tuiles (messages, auteurs, part), les messages par heure, qui écrit ici (les 20 premiers ; cliquez sur un noeud connu pour l'ouvrir), les derniers messages, et une zone pour écrire.</td></tr>
+<tr><td>Ouvrir le chat</td><td class="w"><i>Ouvrir la discussion &lt;nom&gt;</i> ouvre la <a href="#u-chat">fenêtre de chat</a> du canal.</td></tr>
+<tr><td>Ajouter</td><td class="w">Sous la liste : <code>#nom</code> pour un canal hashtag (lettres, chiffres, <code>-</code> et <code>_</code>), <code>Public</code>, ou un nom et sa clé de 32 chiffres hexadécimaux pour un canal privé ; noms jusqu'à 31 octets. <kbd>Échap</kbd> annule. Le canal va dans le premier emplacement vide du compagnon ; un canal existant n'est jamais remplacé.</td></tr>
+<tr><td>Retirer du compagnon</td><td class="w">Sur le canal ouvert. Une fenêtre demande confirmation, puis quoi faire de ses messages stockés : <i>Effacer</i> les retire du proxy pour toutes vos apps, un instant plus tard, une fois le retrait confirmé par le compagnon ; <i>Garder</i> les laisse stockés mais ils ne sont plus listés. La fenêtre de chat du canal se ferme quand ses messages sont supprimés.</td></tr>
+</table></div>
+<div class="note"><b>Des données par compagnon</b> Les changements de canaux sont enregistrés sur la radio. Le proxy garde des données séparées pour chaque compagnon : quand un autre compagnon se connecte, l'app se recharge et ne montre que les données de celui-ci (vides pour un nouveau). Rien n'est copié d'un compagnon à l'autre.</div>
+
+<h3 id="u-chat">Fenêtres de chat</h3>
+<p>Le chat d'un canal s'ouvre depuis Canaux. Un message direct s'ouvre depuis l'icône ronde de la sorte sur la page d'un contact (au survol : « Écrire à &lt;nom&gt; »), depuis <i>Messages reçus</i>, ou depuis un dernier chat de la barre latérale. Chaque chat s'ouvre dans sa propre fenêtre ; plusieurs peuvent être ouvertes en même temps. Un chat direct appartient à la clé du contact : deux contacts du même nom ont chacun le leur (avec un proxy plus ancien, les messages envoyés vont par nom).</p>
+<figure class="app">
+<svg viewBox="0 0 1000 470" role="img" aria-label="Une fenêtre de chat de canal : l'en-tête avec le canal et sa région, un séparateur de jour, un message reçu avec son expéditeur, une réponse envoyée avec le message auquel elle répond, sa ligne de remise, et la zone de saisie avec le bouton d'envoi">
+  <rect class="a-panel" x="0" y="0" width="1000" height="470"/>
+  <rect class="a-bg" x="0" y="0" width="1000" height="62"/>
+  <circle cx="34" cy="31" r="20" fill="#3987e5" fill-opacity=".22"/><text x="34" y="38" text-anchor="middle" style="fill:#3987e5;font:600 20px 'IBM Plex Sans',sans-serif">#</text>
+  <text class="a-b" x="64" y="27" style="font-size:16px">#local</text>
+  <rect class="a-card" x="64" y="35" width="92" height="18" rx="9"/><text class="a-m" x="76" y="48">region · eu-se ▾</text>
+  <rect class="a-edge" x="958" y="20" width="20" height="22" rx="3"/><path d="M962 26 h12 M962 26 v14 h12 v-14 M966 30 v6 M970 30 v6" stroke="#8d94a5" stroke-width="1.4" fill="none"/>
+  <rect class="a-card" x="470" y="76" width="60" height="20" rx="10"/><text class="a-m" x="500" y="90" text-anchor="middle">Today</text>
+  <circle cx="34" cy="122" r="15" fill="#c98500" fill-opacity=".85"/><text class="a-dark" x="34" y="127" text-anchor="middle">V</text>
+  <rect class="a-card" x="58" y="106" width="360" height="74" rx="14"/><rect class="a-edge" x="58" y="106" width="360" height="74" rx="14"/>
+  <text x="72" y="126" style="fill:#c98500;font:600 12.5px 'IBM Plex Sans',sans-serif">Valley node</text>
+  <text class="a-t" x="72" y="146">Anyone near the ridge tonight? Testing the new antenna.</text>
+  <text class="a-f" x="72" y="168">19:42</text><text class="a-tg" x="108" y="168">2 hops</text><text class="a-tg" x="152" y="168">6.5 dB</text><text class="a-m" x="202" y="168">2-byte ids</text><text class="a-m" x="268" y="168">heard 3×</text>
+  <text class="a-m" x="584" y="206">↩ to Valley node</text>
+  <rect x="584" y="212" width="300" height="34" rx="14" fill="#242831" fill-opacity=".55"/>
+  <text x="598" y="232" style="fill:#e6e8ee;fill-opacity:.55;font:12px 'IBM Plex Sans',sans-serif">Anyone near the ridge tonight? Testing the…</text>
+  <rect x="584" y="236" width="396" height="110" rx="14" fill="#2a3d63" stroke="#4f8cff" stroke-opacity=".45"/>
+  <text class="a-t" x="598" y="260">Yes, from 9 pm, I'll be on the north side.</text>
+  <text class="a-f" x="598" y="282">19:44</text>
+  <path d="M600 298 l4 4 l8 -8 M610 302 l8 -8" stroke="#4cb87a" stroke-width="1.8" fill="none"/>
+  <text class="a-tg" x="624" y="302">Sent · heard by 3 repeaters</text><text class="a-m" x="790" y="302">›</text>
+  <text class="a-m" x="598" y="320">Strongest: Hilltop RPT · 9.0 dB</text>
+  <text class="a-m" x="598" y="337">by flood · 2-byte ids</text>
+  <rect class="a-bg" x="0" y="396" width="1000" height="74"/>
+  <text class="a-m" x="20" y="414">Channel · everyone with its key reads it</text>
+  <rect class="a-panel" x="20" y="424" width="900" height="34" rx="17"/><rect class="a-edge" x="20" y="424" width="900" height="34" rx="17"/>
+  <text class="a-f" x="38" y="446">Write a message…</text><text class="a-f" x="900" y="446" text-anchor="end">0/133</text>
+  <circle class="a-acc" cx="954" cy="441" r="18"/><path d="M946 433 l18 8 l-18 8 l3 -8 z" fill="#16181d"/>
+</svg>
+<figcaption>Le chat d'un canal. Les autres à gauche avec leur nom et leur couleur, vos messages à droite avec leur remise. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Élément</th><th>Rôle</th></tr>
+<tr><td>En-tête</td><td class="w">Le nom du chat ; dessous, pour un canal, sa <a href="#u-regions">région</a> (cliquez pour la changer), pour un contact, comment il a été entendu la dernière fois (cliquez sur son avatar pour la page du noeud). Vider à droite.</td></tr>
+<tr><td>Saisie</td><td class="w">Écrivez, puis <kbd>Entrée</kbd> ou le bouton rond Envoyer. Le compteur donne les octets utilisés / permis : accents et emoji en prennent plusieurs.</td></tr>
+<tr><td>Menu d'envoi (DM)</td><td class="w">Appui long ou clic droit sur Envoyer : <i>Envoi auto</i> (le chemin actuel, en flood avant le dernier essai), <i>Envoi direct</i> (sans répéteur) ou <i>Envoi flood</i> (tous les répéteurs). Comme dans les apps MeshCore, le choix est gardé sur le compagnon.</td></tr>
+<tr><td>Route (DM)</td><td class="w">La ligne sous la saisie montre la route utilisée : les sauts par leur nom, les ids au survol. <i>Changer</i> la met en flood, en direct (sans répéteur), ou sur une de trois <i>Routes suggérées</i> au plus : la plus fiable, une de secours qui commence par un autre répéteur, et celle qui a le moins de sauts. Chacune montre son nombre de sauts, une chance estimée d'aller-retour, son lien le plus faible et, dès que des DM sont partis ainsi, combien ont eu leur ACK. L'estimation utilise les 30 derniers jours enregistrés par le proxy : le SNR et l'usage de chaque lien dans les deux sens, les chemins pris par les annonces de ce contact, et les ACK de vos DM, qui comptent davantage à mesure qu'ils s'accumulent. Seuls les répéteurs entendus ces 3 derniers jours servent. Un id partagé par plusieurs répéteurs reste un id.</td></tr>
+<tr><td>Répondre</td><td class="w">Sur un canal, survolez le message de quelqu'un et cliquez sur la flèche à côté, ou faites un clic droit dessus. La réponse commence par <code>@[Name]</code>, comme dans les apps MeshCore. Une barre au-dessus de la saisie montre à qui vous répondez ; si vous l'annulez, le texte reste.</td></tr>
+<tr><td>Liens et mentions</td><td class="w">Les liens web sont cliquables. Une mention du nom de votre noeud est mise en évidence.</td></tr>
+<tr><td>Clic droit sur un message</td><td class="w"><i>Répondre</i> (messages de canal des autres) ; <i>Copier le texte</i> ; <i>Masquer (ici)</i> : le proxy, le compagnon et vos autres appareils le gardent ; ou <i>Effacer partout…</i>, qui le retire du proxy après confirmation.</td></tr>
+<tr><td>Icône de corbeille</td><td class="w">Un canal : « Vider tous les messages affichés ? », puis le chat est vidé dans cette app seulement. Un contact : un menu avec <i>Vider ici</i> ou <i>Effacer la discussion…</i>, qui retire du proxy, après confirmation, tous les messages avec ce contact, envoyés et reçus (avec leur nombre quand tout l'historique est chargé). Les messages vidés reviennent avec « Réafficher » ; les supprimés ne reviennent pas.</td></tr>
+<tr><td>Supprimé ailleurs</td><td class="w">Un message, une conversation ou l'historique d'un canal supprimé depuis n'importe quelle app disparaît ici aussi : listes, nombres de non lus, marques de lecture, réponses en cours et page Live. Une conversation ouverte qui a été supprimée s'affiche vide.</td></tr>
+<tr><td>Longs historiques</td><td class="w">Une conversation est lue par 100 messages : les plus anciens se chargent quand vous remontez, les plus récents quand vous redescendez, et quelques centaines sont gardés à la fois : n'importe quel historique défile sans à-coups. Tant que vous lisez plus haut, les nouveaux messages sont comptés sur un bouton qui mène aux derniers. La page Canaux et la fenêtre de chat partagent les mêmes messages et la même zone de saisie.</td></tr>
+<tr><td>Sous un message</td><td class="w">Cliquez sur <i>entendu 3×</i> pour les copies entendues par votre radio, sur la pastille de région pour ce qu'elle signifie, ou sur <i>via …</i> pour voir qui d'autre chaque id pourrait être. Le panneau s'ouvre à côté de la pastille ; un clic ailleurs, <kbd>Échap</kbd> ou un deuxième clic le ferme.</td></tr>
+<tr><td>« même nom que moi »</td><td class="w">Envoyé sous le nom de votre noeud, mais pas par vous : un autre appareil du même nom.</td></tr>
+</table></div>
+<h4>État de la remise</h4>
+<div class="wrap"><table>
+<tr><th>Sorte</th><th>Sous votre bulle</th></tr>
+<tr><td>DM</td><td class="w">Des points pour chaque essai et une barre pour le temps restant, puis <span class="good">Remis en 2,4 s</span> (l'ACK du destinataire) ou <span class="bad">Non remis</span>. Comme dans l'app MeshCore, il est réessayé de lui-même, par flood avant le dernier essai. Ensuite, un premier clic sur <i>Renvoyer</i> montre <i>Direct</i> et <i>Flood</i> à côté, avec la route affichée : le chemin du contact sur le compagnon, ou le flood si le dernier essai l'a fait oublier au compagnon. Un deuxième clic sur <i>Renvoyer</i> utilise cette route ; <i>Direct</i> ou <i>Flood</i> utilisent la leur, et ce choix est gardé pour les messages suivants. Chacun réessaie une fois de plus dans la même bulle : aucun second message n'est stocké. Si seul l'ACK s'est perdu, l'app du destinataire peut le montrer deux fois. S'il ne peut plus être réessayé, la bulle dit pourquoi ; un message dont le texte n'est plus gardé ne peut pas être renvoyé.</td></tr>
+<tr><td>Canal</td><td class="w">Les canaux n'ont pas d'ACK : « Envoyé · entendu par 3 répéteurs » compte les répétitions entendues par votre radio, ce qui confirme que le message a été émis. Dessous, la copie la plus forte ; cliquez sur la ligne pour toutes les copies, avec le répéteur qui l'a relayée, son signal et ses sauts. Si aucun répéteur n'a été entendu le relayer après 30 s, <i>Renvoyer</i> envoie le même paquet une fois de plus, jusqu'à 10 minutes après l'envoi : qui l'a déjà ignore la copie.</td></tr>
+<tr><td>Pas de réponse</td><td class="w">« Proxy injoignable » : <i>Réessayer</i> envoie le même message, et le proxy garantit qu'il ne part jamais deux fois. « Peut-être envoyé : le compagnon n'a pas répondu » (avec une icône « ? »), sous n'importe lequel de vos messages stockés par le proxy, de cette app ou d'une autre : il reste un seul message, et peut encore passer à envoyé ou remis. <i>Renvoyer</i> réessaie ce même message, sans en créer un second ; sur un canal, jusqu'à 10 minutes après l'envoi, tant qu'aucun répéteur n'a été entendu le relayer. « Peut-être envoyé : la radio n'a pas répondu à temps », quand le proxy n'en a stocké aucune copie (un proxy plus ancien, ou le proxy lui-même n'a pas répondu à temps) : regardez d'abord le chat ; <i>Renvoyer</i> envoie un nouveau message (il peut arriver deux fois), <i>Jeter</i> l'abandonne. Quand le stockage des messages du proxy est désactivé, un message du chat n'a pas de <i>Renvoyer</i>.</td></tr>
+</table></div>
+<div class="note"><b>Messages directs</b> Un DM ne peut être envoyé qu'à un noeud des contacts du compagnon, et le destinataire ne peut le lire que si votre noeud est dans les siens.</div>
+
+<h3 id="u-regions">Régions</h3>
+<p>Une région (flood scope) limite un message en flood aux répéteurs réglés sur cette région. Elle se règle à deux endroits :</p>
+<div class="wrap"><table>
+<tr><th>Où</th><th>Effet</th></tr>
+<tr><td>Région défaut</td><td class="w">Aperçu, « Sur la radio ». Enregistrée sur le compagnon : tous ses floods restent dans cette région, sauf si un canal a la sienne. « Le firmware de ce compagnon n'a pas de régions » quand c'est impossible.</td></tr>
+<tr><td>Région d'un canal</td><td class="w">La pastille à épingle dans l'en-tête du chat, ou le bouton de réglages de sa ligne dans la liste des canaux : le défaut du compagnon, sans région (tous les répéteurs ; proposé quand le firmware le permet), ou une région nommée ; une région dont le proxy ne connaît pas le nom s'affiche « ? ». Une épingle avec le nom montre une région ; une épingle barrée, aucune. Gardée par le proxy, pour ce qu'il envoie sur ce canal ; les apps MeshCore gardent la leur.</td></tr>
+<tr><td>Nouvelle région</td><td class="w">Entrez un nom : lettres a-z, chiffres et <code>-</code>, 29 au plus (majuscules abaissées, <code>#</code> facultatif), comme dans l'app MeshCore.</td></tr>
+<tr><td>Demander aux répéteurs</td><td class="w">Les répéteurs à portée directe sont interrogés sur les régions qu'ils desservent ; les noms s'ajoutent à la liste. Cela prend quelques secondes ; les routes de vos contacts ne changent jamais.</td></tr>
+<tr><td>Sur un message</td><td class="w">Une petite pastille quand il est arrivé par flood dans une région.</td></tr>
+</table></div>
+
+<h3 id="u-node">Page d'un noeud</h3>
+<p>Cliquez sur un noeud n'importe où (barre latérale, graphique, expéditeur) pour l'ouvrir. Ce qu'elle montre dépend de sa sorte.</p>
+<div class="wrap"><table>
+<tr><th>Élément</th><th>Contenu</th></tr>
+<tr><td>En-tête</td><td class="w">Nom, ★ (favori sur le compagnon), l'icône ronde de la sorte (sur un contact de chat : ouvre son chat), l'icône de contact (verte quand le noeud a votre clé), Console, Mien ; puis sorte · clé · première et dernière fois entendu · direct / via / sauts · distance ; <i>Avancé</i> (détails de la taille d'id) et une icône pour copier la clé. La période (24 h, 7 j, 30 j, tout), <b>Batterie, télémétrie</b> et <b>Demander ses stats (toutes les 12 h)</b> sont à droite.</td></tr>
+<tr><td>Bande de connexion</td><td class="w">Un cadenas avec « Connecté : &lt;rôle&gt; » ou « non connecté », <b>Accès invité</b> (ou <b>Se reconnecter</b>), <b>Accès admin</b> ; sur un salon, un champ pour le mot de passe invité (souvent <code>hello</code>). <i>Demander</i> : État (répéteurs et salons), Télémétrie, Voisins (répéteurs).</td></tr>
+<tr><td>Tuiles</td><td class="w"><i>Entendu ici à</i> (SNR, RSSI) et <i>Annonces</i> (chaque ~47 h, locale ~2 h, N à la main, N répétitions). Avec Batterie, télémétrie activé : batterie, son dernier RX, marche.</td></tr>
+<tr><td>Entendu ici</td><td class="w"><i>SNR entendu ici</i> et <i>RSSI entendu ici</i> (moyenne horaire, ses annonces en points), et <i>Paquets reçus de lui, par heure</i>.</td></tr>
+<tr><td>L'atteindre</td><td class="w">D'après ses annonces. D'abord une ligne : entendu en direct (avec son signal), ou par quel répéteur et en combien de sauts. Puis les chiffres, une frise de ses annonces (au rythme de son minuteur, ou envoyées à la main dans une autre couleur), et ses routes regroupées depuis votre côté : le dernier répéteur avant vous avec le signal auquel il a été entendu, et dessous les précédents (cliquez sur la flèche). Barre et nombre : combien de copies ont pris ce chemin. <i>Chaque copie</i> déplie la liste complète.</td></tr>
+<tr><td>Ses voisins</td><td class="w">Les noeuds à sa portée radio directe, d'après les chemins des paquets reçus. Chaque ligne met les deux sens en miroir : à gauche combien de fois le voisin a entendu ce noeud, à droite combien de fois ce noeud l'a entendu, chacun avec son signal ; une ligne déséquilibrée est un lien faible ou à sens unique. Filtre Tous / Double sens / Simple sens, tri Trafic / Signal / Récent, <i>Chercher…</i>. Cliquez sur une ligne pour les voisins de ce voisin ; cliquez sur son nom pour l'ouvrir.</td></tr>
+<tr><td>Routes vers lui</td><td class="w">Le chemin en service, et d'autres routes trouvées dans ce que le proxy a entendu, notées d'après leur étape la plus faible. <b>Prendre</b> en règle une sur le compagnon.</td></tr>
+<tr><td>Tracer</td><td class="w">Sur les contacts chat, répéteur et salon : envoie une trace le long du chemin et retour ; chaque répéteur note le SNR auquel il l'a entendue.</td></tr>
+<tr><td>Répéteurs, salons, capteurs</td><td class="w"><b>Demander ses stats (toutes les 12 h)</b> : le proxy se connecte en invité toutes les 12 heures ; puis les stats et la Santé (batterie faible ou en baisse, redémarré, chargé, bruyant, aucune réponse depuis un jour). <b>Ce qu'il entend</b> : <i>Demander</i> pour sa table de voisins. <b>Propriétaire</b> : firmware et texte du propriétaire, avec son propre bouton de demande.</td></tr>
+<tr><td>Batterie, télémétrie</td><td class="w">Désactivé par défaut : les noeuds MeshCore n'envoient pas de télémétrie sauf s'ils sont réglés pour le faire.</td></tr>
+<tr><td>Archivé</td><td class="w"><b>Remettre au compagnon</b> le rajoute aux contacts du compagnon, pour lui écrire aussitôt.</td></tr>
+</table></div>
+<div class="note"><b>Temps d'antenne</b> Les tables de voisins, les informations du propriétaire et les traces sont demandées par radio et prennent jusqu'à deux minutes. L'app n'envoie ces demandes que sur commande.</div>
+
+<h3 id="u-console">Console</h3>
+<p>Les répéteurs et les capteurs prennent des commandes, pas des messages de chat. La console sert aux noeuds que vous administrez, et aux salons, dont le chat reste à part. Sur la page d'un contact, <b>Accès invité</b> utilise un mot de passe vide et le noeud répond par le rôle qu'il accorde ; sur un salon, laissez d'abord le champ vide : un membre du salon entre sans mot de passe, et tout mot de passe court-circuite sa liste. Sans réponse, le champ se remplit avec <code>hello</code>, le mot de passe invité habituel, pour l'essai suivant. Sur un répéteur ou un capteur, un accès invité à vide sans réponse ouvre la zone du mot de passe admin. <b>Accès admin</b> demande son mot de passe. Une connexion est essayée jusqu'à 3 fois et peut donc prendre une minute ou plus ; la page montre le temps écoulé. Une fois la connexion faite, la page montre votre rôle, ce qu'il permet, et des boutons <b>Demander</b>, envoyés seulement au clic : état (répéteurs et salons), télémétrie, voisins (répéteurs). <b>Console</b> apparaît dès qu'une connexion a donné admin. La page du noeud montre toujours votre rôle de la dernière connexion, et vos propres noeuds portent une clé pleine dans la liste des noeuds. Une étoile ou une clé pleine signifie activé ; un contour, non activé. Chaque commande est un bloc compact : la commande, son heure et un bouton pour la relancer, avec la réponse dessous dans une police à chasse fixe. Les commandes envoyées d'autres appareils par le proxy apparaissent aussi.</p>
+<div class="wrap"><table>
+<tr><th>Élément</th><th>Rôle</th></tr>
+<tr><td>Rôle</td><td class="w">La pastille de l'en-tête montre le rôle de la dernière connexion : admin, lecture-écriture, lecture, invité, « connecté, rôle inconnu » ou « non connecté ». L'app ne stocke jamais de mot de passe. L'en-tête a aussi Mien, Voisins (répéteurs), Connecter, Commandes (admins) et la corbeille.</td></tr>
+<tr><td>Connecter</td><td class="w">Ouvre la zone de connexion, pour se reconnecter. Un mot de passe vide marche si le noeud vous a dans sa liste d'accès, ou si son mot de passe invité est vide.</td></tr>
+<tr><td>Garder le code</td><td class="w">Un répéteur ne garde pas de session : une connexion peut donc garder son mot de passe, stocké chiffré sur le proxy et partagé par vos apps, sans qu'aucune puisse le relire. Il est gardé une fois la connexion réussie. Le noeud propose alors <b>Connecter</b> en un clic et <b>Oublier le code</b>. <b>Accès invité</b> ne l'utilise jamais. Une connexion qui échoue ne le retire pas, car une absence de réponse peut aussi signifier que le noeud est hors de portée.</td></tr>
+<tr><td>Ligne de commande</td><td class="w">Admins seulement. Tout autre rôle voit à la place ce qui reste disponible (état, télémétrie, voisins et propriétaire) avec <i>Ouvrir sa page</i>.</td></tr>
+<tr><td>Boutons rapides</td><td class="w">Envoient en un clic une commande de lecture seule : <code>ver</code>, <code>clock</code> ; sur un répéteur, aussi <code>neighbors</code>, <code>get radio</code>, <code>get tx</code>.</td></tr>
+<tr><td>Commandes</td><td class="w">Les commandes de cette sorte de noeud, par section, avec une recherche. Un clic met la commande dans la saisie, sur sa première valeur ; rien n'est envoyé avant Entrée. Une note indique quand une commande demande un firmware plus récent que celui du noeud, ou quand son firmware n'est pas connu ; une réponse à <code>ver</code> l'apprend à l'app. Masquez la liste avec son ✕ ou le bouton Commandes ; le choix est gardé.</td></tr>
+<tr><td>Récentes</td><td class="w">Les 12 dernières commandes entrées, avec leurs valeurs, en haut de la liste, par proxy et par sorte de noeud, stockées par cette app. Un clic remplit la saisie. Les commandes avec un secret et les boutons rapides ne sont pas gardés. Vider efface la liste.</td></tr>
+<tr><td>Relancer</td><td class="w">Le bouton d'un bloc renvoie sa commande ; le résultat apparaît en bas. Une commande dangereuse demande d'abord confirmation. Une commande avec un secret revient dans la saisie pour que sa valeur soit retapée. Une commande absente de la liste des commandes attend Entrée dans la saisie.</td></tr>
+<tr><td><kbd>Haut</kbd> / <kbd>Bas</kbd></td><td class="w">Parcourent dans la saisie les commandes passées du noeud, les plus récentes d'abord, modifiables avant l'envoi. <kbd>Bas</kbd> après la plus récente revient à ce qui était en cours de saisie. Une commande avec un secret revient sans sa valeur.</td></tr>
+<tr><td>×N</td><td class="w">La même commande lancée N fois de suite, le même jour, forme un seul bloc avec la dernière réponse. Un clic sur ×N montre les réponses précédentes et leurs heures.</td></tr>
+<tr><td>Voisins</td><td class="w">Sur un répéteur, cette vue remplace le journal par les noeuds qu'il entend : chacun par son nom (un clic ouvre sa page), avec son SNR et quand il a été entendu, triés par plus récents, plus anciens, plus forts ou plus faibles. <b>Relire</b> envoie la commande <code>neighbors</code>, un message avec environ 8 noeuds, ceux entendus le plus récemment. <b>Tout relire</b> lit toute la table par radio, plusieurs demandes qui peuvent prendre une minute. Les réponses s'ajoutent : les noeuds déjà listés restent et les nouveaux sont ajoutés, avec ceux des réponses à <code>neighbors</code> du journal. Un voisin que le proxy ne connaît pas montre le début de sa clé. Le ✕ au-dessus de la liste, ou le bouton <b>Voisins</b>, revient au journal.</td></tr>
+<tr><td>Corbeille</td><td class="w">Vide le journal après confirmation, dans cette app seulement : le proxy et vos autres appareils gardent l'historique, et les nouvelles commandes apparaissent comme d'habitude. <i>Réafficher</i> ramène les lignes. Les commandes récentes, <kbd>Haut</kbd> / <kbd>Bas</kbd> et la liste des voisins restent telles quelles.</td></tr>
+<tr><td>Triangle d'avertissement</td><td class="w">La commande redémarre le noeud, le coupe ou change son émission. L'app demande confirmation avant de l'envoyer.</td></tr>
+<tr><td>Grisée, icône USB</td><td class="w">La commande ne marche que sur la console USB du noeud. La console l'atteint par LoRa : ces commandes sont listées pour information et ne peuvent pas être envoyées.</td></tr>
+<tr><td>Mots de passe</td><td class="w">Une valeur secrète est masquée à la saisie. Le journal montre une telle commande avec <code>***</code>.</td></tr>
+</table></div>
+<div class="note"><b>Une à la fois</b> Une réponse prend des secondes, ou des dizaines de secondes sur plusieurs sauts ; le bloc montre l'attente. La commande suivante peut partir une fois la réponse arrivée.</div>
+
+<h3 id="u-live">Live</h3>
+<p>Le flux décodé du proxy, en trois panneaux : Paquets, Activité, Messages.</p>
+<div class="wrap"><table>
+<tr><th>Commande</th><th>Effet</th></tr>
+<tr><td>Recherche</td><td class="w">Noeud, type, texte…</td></tr>
+<tr><td>Lignes HEARD</td><td class="w">Ajoute la ligne de la radio pour chaque paquet (le panneau Paquets le montre déjà, décodé).</td></tr>
+<tr><td>Noeud / état</td><td class="w">Ajoute dans Activité les mises à jour des noeuds et les changements d'état du proxy.</td></tr>
+<tr><td>Pause</td><td class="w">Arrête le défilement ; Suite rattrape le retard.</td></tr>
+<tr><td>Un paquet</td><td class="w">Clic : type, route, signal, sauts, chemin, taille, origine, version, taille d'id, saut final, destination / source, hash du canal, ACK.</td></tr>
+<tr><td>Un message</td><td class="w">« canal inconnu » : un message de canal dont le canal ne peut pas être déterminé.</td></tr>
+<tr><td>Compteur</td><td class="w">Événements reçus et paquets par minute.</td></tr>
+</table></div>
+
+<h3 id="u-logs">Journal</h3>
+<p>Le log du service du proxy, en direct : Tout, Apps, Radio ou Soucis, une recherche, 500, 2 000 ou 5 000 lignes (leur nombre est affiché), Copier et Relire.</p>
+</section>
+
+<section class="panel" id="trouble" role="tabpanel">
+<h2>Problèmes</h2>
+<p class="sub">Quand le proxy lui-même peut être en cause, commencez par <code>mcproxy doctor</code> <span class="where pi">sur la machine du proxy</span>.</p>
+<div class="wrap"><table>
+<tr><th>Vous voyez</th><th>Que faire</th></tr>
+<tr><td>Pastille <span class="bad">hors ligne</span></td><td class="w">Le proxy est injoignable ; la raison est sur la pastille et sur la page Connexion et réglages. L'app réessaie toutes les quelques secondes et recharge tout dès que le proxy répond. Les pages gardent les données déjà chargées ; les parties pas encore chargées indiquent « Indisponible tant que le proxy est hors ligne ».</td></tr>
+<tr><td>« connexion refusée » / « pas de réponse »</td><td class="w">Vérifiez l'adresse et le port (<code>mcproxy api</code> sur la machine du proxy), que votre ordinateur et la machine du proxy sont sur le même réseau, et que <code>[server] allow</code> du proxy laisse entrer votre ordinateur.</td></tr>
+<tr><td>« répond, mais ce n'est pas un mcproxy »</td><td class="w">Autre chose répond sur ce port : l'API de données est sur <code>5080</code>, pas <code>5000</code>.</td></tr>
+<tr><td>« Le certificat du proxy a changé »</td><td class="w">Approuvez-le seulement si vous avez réinstallé le proxy ou renouvelé son certificat. Sinon, Annuler.</td></tr>
+<tr><td>Jeton refusé</td><td class="w">Entrez le <code>[api] token</code> du proxy sur la page Connexion et réglages (affiché par <code>mcproxy api</code>).</td></tr>
+<tr><td>Pastille <span class="warn">reconnexion</span></td><td class="w">Les mises à jour en direct ont été interrompues ; l'app se reconnecte automatiquement. Survolez la pastille pour la raison.</td></tr>
+<tr><td>Barre latérale : <span class="bad">radio coupée</span></td><td class="w">Le proxy a perdu le compagnon. Sur la machine du proxy : <code>mcproxy status</code>, ou l'onglet « Problèmes » du guide du proxy.</td></tr>
+<tr><td>Message « Non envoyé : pas dans les contacts du compagnon »</td><td class="w">Un DM demande le contact sur le compagnon. Sur sa page : <b>Remettre au compagnon</b>, ou attendez sa prochaine annonce.</td></tr>
+<tr><td>« lecture de ses canaux en cours »</td><td class="w">Juste après la connexion du compagnon. Réessayez dans un instant.</td></tr>
+<tr><td>« plusieurs contacts correspondent »</td><td class="w">Le nom ou la clé ne dit pas de quel contact il s'agit : rien n'a été envoyé ni supprimé.</td></tr>
+<tr><td>DM « Non remis »</td><td class="w">Le destinataire ne vous a peut-être pas dans ses contacts, ou le chemin est rompu : utilisez <i>Renvoyer</i> puis <i>Flood</i> sous le message, ou <i>Changer</i> pour la route.</td></tr>
+<tr><td>Console : « Pas de réponse à temps » / « Le compagnon n'a pas répondu »</td><td class="w">La commande a pu s'exécuter sur le noeud. L'app ne la renvoie pas d'elle-même, car le noeud l'exécuterait deux fois. Vérifiez par une commande de lecture comme <code>clock</code> ou <code>get tx</code>, puis utilisez le bouton Relancer si elle est encore nécessaire.</td></tr>
+<tr><td>Pas de bouton Console sur un noeud</td><td class="w">La console demande une connexion admin. Sur la page du noeud, utilisez <b>Accès admin</b> avec le mot de passe du noeud.</td></tr>
+<tr><td>Console : pas de ligne de commande</td><td class="w">La dernière connexion a donné un autre rôle qu'admin. Reconnectez-vous avec le mot de passe admin.</td></tr>
+<tr><td>Connexion : « Pas de réponse après 3 essais »</td><td class="w">Le mot de passe est faux, ou le noeud est hors de portée. Un noeud ne renvoie rien pour un mauvais mot de passe, y compris un accès invité à vide quand son mot de passe invité est défini : l'app ne peut donc le dire qu'après le dernier essai. Vérifiez le mot de passe et la route, puis réessayez. Sur un salon, une connexion à vide sans réponse signifie que vous n'êtes pas dans sa liste ou qu'il est hors de portée : essayez son mot de passe invité.</td></tr>
+<tr><td>« (texte plus gardé) » / « (texte stocké, mais sa clé n'est pas disponible) »</td><td class="w">Le proxy a retiré les anciens textes, ou tourne sans sa clé des messages. Voir le guide du proxy.</td></tr>
+<tr><td>Tuiles de relief non téléchargées</td><td class="w">Pas d'internet sur votre ordinateur. Les autres vues marchent toujours.</td></tr>
+<tr><td>« Réglages non enregistrés »</td><td class="w">L'app ne peut pas écrire son fichier de réglages : À propos, sur la page Connexion et réglages, montre où il est. Placez l'app là où vous pouvez écrire, ou rendez ce fichier modifiable.</td></tr>
+<tr><td>« Fichier de langue introuvable ou inutilisable » / « Fichier de langue inutilisable »</td><td class="w">Le fichier indiqué est absent, dépasse 1 Mo ou n'est pas un texte UTF-8 : remettez-le, ou choisissez une autre langue (voir <a href="#language">Langue</a>).</td></tr>
+<tr><td>« demande un mcproxy plus récent »</td><td class="w">L'app utilise quelque chose que ce proxy ne fournit pas encore : mettez le proxy à jour (guide du proxy, onglet « Mettre à jour »).</td></tr>
+</table></div>
+</section>
+
+<footer>mcproxy desk · by FED1291</footer>
+</main>
+
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('nav.tabs button'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('section.panel'));
+  function show(id, target) {
+    var found = false;
+    panels.forEach(function (p) { var on = p.id === id; p.classList.toggle('on', on); found = found || on; });
+    if (!found) { return false; }
+    tabs.forEach(function (b) { b.setAttribute('aria-selected', b.dataset.tab === id ? 'true' : 'false'); });
+    if (target) { target.scrollIntoView(); } else { window.scrollTo(0, 0); }
+    return true;
+  }
+  function go(hash) {
+    var el = hash && document.getElementById(hash.slice(1));
+    var panel = el && (el.classList.contains('panel') ? el : el.closest('section.panel'));
+    if (!panel) { return show('overview'); }
+    show(panel.id, el === panel ? null : el);
+  }
+  tabs.forEach(function (b) {
+    b.addEventListener('click', function () { history.replaceState(null, '', '#' + b.dataset.tab); show(b.dataset.tab); });
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href^="#"]');
+    if (!a) { return; }
+    e.preventDefault();
+    history.replaceState(null, '', a.getAttribute('href'));
+    go(a.getAttribute('href'));
+  });
+  window.addEventListener('hashchange', function () { go(location.hash); });
+  go(location.hash);
+  document.querySelector('.lang a').addEventListener('click', function () { this.hash = location.hash; });
+
+  document.querySelectorAll('.cmd').forEach(function (box) {
+    var pre = box.querySelector('pre');
+    var b = document.createElement('button');
+    b.className = 'copy'; b.type = 'button'; b.textContent = 'Copier';
+    b.addEventListener('click', function () {
+      var clone = pre.cloneNode(true);
+      clone.querySelectorAll('.c, .where').forEach(function (n) { n.remove(); });
+      var text = clone.textContent.split('\n').map(function (l) { return l.replace(/\s+$/, ''); })
+        .filter(function (l) { return l.length; }).join('\n');
+      var done = function () { b.textContent = 'Copié'; b.classList.add('done');
+        setTimeout(function () { b.textContent = 'Copier'; b.classList.remove('done'); }, 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); });
+      } else { fallback(text); done(); }
+    });
+    box.appendChild(b);
+  });
+  function fallback(text) {
+    var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t);
+    t.select(); try { document.execCommand('copy'); } catch (e) {} t.remove();
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,263 @@
+<svg class="app" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" role="img" aria-label="The desk window on its Overview page: the top bar with the tabs and the connection pill, the sidebar with our companion and the node list, the page with its tiles, settings and charts">
+<style>
+
+
+:root {
+  --bg: #f7f7f4; --panel: #ffffff; --ink: #1d1f21; --dim: #6b6f75; --line: #dcdcd6;
+  --accent: #b7791f; --accent-soft: #fbf1dc; --cyan: #127a8a; --cyan-soft: #e1f2f4;
+  --good: #2f8a3e; --good-soft: #e5f3e7; --warn: #b7791f; --bad: #c0392b; --bad-soft: #fbe6e3;
+  --violet: #6b4fbb; --violet-soft: #eee9fa;
+  --term: #15171a; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #3a3f45;
+  --code-bg: #efefea;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+    --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+    --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+    --violet: #a993f0; --violet-soft: #231d36;
+    --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+    --code-bg: #24272b;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+a { color: var(--cyan); }
+code, kbd, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: .92em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+kbd { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 5px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); white-space: nowrap; }
+main { max-width: 1000px; margin: 0 auto; padding: 0 16px 64px; }
+
+
+header.top { padding: 24px 0 14px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); margin: 0; }
+nav.tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; scrollbar-width: thin; }
+nav.tabs button { font: inherit; font-size: .95rem; color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: 8px 14px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button .n { display: inline-block; width: 1.4em; color: var(--accent); font-weight: 700; }
+section.panel { padding-top: 26px; }
+.js section.panel:not(.on) { display: none; }
+
+
+h2 { font-size: 1.5rem; margin: 0 0 4px; }
+h3 { font-size: 1.12rem; margin: 30px 0 8px; padding-left: 10px; border-left: 4px solid var(--accent); }
+h4 { font-size: 1rem; margin: 20px 0 6px; }
+p { margin: 8px 0; }
+.sub { color: var(--dim); margin: 0 0 14px; }
+.good { color: var(--good); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+
+
+.note, .tip, .alert { border-left: 4px solid; padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+.note { background: var(--accent-soft); border-color: var(--accent); }
+.tip { background: var(--good-soft); border-color: var(--good); }
+.alert { background: var(--bad-soft); border-color: var(--bad); }
+.note b:first-child, .tip b:first-child, .alert b:first-child { margin-right: 4px; }
+
+
+.where { display: inline-block; font: 600 .72rem/1 "IBM Plex Sans", "Segoe UI", sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 999px; vertical-align: middle; }
+.where.pi { background: var(--cyan-soft); color: var(--cyan); }
+.where.pc { background: var(--accent-soft); color: var(--accent); }
+.where.phone { background: var(--violet-soft); color: var(--violet); }
+
+
+.cmd { position: relative; margin: 8px 0; }
+.cmd pre { background: var(--term); color: var(--term-ink); padding: 12px 70px 12px 14px; border-radius: 8px;
+  overflow-x: auto; margin: 0; line-height: 1.5; }
+.cmd pre .c { color: var(--term-dim); }
+.cmd button.copy { position: absolute; top: 8px; right: 8px; font: 600 .75rem "IBM Plex Sans", sans-serif;
+  background: #2a2e33; color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+.cmd button.copy:hover { border-color: var(--accent); }
+.cmd button.copy.done { color: #111; background: var(--good); border-color: var(--good); }
+
+
+ol.steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+ol.steps > li { counter-increment: step; position: relative; padding: 14px 16px 14px 60px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); color: #111; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps > li > h4 { margin: 3px 0 6px; }
+ol.steps > li > h4 .where { margin-left: 6px; }
+
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card b { display: block; margin-bottom: 4px; }
+.card p { margin: 0; color: var(--dim); font-size: .94rem; }
+
+
+.wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--code-bg); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.w { white-space: normal; }
+
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips a { font-family: "IBM Plex Mono", monospace; font-size: .85rem; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); padding: 3px 10px; border-radius: 4px; }
+.chips a:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+figure { margin: 16px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--dim); font-size: .88rem; margin-top: 6px; }
+footer { margin-top: 56px; color: var(--dim); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+
+.s-term { fill: var(--term); }
+.s-box { fill: none; stroke: var(--term-line); stroke-width: 1.5; }
+.s-t { fill: var(--term-ink); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-td { fill: var(--term-dim); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-ta { fill: var(--accent); font: 600 13px "IBM Plex Mono", Consolas, monospace; }
+.s-tc { fill: var(--cyan); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-tab { fill: var(--accent); }
+.s-tabt { fill: #111; font: 700 12px "IBM Plex Mono", Consolas, monospace; }
+.s-good { fill: var(--good); } .s-warn { fill: var(--warn); } .s-bad { fill: var(--bad); }
+
+.s-goodt { fill: var(--good); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-warnt { fill: var(--warn); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-badt { fill: var(--bad); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-lc { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.s-ink { fill: var(--ink); font: 600 14px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-dim { fill: var(--dim); font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-line { stroke: var(--dim); stroke-width: 2; fill: none; }
+.s-acc { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.s-node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+.s-hub { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.s-pill { fill: #6b4fbb; } .s-pillt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+.s-reg { fill: #b04fa0; } .s-regt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+
+svg.app { border-radius: 10px; border: 1px solid var(--line); }
+.a-bg { fill: #16181d; } .a-panel { fill: #1c1f26; } .a-card { fill: #242831; } .a-hover { fill: #2c313c; }
+.a-edge { fill: none; stroke: #333844; stroke-width: 1; }
+.a-sel { fill: #4f8cff; fill-opacity: .22; stroke: #4f8cff; stroke-width: 1.2; }
+.a-acc { fill: #4f8cff; } .a-good { fill: #4cb87a; } .a-warn { fill: #e8a317; } .a-bad { fill: #e66767; }
+.a-s1 { fill: #3987e5; } .a-s2 { fill: #199e70; } .a-s3 { fill: #d95926; } .a-s4 { fill: #c98500; }
+.a-chat { fill: #6f9fd8; } .a-rpt { fill: #5fae8e; } .a-room { fill: #c9a35a; }
+.a-line { fill: none; stroke: #c98500; stroke-width: 1.6; } .a-grid { stroke: #333844; stroke-width: 1; }
+.a-t { fill: #e6e8ee; font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-b { fill: #e6e8ee; font: 600 13.5px "IBM Plex Sans Condensed", "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-big { fill: #e6e8ee; font: 600 20px "IBM Plex Sans Condensed", "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-h { fill: #e6e8ee; font: 600 19px "IBM Plex Sans Condensed", "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-m { fill: #8d94a5; font: 11.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-f { fill: #5a6070; font: 11px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tg { fill: #4cb87a; font: 11.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tw { fill: #e8a317; font: 11.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-ta { fill: #4f8cff; font: 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tc { fill: #6f9fd8; font: 600 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tr { fill: #5fae8e; font: 600 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-dark { fill: #16181d; font: 600 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  ol.steps > li { padding-left: 52px; }
+  ol.steps > li::before { left: 12px; }
+}
+
+</style>
+
+  <rect class="a-bg" x="0" y="0" width="1000" height="600"/>
+  
+  <rect class="a-bg" x="0" y="0" width="1000" height="48"/><path class="a-grid" d="M0 47.5 H 1000"/>
+  <rect x="12" y="11" width="24" height="24" rx="6" fill="#e2261e"/><path d="M24 15.5 v15 M16.5 23 h15" stroke="#fff" stroke-width="4.2"/>
+  <text class="a-b" x="43" y="29" style="font-size:16px">mcproxy</text><text class="a-m" x="109" y="29">desk</text><text class="a-f" x="138" y="29">by FED1291</text>
+  <rect class="a-sel" x="206" y="10" width="84" height="27" rx="5"/>
+  <g class="a-edge"><rect x="296" y="10" width="64" height="27" rx="5"/><rect x="366" y="10" width="76" height="27" rx="5"/><rect x="448" y="10" width="86" height="27" rx="5"/><rect x="540" y="10" width="54" height="27" rx="5"/><rect x="600" y="10" width="58" height="27" rx="5"/></g>
+  <g fill="none" stroke="#8d94a5" stroke-width="1.3">
+    <rect x="213" y="17" width="5" height="5" stroke="#e6e8ee"/><rect x="220" y="17" width="5" height="5" stroke="#e6e8ee"/><rect x="213" y="24" width="5" height="5" stroke="#e6e8ee"/><rect x="220" y="24" width="5" height="5" stroke="#e6e8ee"/>
+    <circle cx="308" cy="18" r="2.3"/><circle cx="303" cy="28" r="2.3"/><circle cx="313" cy="28" r="2.3"/><path d="M308 20.3 L303 25.7 M308 20.3 L313 25.7"/>
+    <path d="M373 18 l5 -2 l5 2 l5 -2 v12 l-5 2 l-5 -2 l-5 2 z M378 16 v12 M383 18 v12"/>
+    <path d="M547 23 h3 l2 -6 l3 12 l2 -6 h3"/>
+    <rect x="607" y="16" width="10" height="13" rx="1.5"/><path d="M610 20 h4 M610 23 h4 M610 26 h4"/>
+  </g>
+  <text class="a-m" x="455" y="29" style="font-size:14px">#</text>
+  <text class="a-t" x="230" y="28">Overview</text>
+  <g class="a-m"><text x="320" y="28">Mesh</text><text x="392" y="28">Explore</text><text x="468" y="28">Channels</text><text x="564" y="28">Live</text><text x="622" y="28">Logs</text></g>
+  <rect class="a-card" x="680" y="12" width="158" height="24" rx="12"/><circle class="a-good" cx="694" cy="24" r="4"/>
+  <text class="a-t" x="704" y="28">192.168.1.50:5080</text><text class="a-m" x="810" y="28">· live</text>
+  <text class="a-m" x="846" y="28">mcproxy · up 3 d 18 h</text>
+  <path d="M974 18 h14 M974 24 h14 M974 30 h14" stroke="#8d94a5" stroke-width="1.3"/><circle cx="984" cy="18" r="2" fill="#16181d" stroke="#8d94a5"/><circle cx="978" cy="24" r="2" fill="#16181d" stroke="#8d94a5"/><circle cx="984" cy="30" r="2" fill="#16181d" stroke="#8d94a5"/>
+  
+  <rect class="a-panel" x="0" y="48" width="250" height="552"/>
+  <rect class="a-sel" x="8" y="58" width="234" height="66" rx="6"/>
+  <text class="a-m" x="18" y="76">Our companion</text><circle class="a-good" cx="178" cy="72" r="3.5"/><text class="a-tg" x="186" y="76">connected</text>
+  <text class="a-b" x="18" y="96">Base Station</text>
+  <rect class="a-edge" x="18" y="104" width="22" height="10" rx="2"/><rect class="a-good" x="20" y="106" width="16" height="6"/>
+  <text class="a-tg" x="46" y="114">87 %</text><text class="a-m" x="78" y="114">4.02 V · noise −112 dBm</text>
+  <rect class="a-card" x="8" y="134" width="234" height="24" rx="5"/><text class="a-f" x="20" y="150">Filter nodes</text>
+  <rect class="a-sel" x="8" y="166" width="54" height="22" rx="5"/><text class="a-t" x="16" y="181">All 312</text>
+  <rect class="a-card" x="66" y="166" width="38" height="22" rx="5"/><text class="a-warn" x="72" y="181" style="font-size:12px">★</text><text class="a-m" x="85" y="181">12</text>
+  <rect class="a-card" x="108" y="166" width="42" height="22" rx="5"/><rect x="114" y="171" width="9" height="12" rx="1.5" fill="none" stroke="#8d94a5" stroke-width="1.2"/><text class="a-m" x="128" y="181">140</text>
+  <rect class="a-card" x="154" y="166" width="42" height="22" rx="5"/><circle class="a-chat" cx="164" cy="177" r="4.5"/><text class="a-m" x="172" y="181">168</text>
+  <rect class="a-card" x="200" y="166" width="42" height="22" rx="5"/><circle class="a-rpt" cx="210" cy="177" r="4.5"/><text class="a-m" x="218" y="181">96</text>
+  <rect class="a-card" x="8" y="196" width="113" height="22" rx="5"/><text class="a-m" x="16" y="211">Heard in 24 h ▾</text>
+  <rect class="a-card" x="129" y="196" width="113" height="22" rx="5"/><text class="a-m" x="137" y="211">Last heard first ▾</text>
+  <rect class="a-chat" x="14" y="232" width="22" height="22" rx="5" fill-opacity=".25"/><text class="a-t" x="44" y="243">Valley node</text><text class="a-m" x="44" y="258">2 min ago · SNR 6.5 · via Hilltop</text><circle class="a-good" cx="232" cy="246" r="3.5"/>
+  <rect class="a-rpt" x="14" y="272" width="22" height="22" rx="5" fill-opacity=".25"/><text class="a-t" x="44" y="283">Hilltop RPT</text><text class="a-m" x="44" y="298">3 min ago · SNR 9.0 · direct</text><text class="a-warn" x="214" y="287">★</text><circle class="a-good" cx="232" cy="286" r="3.5"/>
+  <rect class="a-room" x="14" y="312" width="22" height="22" rx="5" fill-opacity=".25"/><text class="a-t" x="44" y="323">Ridge Room</text><text class="a-m" x="44" y="338">40 min ago · SNR 1.5 · 2 hops</text><circle class="a-warn" cx="232" cy="326" r="3.5"/>
+  <rect class="a-rpt" x="14" y="352" width="22" height="22" rx="5" fill-opacity=".25"/><text class="a-t" x="44" y="363">Town RPT</text><text class="a-m" x="44" y="378">1 h ago · SNR −2.0 · via Hilltop</text><circle class="a-warn" cx="232" cy="366" r="3.5"/>
+  <rect class="a-chat" x="14" y="392" width="22" height="22" rx="5" fill-opacity=".25"/><text class="a-t" x="44" y="403">Lakeside</text><text class="a-m" x="44" y="418">5 h ago · SNR 4.0 · 1 hop</text><circle class="a-bad" cx="232" cy="406" r="3.5"/>
+  
+  <text class="a-h" x="266" y="78">Overview</text><text class="a-m" x="356" y="78">Base Station · key 3fa9c1… · over BLE AA:BB:CC:DD:EE:FF</text>
+  <g>
+    <rect class="a-card" x="266" y="92" width="138" height="66" rx="5"/><rect class="a-good" x="266" y="92" width="3" height="66"/>
+    <text class="a-m" x="278" y="110">Battery</text><text class="a-big" x="278" y="136">4.02 V</text><text class="a-m" x="278" y="152">read 1 min ago</text>
+    <rect class="a-card" x="412" y="92" width="138" height="66" rx="5"/><rect class="a-acc" x="412" y="92" width="3" height="66"/>
+    <text class="a-m" x="424" y="110">Radio link</text><text class="a-big" x="424" y="136">Up 3 d 4 h</text><text class="a-m" x="424" y="152">0 reconnects</text>
+    <rect class="a-card" x="558" y="92" width="138" height="66" rx="5"/><rect class="a-s1" x="558" y="92" width="3" height="66"/>
+    <text class="a-m" x="570" y="110">Packets this hour</text><text class="a-big" x="570" y="136">214</text><text class="a-m" x="570" y="152">4,980 in 24 h</text>
+    <rect class="a-card" x="704" y="92" width="138" height="66" rx="5"/><rect class="a-s2" x="704" y="92" width="3" height="66"/>
+    <text class="a-m" x="716" y="110">Nodes heard</text><text class="a-big" x="716" y="136">87</text><text class="a-m" x="716" y="152">31 repeaters</text>
+    <rect class="a-card" x="850" y="92" width="138" height="66" rx="5"/><rect class="a-s4" x="850" y="92" width="3" height="66"/>
+    <text class="a-m" x="862" y="110">Connected apps</text><text class="a-big" x="862" y="136">3</text><text class="a-m" x="862" y="152">desk, phone, CLI</text>
+  </g>
+  <text class="a-b" x="266" y="186">On the radio</text><text class="a-m" x="358" y="186">140 / 350 contacts</text>
+  <rect class="a-card" x="870" y="172" width="118" height="22" rx="5"/><text class="a-t" x="929" y="187" text-anchor="middle">Advert (flood)</text>
+  <rect class="a-card" x="266" y="200" width="358" height="34" rx="5"/><text class="a-t" x="278" y="221">Path id size</text>
+  <rect class="a-hover" x="526" y="207" width="28" height="20" rx="4"/><text class="a-m" x="540" y="221" text-anchor="middle">1 B</text>
+  <rect class="a-sel" x="558" y="207" width="28" height="20" rx="4"/><text class="a-t" x="572" y="221" text-anchor="middle">2 B</text>
+  <rect class="a-hover" x="590" y="207" width="28" height="20" rx="4"/><text class="a-m" x="604" y="221" text-anchor="middle">3 B</text>
+  <rect class="a-card" x="632" y="200" width="356" height="34" rx="5"/><text class="a-t" x="644" y="221">Replace the oldest contact when full</text>
+  <rect class="a-acc" x="950" y="208" width="30" height="16" rx="8"/><circle cx="972" cy="216" r="6" fill="#fff"/>
+  <text class="a-b" x="266" y="262">History</text>
+  <rect class="a-sel" x="324" y="249" width="34" height="20" rx="4"/><text class="a-t" x="341" y="263" text-anchor="middle">24 h</text>
+  <rect class="a-hover" x="362" y="249" width="30" height="20" rx="4"/><text class="a-m" x="377" y="263" text-anchor="middle">7 d</text>
+  
+  <rect class="a-card" x="266" y="278" width="358" height="200" rx="5"/>
+  <text class="a-b" x="278" y="298">Packets heard per hour</text>
+  <path class="a-grid" d="M300 456 H 612 M300 380 H 612"/>
+  <text class="a-m" x="292" y="460" text-anchor="end">0</text><text class="a-m" x="292" y="384" text-anchor="end">200</text>
+  <g class="a-s1">
+    <rect x="304" y="420" width="9" height="36"/><rect x="316" y="428" width="9" height="28"/><rect x="328" y="434" width="9" height="22"/><rect x="340" y="438" width="9" height="18"/>
+    <rect x="352" y="436" width="9" height="20"/><rect x="364" y="426" width="9" height="30"/><rect x="376" y="408" width="9" height="48"/><rect x="388" y="390" width="9" height="66"/>
+    <rect x="400" y="372" width="9" height="84"/><rect x="412" y="366" width="9" height="90"/><rect x="424" y="376" width="9" height="80"/><rect x="436" y="360" width="9" height="96"/>
+    <rect x="448" y="352" width="9" height="104"/><rect x="460" y="368" width="9" height="88"/><rect x="472" y="374" width="9" height="82"/><rect x="484" y="362" width="9" height="94"/>
+    <rect x="496" y="346" width="9" height="110"/><rect x="508" y="340" width="9" height="116"/><rect x="520" y="354" width="9" height="102"/><rect x="532" y="366" width="9" height="90"/>
+    <rect x="544" y="384" width="9" height="72"/><rect x="556" y="398" width="9" height="58"/><rect x="568" y="410" width="9" height="46"/><rect x="580" y="404" width="9" height="52"/><rect x="592" y="396" width="9" height="60"/>
+  </g>
+  <text class="a-m" x="352" y="472" text-anchor="middle">00:00</text><text class="a-m" x="448" y="472" text-anchor="middle">08:00</text><text class="a-m" x="544" y="472" text-anchor="middle">16:00</text>
+  
+  <rect class="a-card" x="632" y="278" width="356" height="200" rx="5"/>
+  <text class="a-b" x="644" y="298">Average SNR per hour</text>
+  <path class="a-grid" d="M664 456 H 976 M664 406 H 976 M664 356 H 976"/>
+  <text class="a-m" x="656" y="460" text-anchor="end">0</text><text class="a-m" x="656" y="410" text-anchor="end">3</text><text class="a-m" x="656" y="360" text-anchor="end">6</text>
+  <path class="a-line" d="M668 400 L682 392 L696 410 L710 396 L724 384 L738 398 L752 376 L766 388 L780 370 L794 382 L808 362 L822 378 L836 386 L850 372 L864 394 L878 380 L892 402 L906 388 L920 376 L934 392 L948 384 L962 398 L974 390"/>
+  <text class="a-m" x="716" y="472" text-anchor="middle">00:00</text><text class="a-m" x="812" y="472" text-anchor="middle">08:00</text><text class="a-m" x="908" y="472" text-anchor="middle">16:00</text>
+  
+  <rect class="a-card" x="266" y="488" width="722" height="104" rx="5"/>
+  <text class="a-b" x="278" y="508">What the mesh carries</text><text class="a-m" x="420" y="508">4,980 packets in 24 h, by type</text>
+  <rect class="a-s4" x="278" y="518" width="300" height="10"/><rect class="a-s1" x="578" y="518" width="150" height="10"/><rect class="a-chat" x="728" y="518" width="110" height="10"/><rect class="a-s2" x="838" y="518" width="80" height="10"/><rect class="a-s3" x="918" y="518" width="58" height="10"/>
+  <circle class="a-s4" cx="284" cy="548" r="4"/><text class="a-t" x="294" y="552">Requests</text><text class="a-t" x="430" y="552">2,071</text><text class="a-m" x="474" y="552">41.6 %</text>
+  <circle class="a-s1" cx="284" cy="572" r="4"/><text class="a-t" x="294" y="576">Channel messages</text><text class="a-t" x="430" y="576">1,035</text><text class="a-m" x="474" y="576">20.8 %</text>
+  <circle class="a-chat" cx="560" cy="548" r="4"/><text class="a-t" x="570" y="552">Direct messages</text><text class="a-t" x="706" y="552">762</text><text class="a-m" x="744" y="552">15.3 %</text>
+  <circle class="a-s2" cx="560" cy="572" r="4"/><text class="a-t" x="570" y="576">Adverts</text><text class="a-t" x="706" y="576">531</text><text class="a-m" x="744" y="576">10.7 %</text>
+</svg>

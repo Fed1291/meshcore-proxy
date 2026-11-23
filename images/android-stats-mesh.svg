@@ -1,0 +1,258 @@
+<svg class="menu" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 840" role="img" aria-label="The Mesh tab of Stats over 24 h: Packets heard, by type, as stacked bars per hour with each type's count and share; Average SNR as a line with the average, latest and lowest; Message share of the traffic as a line with message and mesh traffic packets; the top of Messages per hour">
+<style>
+
+
+:root {
+  --bg: #f7f7f4; --panel: #ffffff; --ink: #1d1f21; --dim: #6b6f75; --line: #dcdcd6;
+  --accent: #b7791f; --accent-soft: #fbf1dc; --cyan: #127a8a; --cyan-soft: #e1f2f4;
+  --good: #2f8a3e; --good-soft: #e5f3e7; --warn: #b7791f; --bad: #c0392b; --bad-soft: #fbe6e3;
+  --violet: #6b4fbb; --violet-soft: #eee9fa;
+  --term: #15171a; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #3a3f45;
+  --code-bg: #efefea;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+    --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+    --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+    --violet: #a993f0; --violet-soft: #231d36;
+    --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+    --code-bg: #24272b;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+a { color: var(--cyan); }
+code, kbd, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: .92em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+kbd { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 5px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); white-space: nowrap; }
+main { max-width: 1000px; margin: 0 auto; padding: 0 16px 64px; }
+
+
+header.top { padding: 24px 0 14px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); margin: 0; }
+nav.tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; scrollbar-width: thin; }
+nav.tabs button { font: inherit; font-size: .95rem; color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: 8px 14px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button .n { display: inline-block; width: 1.4em; color: var(--accent); font-weight: 700; }
+section.panel { padding-top: 26px; }
+.js section.panel:not(.on) { display: none; }
+
+
+h2 { font-size: 1.5rem; margin: 0 0 4px; }
+h3 { font-size: 1.12rem; margin: 30px 0 8px; padding-left: 10px; border-left: 4px solid var(--accent); }
+h4 { font-size: 1rem; margin: 20px 0 6px; }
+p { margin: 8px 0; }
+.sub { color: var(--dim); margin: 0 0 14px; }
+.good { color: var(--good); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+
+
+.note, .tip, .alert { border-left: 4px solid; padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+.note { background: var(--accent-soft); border-color: var(--accent); }
+.tip { background: var(--good-soft); border-color: var(--good); }
+.alert { background: var(--bad-soft); border-color: var(--bad); }
+.note b:first-child, .tip b:first-child, .alert b:first-child { margin-right: 4px; }
+
+
+.where { display: inline-block; font: 600 .72rem/1 "IBM Plex Sans", "Segoe UI", sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 999px; vertical-align: middle; }
+.where.pi { background: var(--cyan-soft); color: var(--cyan); }
+.where.pc { background: var(--accent-soft); color: var(--accent); }
+.where.phone { background: var(--violet-soft); color: var(--violet); }
+
+
+.cmd { position: relative; margin: 8px 0; }
+.cmd pre { background: var(--term); color: var(--term-ink); padding: 12px 70px 12px 14px; border-radius: 8px;
+  overflow-x: auto; margin: 0; line-height: 1.5; }
+.cmd pre .c { color: var(--term-dim); }
+.cmd button.copy { position: absolute; top: 8px; right: 8px; font: 600 .75rem "IBM Plex Sans", sans-serif;
+  background: #2a2e33; color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+.cmd button.copy:hover { border-color: var(--accent); }
+.cmd button.copy.done { color: #111; background: var(--good); border-color: var(--good); }
+
+
+ol.steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+ol.steps > li { counter-increment: step; position: relative; padding: 14px 16px 14px 60px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); color: #111; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps > li > h4 { margin: 3px 0 6px; }
+ol.steps > li > h4 .where { margin-left: 6px; }
+
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card b { display: block; margin-bottom: 4px; }
+.card p { margin: 0; color: var(--dim); font-size: .94rem; }
+
+
+.wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--code-bg); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.w { white-space: normal; }
+
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips a { font-family: "IBM Plex Mono", monospace; font-size: .85rem; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); padding: 3px 10px; border-radius: 4px; }
+.chips a:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+figure { margin: 16px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--dim); font-size: .88rem; margin-top: 6px; }
+footer { margin-top: 56px; color: var(--dim); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+
+.s-term { fill: var(--term); }
+.s-box { fill: none; stroke: var(--term-line); stroke-width: 1.5; }
+.s-t { fill: var(--term-ink); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-td { fill: var(--term-dim); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-ta { fill: var(--accent); font: 600 13px "IBM Plex Mono", Consolas, monospace; }
+.s-tc { fill: var(--cyan); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-tab { fill: var(--accent); }
+.s-tabt { fill: #111; font: 700 12px "IBM Plex Mono", Consolas, monospace; }
+.s-good { fill: var(--good); } .s-warn { fill: var(--warn); } .s-bad { fill: var(--bad); }
+
+.s-goodt { fill: var(--good); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-warnt { fill: var(--warn); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-badt { fill: var(--bad); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-lc { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.s-ink { fill: var(--ink); font: 600 14px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-dim { fill: var(--dim); font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-line { stroke: var(--dim); stroke-width: 2; fill: none; }
+.s-acc { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.s-node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+.s-hub { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.s-pill { fill: #6b4fbb; } .s-pillt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+.s-reg { fill: #b04fa0; } .s-regt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+
+svg.phone { border-radius: 14px; border: 1px solid var(--line); max-width: 420px; margin: 0 auto; }
+svg.menu { border-radius: 14px; border: 1px solid var(--line); }
+.p-bg { fill: #000000; } .p-c { fill: #171717; } .p-ch { fill: #2a2a2a; } .p-chh { fill: #3a3a3a; }
+.p-pri { fill: #e5574c; } .p-pc { fill: #e5574c; } .p-line { stroke: #2e2e2e; stroke-width: 1; fill: none; }
+.p-ic { stroke: #9a9a9a; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icp { stroke: #e5574c; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icg { stroke: #4cb87a; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icb { stroke: #f0a7a1; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-t, .p-tl, .p-ts, .p-m, .p-n, .p-h, .p-on, .p-b, .p-bad, .p-good { font-family: Roboto, "Segoe UI", system-ui, sans-serif; }
+.p-t { fill: #fafafa; font-size: 15px; } .p-tl { fill: #fafafa; font-size: 15.5px; } .p-ts { fill: #fafafa; font-size: 12px; }
+.p-m { fill: #9a9a9a; font-size: 11px; } .p-n { font-size: 12px; font-weight: 600; } .p-h { fill: #fafafa; font-size: 16px; font-weight: 600; }
+.p-on { fill: #ffffff; font-size: 15px; } .p-b { fill: #fafafa; font-size: 12px; font-weight: 600; }
+.p-bad { fill: #f0a7a1; font-size: 15.5px; } .p-good { fill: #4cb87a; font-size: 11px; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  ol.steps > li { padding-left: 52px; }
+  ol.steps > li::before { left: 12px; }
+}
+
+</style>
+
+  <defs>
+    <clipPath id="maBody"><rect x="0" y="252" width="400" height="532"/></clipPath>
+    <path id="maD" d="M35 230v-80h11.5v80z M48.8 230v-73.8h11.5v73.8z M145.6 230v-64.6h11.5v64.6z M173.3 230v-106.2h11.5v106.2z M187.1 230v-116.9h11.5v116.9z M201 230v-123.1h11.5v123.1z M228.6 230v-126.2h11.5v126.2z M242.5 230v-130.8h11.5v130.8z M256.3 230v-127.7h11.5v127.7z M284 230v-140h11.5v140z M297.8 230v-133.8h11.5v133.8z M311.6 230v-129.2h11.5v129.2z M339.3 230v-127.7h11.5v127.7z M353.1 230v-124.9h11.5v124.9z"/>
+    <path id="maN" d="M62.7 230v-63.1h11.5v63.1z M76.5 230v-50.8h11.5v50.8z M90.3 230v-40h11.5v40z M104.2 230v-36.9h11.5v36.9z M118 230v-38.5h11.5v38.5z M131.8 230v-46.2h11.5v46.2z"/>
+    <path id="maC" d="M159.5 230v-86.2h11.5v86.2z M214.8 230v-120h11.5v120z M270.1 230v-135.4h11.5v135.4z M325.4 230v-132.3h11.5v132.3z"/>
+    <path id="maMA" d="M35 1180v-25.9h11.5v25.9z M62.7 1180v-11.6h11.5v11.6z M76.5 1180v-6.5h11.5v6.5z M118 1180v-4.5h11.5v4.5z M131.8 1180v-9.7h11.5v9.7z M145.6 1180v-29.1h11.5v29.1z M173.3 1180v-67.9h11.5v67.9z M187.1 1180v-71.2h11.5v71.2z M214.8 1180v-72.5h11.5v72.5z M228.6 1180v-77.6h11.5v77.6z M256.3 1180v-71.2h11.5v71.2z M270.1 1180v-97.1h11.5v97.1z M297.8 1180v-82.8h11.5v82.8z M311.6 1180v-74.4h11.5v74.4z M339.3 1180v-58.2h11.5v58.2z M353.1 1180v-43.3h11.5v43.3z"/>
+    <path id="maMB" d="M48.8 1180v-19.4h11.5v19.4z M159.5 1180v-51.8h11.5v51.8z M242.5 1180v-93.8h11.5v93.8z M325.4 1180v-97.1h11.5v97.1z"/>
+    <path id="maMC" d="M90.3 1180v-3.9h11.5v3.9z M104.2 1180v-3.2h11.5v3.2z M201 1180v-76.3h11.5v76.3z M284 1180v-110h11.5v110z"/>
+    
+    <g id="maPage">
+      
+      <rect class="p-c" x="10" y="0" width="380" height="410" rx="26"/>
+      <path class="p-icp" d="M34 24 l10 -5 l10 5 l-10 5 z M34 30 l10 5 l10 -5 M34 36 l10 5 l10 -5" style="stroke-width:1.5"/>
+      <text class="p-h" x="64" y="34">Packets heard, by type</text>
+      <text class="p-m" x="34" y="60" style="font-size:12.5px">One bar or point per hour</text>
+      <g fill="#5a6070"><use href="#maD"/><use href="#maN"/><use href="#maC"/></g>
+      <use href="#maD" fill="#d48a6c" transform="matrix(1 0 0 .74 0 59.8)"/><use href="#maN" fill="#d48a6c" transform="matrix(1 0 0 .72 0 64.4)"/><use href="#maC" fill="#d48a6c" transform="matrix(1 0 0 .74 0 59.8)"/>
+      <use href="#maD" fill="#d2a64c" transform="matrix(1 0 0 .69 0 71.3)"/><use href="#maN" fill="#d2a64c" transform="matrix(1 0 0 .68 0 73.6)"/><use href="#maC" fill="#d2a64c" transform="matrix(1 0 0 .70 0 69)"/>
+      <use href="#maD" fill="#5aae8a" transform="matrix(1 0 0 .53 0 108.1)"/><use href="#maN" fill="#5aae8a" transform="matrix(1 0 0 .48 0 119.6)"/><use href="#maC" fill="#5aae8a" transform="matrix(1 0 0 .56 0 101.2)"/>
+      <use href="#maD" fill="#6a9ad6" transform="matrix(1 0 0 .34 0 151.8)"/><use href="#maN" fill="#6a9ad6" transform="matrix(1 0 0 .40 0 138)"/><use href="#maC" fill="#6a9ad6" transform="matrix(1 0 0 .30 0 161)"/>
+      <text class="p-m" x="34" y="248">Mar 14, 22:00</text><text class="p-m" x="366" y="248" text-anchor="end">now</text>
+      <circle cx="40" cy="273" r="4" fill="#6a9ad6"/><circle cx="40" cy="301" r="4" fill="#5aae8a"/><circle cx="40" cy="329" r="4" fill="#d2a64c"/><circle cx="40" cy="357" r="4" fill="#d48a6c"/><circle cx="40" cy="385" r="4" fill="#5a6070"/>
+      <g style="fill:#fafafa;font:15px Roboto,sans-serif"><text x="54" y="278">Requests</text><text x="54" y="306">Channel messages</text><text x="54" y="334">Adverts</text><text x="54" y="362">Direct messages</text><text x="54" y="390" fill="#9a9a9a">Other types</text></g>
+      <g style="fill:#fafafa;font:15px Roboto,sans-serif" text-anchor="end"><text x="300" y="278">5,204</text><text x="300" y="306">2,906</text><text x="300" y="334">2,448</text><text x="300" y="362">766</text><text x="300" y="390">3,978</text></g>
+      <g class="p-m" style="font-size:12px" text-anchor="end"><text x="366" y="278">34 %</text><text x="366" y="306">19 %</text><text x="366" y="334">16 %</text><text x="366" y="362">5 %</text><text x="366" y="390">26 %</text></g>
+      
+      <rect class="p-c" x="10" y="422" width="380" height="258" rx="26"/>
+      <path class="p-icp" d="M36 456 v-3 M41 456 v-6 M46 456 v-9 M51 456 v-12" style="stroke-width:2"/>
+      <text class="p-h" x="64" y="456">Average SNR</text>
+      <text class="p-m" x="34" y="482" style="font-size:12.5px">One bar or point per hour</text>
+      <path d="M40.9 545 L54.7 552.8 L68.6 566.5 L82.4 580.2 L96.2 590 L110.1 576.3 L123.9 562.6 L137.7 548.9 L151.6 537.2 L165.4 527.4 L179.2 521.6 L193.1 529.4 L206.9 513.7 L220.7 507.9 L234.6 519.6 L248.4 525.5 L262.2 511.8 L276.1 502 L289.9 515.7 L303.7 523.5 L317.6 531.3 L331.4 519.6 L345.2 513.7 L359.1 517.6" fill="none" stroke="#6a9ad6" stroke-width="2" stroke-linejoin="round"/>
+      <text class="p-m" x="34" y="608">Mar 14, 22:00</text><text class="p-m" x="366" y="608" text-anchor="end">now</text>
+      <g style="fill:#fafafa;font:500 16px Roboto,sans-serif"><text x="34" y="640">4.8 dB</text><text x="145" y="640">5.6 dB</text><text x="256" y="640">1.9 dB</text></g>
+      <g class="p-m" style="font-size:12.5px"><text x="34" y="658">average SNR</text><text x="145" y="658">latest</text><text x="256" y="658">lowest</text></g>
+      
+      <rect class="p-c" x="10" y="692" width="380" height="282" rx="26"/>
+      <path class="p-icp" d="M36 722 a8 7 0 1 1 3 5.5 l-4 2 z" style="stroke-width:1.5"/>
+      <text class="p-h" x="64" y="726">Message share of the traffic</text>
+      <text class="p-m" x="34" y="752" style="font-size:12.5px">One bar or point per hour</text>
+      <path d="M40.9 814 L54.7 816 L68.6 822 L82.4 826 L96.2 830 L110.1 828 L123.9 824 L137.7 818 L151.6 810 L165.4 802 L179.2 796 L193.1 798 L206.9 800 L220.7 796 L234.6 794 L248.4 798 L262.2 792 L276.1 788 L289.9 790 L303.7 794 L317.6 796 L331.4 792 L345.2 798 L359.1 802" fill="none" stroke="#6a9ad6" stroke-width="2" stroke-linejoin="round"/>
+      <text class="p-m" x="34" y="868">Mar 14, 22:00</text><text class="p-m" x="366" y="868" text-anchor="end">now</text>
+      <circle cx="40" cy="895" r="4" fill="#6a9ad6"/><circle cx="40" cy="923" r="4" fill="#5a6070"/>
+      <g style="fill:#fafafa;font:15px Roboto,sans-serif"><text x="54" y="900">Message packets</text><text x="54" y="928">Mesh traffic packets</text></g>
+      <g style="fill:#fafafa;font:15px Roboto,sans-serif" text-anchor="end"><text x="300" y="900">3,672</text><text x="300" y="928">11,630</text></g>
+      <g class="p-m" style="font-size:12px" text-anchor="end"><text x="366" y="900">24 %</text><text x="366" y="928">76 %</text></g>
+      <text class="p-m" x="34" y="954" style="font-size:12.5px">3.2 mesh traffic packets for each message packet</text>
+      
+      <rect class="p-c" x="10" y="986" width="380" height="292" rx="26"/>
+      <path class="p-icp" d="M36 1016 a8 7 0 1 1 3 5.5 l-4 2 z" style="stroke-width:1.5"/>
+      <text class="p-h" x="64" y="1020">Messages per hour</text>
+      <text class="p-m" x="34" y="1046" style="font-size:12.5px">One bar or point per hour</text>
+      <g fill="#d2a64c"><use href="#maMA"/><use href="#maMB"/></g>
+      <use href="#maMA" fill="#6a9ad6" transform="matrix(1 0 0 .82 0 212.4)"/><use href="#maMB" fill="#6a9ad6" transform="matrix(1 0 0 .65 0 413)"/><use href="#maMC" fill="#6a9ad6"/>
+    </g>
+    
+    <g id="maHead">
+      <text class="p-ts" x="20" y="18">21:07</text>
+      <path class="p-ic" d="M340 14 l4 -4 M346 14 l4 -6 M352 14 l4 -8" style="stroke:#fafafa"/><rect x="364" y="7" width="18" height="9" rx="2" fill="none" stroke="#fafafa" stroke-width="1.3"/><rect x="366" y="9" width="12" height="5" fill="#fafafa"/>
+      <rect class="p-c" x="10" y="28" width="380" height="74" rx="26"/>
+      <circle cx="32" cy="53" r="4.5" fill="#4cb87a"/>
+      <text class="p-h" x="44" y="59" style="font-size:17px">Ridge Base</text>
+      <path class="p-ic" d="M140 47 l8 7 l-4 3.5 v-14 l4 3.5 l-8 7" style="stroke-width:1.4"/>
+      <text class="p-h" x="312" y="59" style="font-size:15px">85 %</text>
+      <rect x="352" y="46" width="26" height="14" rx="4" fill="none" stroke="#9a9a9a" stroke-width="1.5"/><rect x="378" y="50" width="2.5" height="6" rx="1" fill="#9a9a9a"/><rect x="354.5" y="48.5" width="18" height="9" rx="2" fill="#4cb87a"/>
+      <circle class="p-ic" cx="32" cy="76" r="3.5" style="stroke-width:1.3"/><path class="p-ic" d="M26 87 a6 6 0 0 1 12 0 M38 73 a3.5 3.5 0 0 1 0 6 M40 87 a6 6 0 0 0 -3 -5" style="stroke-width:1.3"/>
+      <text class="p-m" x="48" y="86" style="font-size:13px">412 / 350</text>
+      <circle class="p-ic" cx="132" cy="81" r="6.5" style="stroke-width:1.3"/><path class="p-ic" d="M132 77 v4 l3 2" style="stroke-width:1.3"/>
+      <text class="p-m" x="145" y="86" style="font-size:13px">up 2 d 4 h</text>
+      <text class="p-m" x="365" y="86" text-anchor="middle" style="font-size:13px">4.07 V</text>
+      <text x="200" y="140" text-anchor="middle" style="fill:#fafafa;font:400 30px Roboto,'Segoe UI',sans-serif">Stats</text>
+      <text x="100" y="182" text-anchor="middle" style="fill:#e5574c;font:400 15px Roboto,sans-serif">Overview</text>
+      <text x="300" y="182" text-anchor="middle" style="fill:#e5574c;font:600 15px Roboto,sans-serif">Mesh</text>
+      <path d="M0 198.5 H 400" stroke="#4a4a4a" stroke-width="1"/><rect x="200" y="196" width="200" height="3" fill="#e5574c"/>
+      <rect x="108" y="208" width="92" height="36" fill="#4a2622"/>
+      <rect x="16" y="208" width="368" height="36" rx="18" fill="none" stroke="#8a8a8a" stroke-width="1.2"/>
+      <path d="M108 208 v36 M200 208 v36 M292 208 v36" stroke="#8a8a8a" stroke-width="1.2"/>
+      <g style="font:500 14px Roboto,sans-serif" text-anchor="middle"><text x="62" y="231" fill="#d8d8d8">1 h</text><text x="164" y="231" fill="#f6d5d0">24 h</text><text x="246" y="231" fill="#d8d8d8">7 days</text><text x="338" y="231" fill="#d8d8d8">30 days</text></g>
+      <path d="M128 226 l4 4 l8 -9" fill="none" stroke="#f6d5d0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect class="p-c" x="0" y="784" width="400" height="56"/><path class="p-line" d="M0 784.5 H 400"/>
+      <rect x="272" y="788" width="122" height="48" rx="18" fill="#2e2e2e"/>
+      <path d="M58 796 h18 a2 2 0 0 1 2 2 v10 a2 2 0 0 1 -2 2 h-11 l-5 4 v-4 h-2 a2 2 0 0 1 -2 -2 v-10 a2 2 0 0 1 2 -2 z" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-linejoin="round"/>
+      <rect x="68" y="789" width="26" height="14" rx="7" fill="#f2b8b5"/><text x="81" y="799.5" text-anchor="middle" style="fill:#601410;font:700 9.5px Roboto,sans-serif">99+</text>
+      <text x="67" y="831" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Chats</text>
+      <g fill="none" stroke="#9a9a9a" stroke-width="1.5"><rect x="196" y="794" width="8" height="6" rx="1.5"/><rect x="190" y="808" width="8" height="6" rx="1.5"/><rect x="202" y="808" width="8" height="6" rx="1.5"/><path d="M200 800 v4 M194 808 v-4 h12 v4"/></g>
+      <text x="200" y="831" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Contacts</text>
+      <path d="M323 795 v18 h20 M328 809 v-6 M333 809 v-11 M338 809 v-4" fill="none" stroke="#fafafa" stroke-width="1.8" stroke-linecap="round"/>
+      <text x="333" y="831" text-anchor="middle" style="fill:#fafafa;font:700 12.5px Roboto,sans-serif">Stats</text>
+    </g>
+  </defs>
+  <rect class="p-bg" x="0" y="0" width="840" height="840"/>
+  <path d="M420 0 V 840" stroke="#2e2e2e" stroke-width="1"/>
+  <use href="#maHead"/>
+  <g clip-path="url(#maBody)"><use href="#maPage" transform="translate(0 252)"/></g>
+  <g transform="translate(440 0)">
+    <use href="#maHead"/>
+    <g clip-path="url(#maBody)"><use href="#maPage" transform="translate(0 -338)"/></g>
+  </g>
+</svg>

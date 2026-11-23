@@ -1,0 +1,1033 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide mcproxy</title>
+<style>
+:root {
+  --bg: #f7f7f4; --panel: #ffffff; --ink: #1d1f21; --dim: #6b6f75; --line: #dcdcd6;
+  --accent: #b7791f; --accent-soft: #fbf1dc; --cyan: #127a8a; --cyan-soft: #e1f2f4;
+  --good: #2f8a3e; --good-soft: #e5f3e7; --warn: #b7791f; --bad: #c0392b; --bad-soft: #fbe6e3;
+  --violet: #6b4fbb; --violet-soft: #eee9fa;
+  --term: #15171a; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #3a3f45;
+  --code-bg: #efefea;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+    --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+    --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+    --violet: #a993f0; --violet-soft: #231d36;
+    --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+    --code-bg: #24272b;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+  --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+  --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+  --violet: #a993f0; --violet-soft: #231d36;
+  --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+  --code-bg: #24272b;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+a { color: var(--cyan); }
+code, kbd, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: .92em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+kbd { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 5px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); white-space: nowrap; }
+main { max-width: 1000px; margin: 0 auto; padding: 0 16px 64px; }
+
+header.top { padding: 24px 0 14px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); margin: 0; }
+.lang { float: right; margin: 0 0 0 16px; color: var(--dim); font-size: .95rem; }
+nav.tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; scrollbar-width: none; }
+nav.tabs::-webkit-scrollbar { display: none; }
+@media (min-width: 601px) { nav.tabs { flex-wrap: wrap; } }
+@media (min-width: 601px) and (max-width: 960px) { html { scroll-padding-top: 116px; } }
+nav.tabs button { font: inherit; font-size: .95rem; color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: 8px 10px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button .n { display: inline-block; width: 1.4em; color: var(--accent); font-weight: 700; }
+section.panel { padding-top: 26px; }
+.js section.panel:not(.on) { display: none; }
+
+h2 { font-size: 1.5rem; margin: 0 0 4px; }
+h3 { font-size: 1.12rem; margin: 30px 0 8px; padding-left: 10px; border-left: 4px solid var(--accent); }
+h4 { font-size: 1rem; margin: 20px 0 6px; }
+p { margin: 8px 0; }
+.sub { color: var(--dim); margin: 0 0 14px; }
+.good { color: var(--good); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+
+.note, .tip, .alert { border-left: 4px solid; padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+.note { background: var(--accent-soft); border-color: var(--accent); }
+.tip { background: var(--good-soft); border-color: var(--good); }
+.alert { background: var(--bad-soft); border-color: var(--bad); }
+.note b:first-child, .tip b:first-child, .alert b:first-child { margin-right: 4px; }
+
+.where { display: inline-block; font: 600 .72rem/1 "IBM Plex Sans", "Segoe UI", sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 999px; vertical-align: middle; }
+.where.pi { background: var(--cyan-soft); color: var(--cyan); }
+.where.pc { background: var(--accent-soft); color: var(--accent); }
+.where.phone { background: var(--violet-soft); color: var(--violet); }
+.where.admin { background: var(--bad-soft); color: var(--bad); }
+
+.cmd { position: relative; margin: 8px 0; }
+.cmd pre { background: var(--term); color: var(--term-ink); padding: 12px 70px 12px 14px; border-radius: 8px;
+  overflow-x: auto; margin: 0; line-height: 1.5; }
+.cmd pre .c { color: var(--term-dim); }
+.cmd button.copy { position: absolute; top: 8px; right: 8px; font: 600 .75rem "IBM Plex Sans", sans-serif;
+  background: #2a2e33; color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+.cmd button.copy:hover { border-color: var(--accent); }
+.cmd button.copy.done { color: #111; background: var(--good); border-color: var(--good); }
+
+ol.steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+ol.steps > li { counter-increment: step; position: relative; padding: 14px 16px 14px 60px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); color: #111; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps > li > h4 { margin: 3px 0 6px; }
+ol.steps > li > h4 .where { margin-left: 6px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card b { display: block; margin-bottom: 4px; }
+.card p { margin: 0; color: var(--dim); font-size: .94rem; }
+
+.wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--code-bg); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.w { white-space: normal; }
+#trouble td:first-child { white-space: normal; min-width: 180px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips a { font-family: "IBM Plex Mono", monospace; font-size: .85rem; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); padding: 3px 10px; border-radius: 4px; }
+.chips a:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+figure { margin: 16px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--dim); font-size: .88rem; margin-top: 6px; }
+footer { margin-top: 56px; color: var(--dim); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+.s-term { fill: var(--term); }
+.s-box { fill: none; stroke: var(--term-line); stroke-width: 1.5; }
+.s-t { fill: var(--term-ink); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-td { fill: var(--term-dim); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-ta { fill: var(--accent); font: 600 13px "IBM Plex Mono", Consolas, monospace; }
+.s-tc { fill: var(--cyan); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-tab { fill: var(--accent); }
+.s-tabt { fill: #111; font: 700 12px "IBM Plex Mono", Consolas, monospace; }
+.s-good { fill: var(--good); } .s-warn { fill: var(--warn); } .s-bad { fill: var(--bad); }
+.s-goodt { fill: var(--good); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-warnt { fill: var(--warn); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-badt { fill: var(--bad); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-lc { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.s-ink { fill: var(--ink); font: 600 14px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-dim { fill: var(--dim); font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-line { stroke: var(--dim); stroke-width: 2; fill: none; }
+.s-acc { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.s-node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+.s-hub { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.s-pill { fill: #6b4fbb; } .s-pillt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+.s-reg { fill: #b04fa0; } .s-regt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+figure.con svg { border-radius: 10px; border: 1px solid var(--line); }
+.c-bg { fill: #0c0c0c; } .c-box { fill: none; stroke: #8a8a8a; stroke-width: 1; }
+.c-t, .c-b, .c-d, .c-y, .c-h, .c-g, .c-r, .c-c, .c-lb, .c-m, .c-lm, .c-k, .c-w, .c-kc, .c-kr, .c-kp, .c-ks {
+  font: 12px "Cascadia Mono", Consolas, "IBM Plex Mono", ui-monospace, monospace; white-space: pre; }
+.c-t { fill: #cccccc; } .c-b { fill: #f2f2f2; font-weight: 700; } .c-d { fill: #8a8a8a; }
+.c-y { fill: #c19c00; } .c-h { fill: #c19c00; font-weight: 700; } .c-g { fill: #16c60c; } .c-r { fill: #e74856; }
+.c-c { fill: #3a96dd; } .c-lb { fill: #3b78ff; font-weight: 700; } .c-m { fill: #c33ec3; } .c-lm { fill: #d670d6; font-weight: 700; }
+.c-k { fill: #0c0c0c; font-weight: 700; } .c-w { fill: #ffffff; font-weight: 700; }
+.c-kc { fill: #87af87; } .c-kr { fill: #87afd7; } .c-kp { fill: #af87af; } .c-ks { fill: #d7af87; }
+.c-fy { fill: #c19c00; } .c-fsel { fill: #cccccc; } .c-fb { fill: #0037da; } .c-fg { fill: #13a10e; } .c-fgr { fill: #767676; }
+.c-fm { fill: #c33ec3; } .c-fr { fill: #e74856; } .c-dc { fill: #3a96dd; } .c-dg { fill: #16c60c; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  ol.steps > li { padding-left: 52px; }
+  ol.steps > li::before { left: 12px; }
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js');</script>
+<main>
+
+<header class="top">
+  <p class="lang"><a href="GUIDE-windows.html" lang="en">English</a> · Français</p>
+  <h1>Guide mc<span>proxy</span> · Windows</h1>
+  <p class="lead">Partager une radio compagnon MeshCore entre toutes les apps de votre réseau, et garder l'historique de tout ce qu'elle entend. Le proxy tourne sur un PC Windows, avec la radio en Bluetooth, sur un câble USB ou sur votre réseau (TCP).</p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Sections du guide">
+  <button role="tab" data-tab="overview"><span class="n">1</span>Aperçu</button>
+  <button role="tab" data-tab="install"><span class="n">2</span>Installer</button>
+  <button role="tab" data-tab="commands"><span class="n">3</span>Commandes</button>
+  <button role="tab" data-tab="console"><span class="n">4</span>Console</button>
+  <button role="tab" data-tab="api"><span class="n">5</span>Apps et API</button>
+  <button role="tab" data-tab="update"><span class="n">6</span>Mettre à jour</button>
+  <button role="tab" data-tab="remove"><span class="n">7</span>Désinstaller</button>
+  <button role="tab" data-tab="trouble"><span class="n">8</span>Problèmes</button>
+</nav>
+
+<section class="panel" id="overview" role="tabpanel">
+<h2>Aperçu</h2>
+
+<p>Une radio compagnon MeshCore ne parle qu'à une app à la fois. mcproxy tourne sur un PC Windows avec la radio en Bluetooth ou sur un câble USB, ou la joint par le réseau (TCP) quand son firmware a le Wi-Fi ou l'Ethernet.
+Il garde cette unique connexion et laisse autant d'apps MeshCore que vous voulez s'y connecter par votre réseau
+(port TCP <code>5000</code>), comme si chacune avait la radio pour elle seule.</p>
+<div class="note"><b>N'importe quelle app MeshCore se connecte sur le port 5000</b> Les apps officielles MeshCore, meshcore-cli, l'intégration Home Assistant et tout ce qui parle le protocole compagnon MeshCore en TCP se connectent à l'adresse IP du PC du proxy, port <code>5000</code>, exactement comme à un compagnon Wi-Fi du réseau. Rien à installer dans l'app, pas de mode spécial. Plusieurs apps peuvent être connectées en même temps. <code>.\mcproxy status</code> (l'onglet État de la console) affiche l'adresse à utiliser ; le port est réglé par <code>[server] listen</code>. L'API de données du port <code>5080</code> est à part : elle sert aux apps faites pour le proxy (mcproxy desk, mcproxy pour Android), aux pages web et aux scripts.</div>
+<div class="tip"><b>mcproxy est le programme principal</b> et se suffit à lui-même : sa console montre la radio, les noeuds, le mesh, l'historique et les logs, et a un chat pour lire et écrire des messages ; les commandes <code>mcproxy</code> font le reste. Les apps mcproxy desk et Android sont des plus facultatifs qui montrent les mêmes données dans une fenêtre ou sur un téléphone.</div>
+
+<figure>
+<svg viewBox="0 0 900 340" role="img" aria-label="La radio compagnon est reliée en Bluetooth, en USB ou en TCP à mcproxy sur un PC Windows. mcproxy sert les apps MeshCore habituelles sur le port TCP 5000, et les apps faites pour le proxy, les pages web et les scripts par l'API de données, port HTTPS 5080">
+  <rect class="s-node" x="20" y="130" width="150" height="80" rx="10"/>
+  <text class="s-ink" x="95" y="165" text-anchor="middle">Companion</text>
+  <text class="s-dim" x="95" y="185" text-anchor="middle">MeshCore radio</text>
+  <path class="s-line" d="M170 157 H 320" stroke-dasharray="6 5"/>
+  <text class="s-dim" x="245" y="147" text-anchor="middle">Bluetooth</text>
+  <path class="s-line" d="M170 185 H 320"/>
+  <text class="s-dim" x="245" y="205" text-anchor="middle">or USB cable, or TCP</text>
+  <rect class="s-hub" x="320" y="55" width="250" height="230" rx="12"/>
+  <text class="s-ink" x="445" y="86" text-anchor="middle">mcproxy</text>
+  <text class="s-dim" x="445" y="106" text-anchor="middle">a Windows PC</text>
+  <rect class="s-node" x="340" y="122" width="210" height="30" rx="6"/>
+  <text class="s-dim" x="445" y="142" text-anchor="middle">relays every command</text>
+  <rect class="s-node" x="340" y="160" width="210" height="30" rx="6"/>
+  <text class="s-dim" x="445" y="180" text-anchor="middle">records: messages, nodes, mesh</text>
+  <rect class="s-node" x="340" y="198" width="210" height="30" rx="6"/>
+  <text class="s-dim" x="445" y="218" text-anchor="middle">console and commands: works alone</text>
+  <path class="s-acc" d="M570 110 C 630 110, 630 60, 690 60"/>
+  <path class="s-acc" d="M570 110 C 630 110, 630 128, 690 128"/>
+  <text class="s-ink" x="636" y="34" text-anchor="middle" style="font-size:12.5px">TCP 5000</text>
+  <text class="s-dim" x="636" y="48" text-anchor="middle" style="font-size:11px">MeshCore protocol</text>
+  <rect class="s-node" x="690" y="38" width="195" height="44" rx="8"/>
+  <text class="s-ink" x="787" y="65" text-anchor="middle">MeshCore apps</text>
+  <rect class="s-node" x="690" y="106" width="195" height="44" rx="8"/>
+  <text class="s-ink" x="787" y="133" text-anchor="middle">Home Assistant, CLI…</text>
+  <path class="s-lc" d="M570 240 C 630 240, 630 214, 690 214"/>
+  <path class="s-lc" d="M570 240 C 630 240, 630 282, 690 282"/>
+  <text class="s-ink" x="636" y="320" text-anchor="middle" style="font-size:12.5px">HTTPS 5080</text>
+  <text class="s-dim" x="636" y="334" text-anchor="middle" style="font-size:11px">data API</text>
+  <rect class="s-node" x="690" y="192" width="195" height="44" rx="8"/>
+  <text class="s-ink" x="787" y="219" text-anchor="middle">mcproxy desk / Android</text>
+  <rect class="s-node" x="690" y="260" width="195" height="44" rx="8"/>
+  <text class="s-ink" x="787" y="287" text-anchor="middle">web pages, scripts</text>
+</svg>
+<figcaption>Deux portes : les apps MeshCore habituelles passent par le port TCP 5000, comme avec un compagnon Wi-Fi ; les apps faites pour le proxy, les pages web et les scripts passent par l'API de données, port HTTPS 5080. La radio garde ses propres réglages ; mcproxy relaie chaque commande et garde un historique que la radio ne peut pas contenir.</figcaption>
+</figure>
+
+<h3>Fonctions</h3>
+<div class="cards">
+  <div class="card"><b>Plusieurs apps à la fois</b><p>Téléphone, tablette et ordinateur connectés ensemble ; chacun voit chaque message.</p></div>
+  <div class="card"><b>Historique des messages</b><p>Stocké chiffré : une app qui était hors ligne reçoit ce qu'elle a manqué quand elle se reconnecte.</p></div>
+  <div class="card"><b>Observateur du mesh</b><p>Chaque paquet entendu est enregistré : qui est là, par quel répéteur, avec quel signal, dans quelle région.</p></div>
+  <div class="card"><b>Reconnexion automatique</b><p>La liaison radio revient d'elle-même après une coupure, un débranchement ou un redémarrage.</p></div>
+  <div class="card"><b>Console en direct</b><p>Une vue en plein écran dans le terminal : radio, noeuds, mesh, historique, logs et chat.</p></div>
+  <div class="card"><b>API de données</b><p>HTTPS + événements en direct pour les apps mcproxy desk et Android, les pages web et les scripts.</p></div>
+</div>
+
+<h3>Ce qu'il faut</h3>
+<div class="wrap"><table>
+<tr><th>Élément</th><th>Détails</th></tr>
+<tr><td>PC</td><td class="w">Windows 10 ou 11, 64 bits. Comme il fait tourner le proxy, il doit rester allumé et ne pas se mettre en veille.</td></tr>
+<tr><td>Radio</td><td class="w">Un compagnon MeshCore : le firmware compagnon <b>Bluetooth</b>, le firmware compagnon <b>USB</b> avec un câble USB de données, ou un firmware compagnon avec <b>Wi-Fi ou Ethernet</b> sur votre réseau (TCP).</td></tr>
+<tr><td>Bluetooth</td><td class="w">Seulement pour un compagnon Bluetooth : Bluetooth 4.0 ou plus récent, intégré ou sur une clé USB. Rien à installer. Windows donne aux programmes son adaptateur par défaut : il n'y en a pas à choisir.</td></tr>
+<tr><td>Fichiers</td><td class="w">Un dossier avec <code>mcproxy.exe</code> (le programme), ce guide et <code>API.md</code> (la référence de l'API de données). Rien à installer.</td></tr>
+</table></div>
+
+</section>
+
+<section class="panel" id="install" role="tabpanel">
+<h2>Installer</h2>
+<p class="sub">Rien n'est installé dans Windows lui-même : le programme, sa config et ses données restent dans un seul dossier. Chaque étape peut être annulée ; voir <a href="#remove">Désinstaller</a>.</p>
+
+<ol class="steps">
+<li>
+  <h4>Mettre les fichiers dans un dossier</h4>
+  <p>Copiez le dossier (<code>mcproxy.exe</code>, <code>GUIDE.html</code>, <code>API.md</code>) là où votre utilisateur peut écrire, par ex. <code>C:\mcproxy</code>.
+  Pas sous <code>C:\Program Files</code> : mcproxy écrit sa config, sa base de données et ses logs à côté du programme.</p>
+  <p>Si Windows affiche « Windows a protégé votre ordinateur » la première fois : <b>Informations complémentaires</b>, puis <b>Exécuter quand même</b>.</p>
+</li>
+<li>
+  <h4>Préparer la radio</h4>
+  <p><b>USB</b> : branchez le compagnon avec un câble USB de données. Fermez tout ce qui tient son port : le flasher web, un moniteur série, un autre programme MeshCore.
+  Dans la plupart des cas, Windows installe le pilote USB de lui-même. Si le Gestionnaire de périphériques montre la carte sans port COM, installez le pilote USB-série de sa puce (CP210x ou CH34x).</p>
+  <p><b>Bluetooth</b> : activez le Bluetooth (Paramètres → Périphériques → Bluetooth). Le compagnon n'accepte qu'<b>une</b> connexion Bluetooth : déconnectez-en votre téléphone et arrêtez tout autre programme qui l'utilise.</p>
+</li>
+<li>
+  <h4>Ouvrir PowerShell dans le dossier <span class="where pi">dans PowerShell</span></h4>
+  <p>Dans l'Explorateur de fichiers, ouvrez le dossier, puis <b>Fichier → Ouvrir Windows PowerShell</b> (ou <kbd>Shift</kbd>+clic droit dans le dossier, « Ouvrir la fenêtre PowerShell ici »). Ou bien :</p>
+  <div class="cmd"><pre>cd C:\mcproxy</pre></div>
+  <p>Windows Terminal affiche le mieux la console ; la fenêtre PowerShell classique marche aussi.</p>
+</li>
+<li>
+  <h4>Setup : trouver la radio <span class="where pi">dans PowerShell</span></h4>
+  <div class="cmd"><pre>.\mcproxy setup</pre></div>
+  <div class="wrap"><table>
+  <tr><th>Radio en</th><th>Ce que fait setup</th></tr>
+  <tr><td>Câble USB</td><td class="w">Cherche d'abord ici : interroge les ports COM, affiche le compagnon trouvé avec son nom et demande s'il faut l'utiliser en USB. Rien à appairer. Si plusieurs radios sont branchées, il demande laquelle ; <code>--usb COM5</code> prend ce port sans demander.</td></tr>
+  <tr><td>Bluetooth</td><td class="w">Quand aucun compagnon n'est utilisé en USB : affiche l'adaptateur Bluetooth, cherche, liste chaque compagnon avec son signal, demande le PIN (celui de l'écran du compagnon, sinon celui par défaut dans MeshCore : <code>123456</code>) et appaire. <code>--ble</code> saute l'USB ; <code>--address AA:BB:CC:DD:EE:FF</code> saute la recherche et <code>--pin</code> la question.</td></tr>
+  <tr><td>Réseau (TCP)</td><td class="w"><code>.\mcproxy setup --tcp 192.168.1.60</code> (ajoutez <code>:port</code> si ce n'est pas 5000, ou donnez un nom). Setup demande au compagnon qui il est et enregistre son adresse. Donnez-lui une adresse fixe dans le routeur (réservation DHCP). Il ne sert qu'un client à la fois : les apps se connectent à mcproxy, jamais au compagnon lui-même.</td></tr>
+  </table></div>
+  <p>Setup enregistre le choix dans <code>config\config.toml</code>.</p>
+  <div class="note"><b>Le même compte Windows</b> Un appairage Bluetooth appartient au compte Windows qui a lancé setup : faites tourner le proxy avec ce compte.</div>
+</li>
+<li>
+  <h4>Démarrer et vérifier <span class="where pi">dans PowerShell</span></h4>
+  <div class="cmd"><pre>.\mcproxy run</pre></div>
+  <p>Le proxy tourne tant que cette fenêtre reste ouverte ; <kbd>Ctrl</kbd>+<kbd>C</kbd> l'arrête.
+  La première fois, le pare-feu Windows demande si mcproxy peut utiliser le réseau : autorisez-le sur les <b>réseaux privés</b>, pour que les apps d'autres appareils puissent se connecter.</p>
+  <p>Dans une deuxième fenêtre PowerShell, dans le même dossier :</p>
+  <div class="cmd"><pre>.\mcproxy status</pre></div>
+  <p>La console s'ouvre sur son onglet État : vous devez voir <span class="good">● radio connectée</span> et l'adresse à utiliser par les apps. <kbd>q</kbd> quitte (le proxy continue de tourner).</p>
+</li>
+<li>
+  <h4>Connecter vos apps</h4>
+  <div class="wrap"><table>
+  <tr><th>App</th><th>Se connecte à</th></tr>
+  <tr><td>Apps MeshCore</td><td class="w"><b>TCP/IP</b>, l'adresse de l'étape 5, par ex. <code>192.168.1.50</code> port <code>5000</code>.</td></tr>
+  <tr><td>mcproxy desk, Android</td><td class="w">L'API de données : voir l'onglet <a href="#api">Apps et API</a>.</td></tr>
+  </table></div>
+</li>
+<li id="service">
+  <h4>Le lancer en tâche de fond <span class="where admin">en administrateur</span></h4>
+  <p>Facultatif : au lieu de garder une fenêtre ouverte, Windows lance lui-même mcproxy à chaque démarrage du PC, sans fenêtre et avant toute ouverture de session
+  (une tâche planifiée, l'équivalent Windows d'un service). Arrêtez d'abord le proxy de l'étape 5 (<kbd>Ctrl</kbd>+<kbd>C</kbd> dans sa fenêtre).</p>
+  <p>Ouvrez PowerShell avec <b>Exécuter en tant qu'administrateur</b>, <b>avec le même compte Windows</b> que celui qui a lancé setup (la clé des messages est dans le profil de ce compte, et un appairage Bluetooth appartient à ce compte).
+  Allez dans le dossier, puis collez tout le bloc :</p>
+  <div class="cmd"><pre>cd C:\mcproxy
+$exe = (Resolve-Path .\mcproxy.exe).Path
+$action = New-ScheduledTaskAction -Execute $exe -Argument run -WorkingDirectory (Split-Path $exe)
+$trigger = New-ScheduledTaskTrigger -AtStartup
+$user = New-ScheduledTaskPrincipal -UserId "$env:USERDOMAIN\$env:USERNAME" -LogonType S4U -RunLevel Limited
+$settings = New-ScheduledTaskSettingsSet -ExecutionTimeLimit ([TimeSpan]::Zero) -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -StartWhenAvailable -RestartCount 999 -RestartInterval (New-TimeSpan -Minutes 1)
+Register-ScheduledTask -TaskName mcproxy -Action $action -Trigger $trigger -Principal $user -Settings $settings
+New-NetFirewallRule -DisplayName mcproxy -Direction Inbound -Program $exe -Action Allow -Profile Private
+Start-ScheduledTask mcproxy</pre></div>
+  <div class="wrap"><table>
+  <tr><th>Partie</th><th>Ce qu'elle fait</th></tr>
+  <tr><td><code>-AtStartup</code>, <code>S4U</code></td><td class="w">Se lance à chaque démarrage du PC, avec votre compte, que votre session soit ouverte ou non. Aucun mot de passe n'est stocké.</td></tr>
+  <tr><td><code>-ExecutionTimeLimit 0</code></td><td class="w">Tourne sans limite de durée (par défaut, Windows arrête une tâche après 3 jours).</td></tr>
+  <tr><td><code>-AllowStartIfOnBatteries</code> …</td><td class="w">Continue de tourner sur un portable sur batterie.</td></tr>
+  <tr><td><code>New-NetFirewallRule</code></td><td class="w">Laisse les apps d'autres appareils joindre le proxy (une tâche de fond ne reçoit pas la question du pare-feu). <code>-Profile Private</code> : seulement sur les réseaux définis comme privés.</td></tr>
+  </table></div>
+  <p>Vérifiez, dans une fenêtre PowerShell normale ouverte dans le dossier : <code>.\mcproxy status</code>. Les commandes pour arrêter, démarrer et retirer la tâche sont dans <a href="#task">Commandes</a>.</p>
+  <div class="note"><b>Veille</b> Un PC en veille arrête le proxy. Réglez <b>Paramètres → Système → Alimentation → Veille</b> sur <b>Jamais</b> quand il est branché.</div>
+</li>
+</ol>
+
+<div class="tip"><b>Changement de radio</b> Après avoir remplacé la radio, ou l'avoir déplacée sur un autre port USB, relancez <code>.\mcproxy setup</code> (avec le proxy arrêté).</div>
+</section>
+
+<section class="panel" id="commands" role="tabpanel">
+<h2>Commandes</h2>
+<p class="sub"><span class="where pi">dans PowerShell</span> Dans le dossier de mcproxy, tapez chaque commande sous la forme <code>.\mcproxy …</code> (dans l'Invite de commandes : <code>mcproxy …</code>). <code>.\mcproxy &lt;command&gt; --help</code> décrit chacune.</p>
+
+<h3>Voir</h3>
+<div class="wrap"><table>
+<tr><th>Commande</th><th>Affiche</th></tr>
+<tr><td><code>mcproxy status</code></td><td class="w">La console, onglet État : liaison radio, batterie, apps connectées, activité en direct.</td></tr>
+<tr><td><code>mcproxy nodes</code></td><td class="w">La console, onglet Noeuds : chaque noeud entendu. <code>--hours 24</code>, <code>--type repeater</code>.</td></tr>
+<tr><td><code>mcproxy mesh</code></td><td class="w">La console, onglet Mesh : trafic par type et par heure, répéteurs par lesquels vous entendez le mesh.</td></tr>
+<tr><td><code>mcproxy history</code></td><td class="w">La console, onglet Suivi : votre radio au fil du temps (batterie, température, bruit, paquets).</td></tr>
+<tr><td><code>mcproxy history &lt;name&gt;</code></td><td class="w">Un noeud : ses annonces, son signal, son état et sa télémétrie.</td></tr>
+<tr><td><code>mcproxy watch</code></td><td class="w">Chaque trame et événement, en direct, en lignes simples (<code>--hex</code> ajoute les octets). <kbd>Ctrl</kbd>+<kbd>C</kbd> arrête.</td></tr>
+<tr><td><code>mcproxy logs</code></td><td class="w">Le log du proxy (les fichiers de <code>logs\</code>). <code>-f</code> suit, <code>-n 200</code> lignes, <code>--apps</code>, <code>--radio</code>, <code>--problems</code>, <code>--grep &lt;text&gt;</code>. <code>--purge-own</code> retire des fichiers de log les lignes sur les messages envoyés par votre noeud (demande d'abord).</td></tr>
+<tr><td><code>mcproxy contacts</code></td><td class="w">Les contacts de la radio : type, dernière annonce, chemin, distance.</td></tr>
+<tr><td><code>mcproxy doctor</code></td><td class="w">Vérifie tout (config, Bluetooth ou USB, appairage, proxy, liaison) et donne des pistes.</td></tr>
+</table></div>
+<p>Ajoutez <code>--plain</code> à une commande de la console pour du texte simple (pratique pour copier ou pour un pipe), <code>--json</code> à <code>status</code> pour les données brutes.</p>
+
+<h3>Messages</h3>
+<div class="wrap"><table>
+<tr><th>Commande</th><th>Effet</th></tr>
+<tr><td><code>mcproxy send --channel Public hi</code></td><td class="w">Envoie un message de canal ; <code>--to &lt;name&gt;</code> pour un message direct. Envoyé une fois, jamais répété. Un message de canal part une fois que le compagnon a confirmé quel emplacement contient ce canal ; pour un canal qui n'est pas sur le compagnon, il est refusé.</td></tr>
+<tr><td><code>mcproxy mirror</code></td><td class="w">Copies de ce qu'un appareil envoie, pour vos autres appareils : <code>mirror channel on|off</code>, <code>mirror dm on|off</code>.</td></tr>
+<tr><td><code>mcproxy text own hide|show</code></td><td class="w">Afficher ou non le texte des messages envoyés par votre noeud dans la console, watch, le log et l'API.</td></tr>
+<tr><td><code>mcproxy polite on|off</code></td><td class="w">Envoi courtois, activé par défaut, pour toutes les apps ensemble : jusqu'à 4 commandes émises sur les ondes (messages, annonces, demandes aux répéteurs) partent d'un coup, puis une toutes les 3 s ; au plus 6 DM attendent leur ACK en même temps (le compagnon en reconnaît 8) ; exactement le même message envoyé deux fois ne part qu'une fois. Rien n'est refusé : une commande attend son tour. Les renvois manuels et les nouveaux essais de DM partent toujours. <code>off</code> = tout part comme cela arrive. <code>[polite]</code> dans la config règle les nombres.</td></tr>
+</table></div>
+
+<h3>Radio et contacts</h3>
+<div class="wrap"><table>
+<tr><th>Commande</th><th>Effet</th></tr>
+<tr><td><code>mcproxy reconnect</code></td><td class="w">Coupe la liaison radio et reconnecte aussitôt. Avec <code>serial_port = ""</code>, interroge aussi à nouveau les autres ports COM.</td></tr>
+<tr><td><code>mcproxy kick &lt;id&gt;</code></td><td class="w">Déconnecte une app (son id est dans <code>mcproxy status</code>).</td></tr>
+<tr><td><code>mcproxy track add &lt;name&gt;</code></td><td class="w">Demande régulièrement son état et sa télémétrie à un répéteur, un salon ou un capteur (un contact du compagnon) ; <code>track remove</code> arrête.</td></tr>
+<tr><td><code>mcproxy prune --days 30</code></td><td class="w">Retire les contacts que la radio n'a pas entendus depuis 30 jours (les favoris restent). Les liste et demande d'abord ; <code>--auto 30</code> le fait chaque jour.</td></tr>
+<tr><td><code>mcproxy contacts --overwrite-oldest on|off</code></td><td class="w">Quand la liste de la radio est pleine : remplacer le contact le plus ancien, ou ne rien ajouter (un réglage de la radio elle-même).</td></tr>
+<tr><td><code>mcproxy channels</code></td><td class="w">Les canaux de la radio. <code>channels add "#name"</code> ajoute un canal hashtag, <code>channels add Name --key &lt;32 hex&gt;</code> un canal privé, <code>channels remove &lt;name|id|slot&gt;</code> en retire un (ses messages restent ; avec <code>--delete-messages</code> ils sont aussi effacés du proxy). Un canal est sa clé : retiré puis ajouté à nouveau, c'est le même canal dans n'importe quel emplacement, avec ses messages.</td></tr>
+<tr><td><code>mcproxy login &lt;name&gt;</code></td><td class="w">Se connecte à un répéteur ou un salon et affiche votre rôle (admin, lecture-écriture, lecture seule ou invité). Un mot de passe vide marche quand le noeud vous a dans sa liste d'accès, ou a un mot de passe invité vide ; sinon <code>--password &lt;password&gt;</code>. Le mot de passe n'est gardé nulle part. Les invités peuvent lire l'état, la télémétrie de base, les voisins et les infos du propriétaire, pas lancer de commandes.</td></tr>
+<tr><td><code>mcproxy cli &lt;name&gt; &lt;command&gt;</code></td><td class="w">Lance une commande sur un répéteur, un salon ou un capteur et affiche sa réponse, par ex. <code>mcproxy cli "Hilltop Rptr" ver</code>. Elle demande un rôle admin et part une fois : sans réponse, elle a quand même pu être exécutée. <code>mcproxy cli --list</code> affiche les commandes.</td></tr>
+<tr><td><code>mcproxy backup</code> / <code>restore</code></td><td class="w">Ce que le proxy a sauvegardé (contacts, canaux), et sa remise sur la radio après un reflash ou une remise à zéro. <code>backup --keys on</code> garde aussi les clés secrètes des canaux (chiffrées), pour que <code>restore</code> puisse recréer les canaux privés ; <code>restore --contacts</code> ou <code>--channels</code> ne remet qu'une partie.</td></tr>
+</table></div>
+
+<h3>Données</h3>
+<div class="wrap"><table>
+<tr><th>Commande</th><th>Effet</th></tr>
+<tr><td><code>mcproxy retention</code></td><td class="w">La durée de conservation des données et la taille de la base. Des options la changent (la réduire efface aussitôt les données plus anciennes).</td></tr>
+<tr><td><code>mcproxy reset</code></td><td class="w">Repartir de zéro : efface ce que le proxy a recueilli (<code>--messages</code>, <code>--mesh</code>, <code>--contacts</code>, <code>--history</code> ou <code>--all</code>). Montre ce qui part et demande de taper <code>yes</code>. La radio et la config ne sont jamais touchées.<br>Chaque compagnon a ses propres données : en connecter un autre met de côté les données en cours et part d'une base vide ; le compagnon précédent retrouve les siennes quand il est reconnecté. <code>reset</code> efface les données du compagnon connecté.</td></tr>
+<tr><td><code>mcproxy sync</code></td><td class="w">Ce que reçoit une app MeshCore du port 5000 à son retour : les messages des 2 derniers jours et, parmi eux, les 200 plus récents de chaque canal, pour qu'une app ne soit pas submergée après des jours d'absence. Les DM ne sont pas limités par canal. <code>--days 7 --per-channel 500</code> le change, <code>0</code> = sans limite. Ce qui est laissé de côté reste dans le proxy (console, desk, Android) mais n'arrive jamais à cette app. Un appareil vu pour la première fois commence 24 heures en arrière.</td></tr>
+<tr><td><code>mcproxy api</code></td><td class="w">L'adresse de l'API de données, l'empreinte du certificat et le jeton (voir <a href="#api">Apps et API</a>).</td></tr>
+</table></div>
+
+<h3>Setup, Bluetooth et USB</h3>
+<div class="wrap"><table>
+<tr><th>Commande</th><th>Effet</th></tr>
+<tr><td><code>mcproxy setup</code></td><td class="w">Installation guidée (voir <a href="#install">Installer</a>). Le proxy doit être arrêté.</td></tr>
+<tr><td><code>mcproxy run</code></td><td class="w">Fait tourner le proxy dans cette fenêtre, jusqu'à <kbd>Ctrl</kbd>+<kbd>C</kbd>.</td></tr>
+<tr><td><code>mcproxy adapters</code></td><td class="w">L'adaptateur Bluetooth que Windows donne aux programmes.</td></tr>
+<tr><td><code>mcproxy scan</code></td><td class="w">Chaque compagnon MeshCore qu'il peut trouver : en Bluetooth (<code>--all</code> : tous les appareils), et sur les ports COM, avec la carte que désigne chaque id USB. Celui qu'utilise mcproxy est marqué « utilisé ».</td></tr>
+<tr><td><code>mcproxy pair</code> / <code>unpair</code></td><td class="w">Appairer ou oublier à la main le compagnon Bluetooth, pour ce compte Windows (arrêtez d'abord le proxy).</td></tr>
+<tr><td><code>[radio] serial_port</code></td><td class="w">Dans <code>config\config.toml</code>. <code>""</code> = le compagnon est trouvé tout seul : le port qui a répondu en dernier, puis les cartes connues pour faire tourner MeshCore. Les autres ports série ne sont interrogés que s'il n'y a pas de telle carte, 3 fois chacun, puis à nouveau après avoir été rebranchés ou après <code>mcproxy reconnect</code>.</td></tr>
+<tr><td><code>[radio] pin</code></td><td class="w">Le PIN Bluetooth, 6 chiffres. Un compagnon qui a perdu son appairage (effacé, flashé) est réappairé tout seul avec ce PIN.</td></tr>
+<tr><td><code>[radio] connect_timeout_secs</code></td><td class="w">Abandonne une tentative de connexion après cette durée (Bluetooth : 5 à 120 s). <code>adapter</code> et <code>reset_adapter_after_failures</code> ne sont pas utilisés sous Windows.</td></tr>
+<tr><td><code>config\devices.toml</code></td><td class="w">Facultatif : ajouter ou corriger des cartes (même format que la liste intégrée). mcproxy connaît les cartes MeshCore d'après le firmware et le flasher web, ainsi que les ids USB de leurs puces.</td></tr>
+</table></div>
+
+<h3 id="language">Langue</h3>
+<p>La console, les commandes et leur <code>--help</code> existent en anglais et en français et suivent la langue d'affichage de Windows. Dans toutes les langues, le log, l'API de données,
+les noms des commandes et des options et une partie des textes des commandes sont en anglais.</p>
+<div class="wrap"><table>
+<tr><th>Commande</th><th>Effet</th></tr>
+<tr><td><code>mcproxy language</code></td><td class="w">Liste les langues et marque celle qui est choisie.</td></tr>
+<tr><td><code>mcproxy language fr</code></td><td class="w">Utilise toujours cette langue ; <code>auto</code> = celle de Windows. Enregistré dans <code>[ui] language</code> de <code>config\config.toml</code>. Dans la console, <kbd>l</kbd> dans l'onglet État passe à la suivante ; une console déjà ouverte ailleurs prend le changement à sa prochaine ouverture.</td></tr>
+<tr><td><code>mcproxy language new de</code></td><td class="w">Ajoute une autre langue : crée <code>config\locales\de\mcproxy.ftl</code> avec les textes anglais, à traduire. Un fichier déjà présent n'est jamais remplacé.</td></tr>
+</table></div>
+<p>Dans ce fichier, traduisez le texte après chaque <code>=</code>, gardez les noms qui le précèdent et les <code>{ $variables }</code>, et mettez le nom de la langue, dans cette langue, dans
+<code>language-name</code>. Puis <code>mcproxy language de</code>. Un fichier fait par quelqu'un d'autre va au même endroit.
+C'est du texte UTF-8 simple, de 1 Mo au plus. Un texte absent ou qui contient une erreur s'affiche en anglais ; une fois la langue choisie, <code>mcproxy language</code> indique les lignes qui contiennent une erreur.
+Une langue régionale comme <code>pt-BR</code> prend dans <code>pt</code> ce qui lui manque.</p>
+<div class="note"><b>Le modèle anglais</b> Le proxy écrit <code>config\locales\en\mcproxy.ftl</code> à son démarrage, comme base à traduire. Les changements qui y sont faits, ou un fichier <code>fr</code> à cet endroit, ne sont pas utilisés.</div>
+
+<h3 id="task">La tâche de fond</h3>
+<p>Seulement si vous l'avez mise en place (<a href="#service">Installer, étape 7</a>). Le démarrage et l'arrêt se font dans une fenêtre PowerShell <span class="where admin">en administrateur</span> :</p>
+<div class="cmd"><pre>Stop-ScheduledTask mcproxy                      <span class="c"># arrêter (avant setup ou une mise à jour)</span>
+Start-ScheduledTask mcproxy                     <span class="c"># démarrer</span>
+Stop-ScheduledTask mcproxy; Start-ScheduledTask mcproxy   <span class="c"># redémarrer (après un changement de config)</span>
+Get-ScheduledTask mcproxy                       <span class="c"># tourne-t-elle ? (State : Running)</span></pre></div>
+<p>La même chose dans la fenêtre du Planificateur de tâches : Bibliothèque du Planificateur de tâches, <b>mcproxy</b>, puis Fin / Exécuter.</p>
+</section>
+
+<section class="panel" id="console" role="tabpanel">
+<h2>Console</h2>
+<p class="sub">Une vue en plein écran dans le terminal, mise à jour en direct. <code>mcproxy status</code>, <code>nodes</code>, <code>mesh</code> et <code>history</code> l'ouvrent chacune sur l'onglet correspondant.</p>
+<p>L'onglet État a besoin que le proxy tourne ; les autres onglets lisent directement la base de données et marchent donc même quand il est arrêté. Quitter la console n'arrête jamais le proxy.</p>
+
+<figure class="con">
+<svg viewBox="0 0 960 112" role="img" aria-label="Cadre de la console : les onglets en haut, la vue de l'onglet au milieu, les touches en bas">
+  <rect class="c-bg" x="0" y="0" width="960" height="112"/>
+  <text class="c-h" x="10" y="20">mcproxy</text><text class="c-d" x="66" y="20">by FED1291</text>
+  <rect class="c-fy" x="145" y="7" width="63" height="17"/><text class="c-k" x="150" y="20">1 Status</text>
+  <text class="c-t" x="218" y="20">2 Nodes</text><text class="c-t" x="280" y="20">3 Mesh</text><text class="c-t" x="336" y="20">4 History</text>
+  <text class="c-t" x="410" y="20">5 Logs</text><text class="c-t" x="466" y="20">6 Chat</text>
+  <rect class="c-box" x="6.5" y="34.5" width="947" height="44"/>
+  <rect class="c-bg" x="14" y="28" width="110" height="14"/><text class="c-h" x="16" y="38"> Status </text>
+  <text class="c-d" x="480" y="62" text-anchor="middle">the view of the tab</text>
+  <text class="c-b" x="10" y="100">q</text><text class="c-d" x="24" y="100">quit</text>
+  <text class="c-b" x="68" y="100">Tab</text><text class="c-d" x="94" y="100">switch</text>
+  <text class="c-b" x="150" y="100">d</text><text class="c-d" x="164" y="100">show packet details</text>
+  <text class="c-b" x="310" y="100">l</text><text class="c-d" x="324" y="100">language (auto: English)</text>
+  <text class="c-d" x="504" y="100">updated 19:42:10</text>
+</svg>
+<figcaption>En haut : les onglets (celui en cours est mis en évidence). En bas : les touches utilisables à cet instant ; celles qui affichent / masquent des éléments de l'onglet sont groupées après <code>voir :</code>, plus lumineuses quand l'élément est affiché. Dans une fenêtre étroite, les touches prennent une deuxième ligne. Interface en anglais.</figcaption>
+</figure>
+
+<h3>Touches communes</h3>
+<div class="wrap"><table>
+<tr><th>Touche</th><th>Action</th></tr>
+<tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd>, <kbd>1</kbd>–<kbd>6</kbd></td><td class="w">Onglet suivant / précédent, ou aller à l'un d'eux.</td></tr>
+<tr><td><kbd>q</kbd>, <kbd>Ctrl</kbd>+<kbd>C</kbd></td><td class="w">Quitter (le proxy continue de tourner).</td></tr>
+<tr><td><kbd>+</kbd> <kbd>-</kbd> (ou <kbd>→</kbd> <kbd>←</kbd>)</td><td class="w">Période plus longue / plus courte : 1 h, 3 h, 6 h, 12 h, 24 h, 3 jours, 7 jours, 30 jours. Noeuds et Mesh passent aussi en direct (15 dernières min) en dessous de 1 h ; Noeuds a aussi « tout ». Dans Chat, <kbd>←</kbd> <kbd>→</kbd> changent de chat.</td></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd>, <kbd>PgUp</kbd> <kbd>PgDn</kbd></td><td class="w">Défiler, ou déplacer la sélection.</td></tr>
+<tr><td><kbd>Esc</kbd>, <kbd>Backspace</kbd></td><td class="w">Retour (d'un noeud à la liste ; dans Chat, arrêter d'écrire).</td></tr>
+</table></div>
+
+<div class="chips">
+  <a href="#tab-status">1 État</a><a href="#tab-nodes">2 Noeuds</a><a href="#tab-node">Un noeud</a>
+  <a href="#tab-mesh">3 Mesh</a><a href="#tab-history">4 Suivi</a><a href="#tab-logs">5 Logs</a><a href="#tab-chat">6 Chat</a><a href="#colours">Couleurs</a>
+</div>
+
+<h3 id="tab-status">1 · État</h3>
+<p>L'état du proxy : liaison radio, compagnon, données stockées, apps connectées et activité en direct.</p>
+<figure class="con">
+<svg viewBox="0 0 960 596" role="img" aria-label="Onglet État : le proxy et sa liaison radio, le compagnon, les données gardées, les apps connectées, les noeuds suivis et l'activité en direct">
+  <rect class="c-bg" x="0" y="0" width="960" height="596"/>
+  <text class="c-h" x="10" y="20">mcproxy</text><text class="c-d" x="66" y="20">by FED1291</text>
+  <rect class="c-fy" x="145" y="7" width="63" height="17"/><text class="c-k" x="150" y="20">1 Status</text>
+  <text class="c-t" x="218" y="20">2 Nodes</text><text class="c-t" x="280" y="20">3 Mesh</text><text class="c-t" x="336" y="20">4 History</text>
+  <text class="c-t" x="410" y="20">5 Logs</text><text class="c-t" x="466" y="20">6 Chat</text>
+  <rect class="c-box" x="6.5" y="34.5" width="947" height="62"/>
+  <rect class="c-bg" x="14" y="28" width="170" height="14"/><text class="c-h" x="16" y="38"> mcproxy · running 3d04h </text>
+  <text class="c-g" x="14" y="58">● radio connected 2h10m</text><text class="c-t" x="180" y="58">🔌</text><text class="c-lm" x="200" y="58">USB</text><text class="c-d" x="230" y="58">COM5</text>
+  <text class="c-d" x="14" y="76">apps connect to</text><text class="c-b" x="120" y="76">192.168.1.50 port 5000</text>
+  <rect class="c-box" x="6.5" y="104.5" width="426" height="134"/>
+  <rect class="c-bg" x="14" y="98" width="82" height="14"/><text class="c-b" x="16" y="108"> Companion </text>
+  <text class="c-d" x="14" y="128">node</text><text class="c-t" x="80" y="128">Ridge Base ⛰</text>
+  <text class="c-d" x="14" y="145">board</text><text class="c-t" x="80" y="145">RAK WisBlock 4631 · nRF52840 · v1.17.1</text>
+  <text class="c-d" x="14" y="162">battery</text><text class="c-g" x="80" y="162">🔋 4.07 V  85%</text><text class="c-d" x="186" y="162">(2m14s ago)</text>
+  <text class="c-d" x="14" y="179">drops</text><text class="c-t" x="80" y="179">1  last: link lost</text>
+  <text class="c-d" x="14" y="196">frames</text><text class="c-t" x="80" y="196">48213 from radio, 9120 to radio</text>
+  <text class="c-d" x="14" y="213">commands</text><text class="c-t" x="80" y="213">0 waiting, now: -</text>
+  <rect class="c-box" x="436.5" y="104.5" width="517" height="134"/>
+  <rect class="c-bg" x="444" y="98" width="50" height="14"/><text class="c-b" x="446" y="108"> Data </text>
+  <text class="c-d" x="444" y="128">messages</text><text class="c-t" x="510" y="128">18402 with text (365 d), 52114 metadata</text>
+  <text class="c-d" x="444" y="145">packets</text><text class="c-t" x="510" y="145">412870 heard (180 d)</text>
+  <text class="c-d" x="444" y="162">nodes</text><text class="c-t" x="510" y="162">96543 history rows (forever)</text>
+  <text class="c-d" x="444" y="179">database</text><text class="c-t" x="510" y="179">214.6 MB, 4 devices</text>
+  <text class="c-y" x="444" y="196">contacts  347 / 350 cached</text>
+  <rect class="c-box" x="6.5" y="246.5" width="947" height="100"/>
+  <rect class="c-bg" x="14" y="240" width="72" height="14"/><text class="c-b" x="16" y="250"> Apps (3) </text>
+  <text class="c-d" x="47" y="270">address</text><text class="c-d" x="192" y="270">app</text><text class="c-d" x="324" y="270">since</text><text class="c-d" x="383" y="270">in / out</text><text class="c-d" x="469" y="270">messages</text>
+  <text class="c-t" x="14" y="287">#12</text><text class="c-t" x="47" y="287">192.168.1.23:51544</text><text class="c-t" x="192" y="287">MeshCore</text><text class="c-t" x="324" y="287">1h12m</text><text class="c-t" x="383" y="287">612 / 4180</text>
+  <text class="c-t" x="14" y="304">#14</text><text class="c-t" x="47" y="304">127.0.0.1:50311</text><text class="c-t" x="192" y="304">mcproxy-desk</text><text class="c-t" x="324" y="304">3d02h</text><text class="c-t" x="383" y="304">96 / 2241</text>
+  <text class="c-t" x="14" y="321">#15</text><text class="c-t" x="47" y="321">192.168.1.40:39876</text><text class="c-t" x="192" y="321">Home Assistant</text><text class="c-t" x="324" y="321">18m40s</text><text class="c-t" x="383" y="321">31 / 208</text><text class="c-y" x="469" y="321">2 waiting</text>
+  <rect class="c-box" x="6.5" y="354.5" width="947" height="66"/>
+  <rect class="c-bg" x="14" y="348" width="104" height="14"/><text class="c-b" x="16" y="358"> Tracked nodes </text>
+  <text class="c-t" x="14" y="378">Hilltop Rptr</text><text class="c-g" x="199" y="378">status ok, telemetry ok</text><text class="c-t" x="660" y="378">41m ago</text>
+  <text class="c-t" x="14" y="395">Quarry RPT ⛏</text><text class="c-y" x="199" y="395">no answer (2 tries)</text><text class="c-t" x="660" y="395">3h05m ago</text>
+  <rect class="c-box" x="6.5" y="428.5" width="947" height="134"/>
+  <rect class="c-bg" x="14" y="422" width="112" height="14"/><text class="c-b" x="16" y="432"> Activity (live) </text>
+  <text class="c-d" x="14" y="452">19:41:48</text><text class="c-c" x="80" y="452">radio -></text><text class="c-g" x="186" y="452">HEARD</text><text class="c-t" x="325" y="452">flood advert   snr </text><text class="c-g" x="450" y="452">7.25</text><text class="c-t" x="480" y="452"> rssi </text><text class="c-g" x="520" y="452">-91</text><text class="c-y" x="552" y="452">  "Valley Node 🚲"</text>
+  <text class="c-d" x="14" y="469">19:41:52</text><text class="c-c" x="80" y="469">radio -></text><text class="c-g" x="186" y="469">HEARD</text><text class="c-t" x="325" y="469">flood channel  snr </text><text class="c-y" x="450" y="469">-2.50</text><text class="c-t" x="486" y="469"> rssi </text><text class="c-y" x="526" y="469">-112</text><text class="c-t" x="558" y="469">  </text><text class="c-y" x="572" y="469">4</text><text class="c-t" x="580" y="469"> hops</text>
+  <text class="c-d" x="14" y="486">19:41:53</text><text class="c-c" x="80" y="486">radio ->  all</text><text class="c-b" x="186" y="486">CHANNEL_MSG</text><text class="c-t" x="325" y="486">#hiking  </text><text class="c-y" x="384" y="486">"Valley Node 🚲"</text><text class="c-t" x="502" y="486">  snr </text><text class="c-y" x="542" y="486">-2.5</text>
+  <text class="c-d" x="14" y="503">19:42:01</text><text class="c-lb" x="80" y="503">#12 -> radio</text><text class="c-b" x="186" y="503">SEND_CHANNEL_TXT_MSG</text><text class="c-t" x="340" y="503">#hiking  12 B</text>
+  <text class="c-d" x="14" y="520">19:42:01</text><text class="c-c" x="80" y="520">radio -> #12</text><text class="c-b" x="186" y="520">SENT</text><text class="c-t" x="325" y="520">flood</text>
+  <text class="c-d" x="14" y="537">19:42:03</text><text class="c-c" x="80" y="537">radio -></text><text class="c-g" x="186" y="537">HEARD</text><text class="c-t" x="325" y="537">repeat of ours snr </text><text class="c-g" x="450" y="537">11.0</text><text class="c-t" x="480" y="537"> rssi </text><text class="c-g" x="520" y="537">-64</text><text class="c-t" x="552" y="537">  via Hilltop Rptr</text>
+  <text class="c-d" x="14" y="554">19:42:09</text><text class="c-h" x="80" y="554">app #15 connected from 192.168.1.40</text>
+  <text class="c-b" x="10" y="584">q</text><text class="c-d" x="24" y="584">quit</text>
+  <text class="c-b" x="68" y="584">Tab</text><text class="c-d" x="94" y="584">switch</text>
+  <text class="c-b" x="150" y="584">d</text><text class="c-d" x="164" y="584">show packet details</text>
+  <text class="c-b" x="310" y="584">l</text><text class="c-d" x="324" y="584">language (auto: English)</text>
+  <text class="c-d" x="504" y="584">updated 19:42:10</text>
+</svg>
+<figcaption>L'onglet État. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Partie</th><th>Ce qu'elle indique</th></tr>
+<tr><td>Ligne du haut</td><td class="w">Depuis quand le proxy tourne ; <span class="good">● radio connectée</span> (depuis combien de temps) ou <span class="bad">● radio COUPÉE</span> avec la raison ; l'adresse à utiliser par les apps.</td></tr>
+<tr><td>Compagnon</td><td class="w">Votre radio : nom du noeud, batterie, coupures de la liaison, trames de la radio / vers elle, commandes en attente.</td></tr>
+<tr><td>Données</td><td class="w">Ce qui est stocké : messages (et leur durée de conservation), paquets entendus, taille de la base, contacts en cache.</td></tr>
+<tr><td>Apps</td><td class="w">Chaque app connectée : id, adresse, nom, depuis quand, trames reçues / émises.</td></tr>
+<tr><td>Noeuds suivis</td><td class="w">Les répéteurs dont l'état est demandé régulièrement (<code>mcproxy track</code>), avec leur nom et leur dernière réponse.</td></tr>
+<tr><td>Activité (direct)</td><td class="w">Ce qui passe, le plus récent en bas. <kbd>d</kbd> affiche / masque les détails des paquets.</td></tr>
+<tr><td>Langue</td><td class="w"><kbd>l</kbd> passe à la langue suivante : celle de Windows (<code>auto</code>), anglais, français, puis celles qui ont été ajoutées (voir <a href="#language">Langue</a>). Enregistré, appliqué aussitôt.</td></tr>
+</table></div>
+
+<h3 id="tab-nodes">2 · Noeuds</h3>
+<p>Chaque noeud que votre radio a entendu (et vos contacts), avec la qualité de sa réception. Votre propre radio est la première ligne, en jaune.</p>
+<figure class="con">
+<svg viewBox="0 0 960 478" role="img" aria-label="Onglet Noeuds : nombres par type, puis chaque noeud entendu avec son type, quand, signal, sauts, position, distance, annonces et le répéteur par lequel il est arrivé ; la ligne choisie est mise en évidence">
+  <rect class="c-bg" x="0" y="0" width="960" height="478"/>
+  <text class="c-h" x="10" y="20">mcproxy</text><text class="c-d" x="66" y="20">by FED1291</text>
+  <text class="c-t" x="150" y="20">1 Status</text>
+  <rect class="c-fy" x="213" y="7" width="56" height="17"/><text class="c-k" x="218" y="20">2 Nodes</text>
+  <text class="c-t" x="280" y="20">3 Mesh</text><text class="c-t" x="336" y="20">4 History</text>
+  <text class="c-t" x="410" y="20">5 Logs</text><text class="c-t" x="466" y="20">6 Chat</text>
+  <rect class="c-box" x="6.5" y="34.5" width="947" height="46"/>
+  <rect class="c-bg" x="14" y="28" width="170" height="14"/><text class="c-h" x="16" y="38"> Nodes heard · last 24 h </text>
+  <text class="c-t" x="14" y="56">412 nodes</text><text class="c-kc" x="90" y="56">💬 chat 143</text><text class="c-kr" x="180" y="56">📡 repeater 236</text><text class="c-kp" x="300" y="56">🏠 room 21</text><text class="c-ks" x="390" y="56">📟 sensor 12</text>
+  <text class="c-d" x="14" y="73">showing</text><text class="c-c" x="66" y="73">all types</text><text class="c-d" x="140" y="73">sorted by</text><text class="c-c" x="206" y="73">last heard</text><text class="c-d" x="290" y="73">412 shown</text>
+  <rect class="c-box" x="6.5" y="88.5" width="947" height="356"/>
+  <g class="c-d">
+    <text x="24" y="108">name</text><text x="170" y="108">type</text><text x="262" y="108">heard</text><text x="352" y="108" text-anchor="end">snr</text><text x="398" y="108" text-anchor="end">rssi</text>
+    <text x="432" y="108" text-anchor="end">hops</text><text x="444" y="108">position</text><text x="624" y="108" text-anchor="end">distance</text><text x="680" y="108" text-anchor="end">adverts</text><text x="690" y="108">via</text>
+  </g>
+  <g class="c-h">
+    <text x="24" y="125">Ridge Base ⛰</text><text x="170" y="125">💬 chat</text><text x="262" y="125">now</text><text x="352" y="125" text-anchor="end">-</text><text x="398" y="125" text-anchor="end">-</text><text x="432" y="125" text-anchor="end">-</text><text x="444" y="125">12.3417, 45.6231</text>
+  </g>
+  <path d="M14 133.5 H 946" stroke="#8a8a8a" stroke-width="1"/>
+  <rect class="c-fsel" x="8" y="139" width="944" height="16"/>
+  <rect class="c-fg" x="324" y="139" width="30" height="16"/><rect class="c-fg" x="374" y="139" width="26" height="16"/><rect class="c-fg" x="424" y="139" width="10" height="16"/>
+  <g class="c-k">
+    <text x="12" y="151">•</text><text x="24" y="151">Hilltop Rptr</text><text x="170" y="151">📡 repeater</text><text x="262" y="151">1m ago</text><text x="352" y="151" text-anchor="end">11.5</text><text x="398" y="151" text-anchor="end">-64</text>
+    <text x="432" y="151" text-anchor="end">0</text><text x="444" y="151">12.3911, 45.6402</text><text x="624" y="151" text-anchor="end">4.1 km</text><text x="680" y="151" text-anchor="end">212</text><text x="690" y="151">direct</text>
+  </g>
+  <text class="c-c" x="12" y="168">•</text><text class="c-t" x="24" y="168">Valley Node 🚲</text><text class="c-kc" x="170" y="168">💬 chat</text><text class="c-t" x="262" y="168">3m ago</text><text class="c-y" x="352" y="168" text-anchor="end">4.8</text><text class="c-r" x="398" y="168" text-anchor="end">-103</text><text class="c-g" x="432" y="168" text-anchor="end">2</text><text class="c-t" x="444" y="168">12.4520, 45.5987</text><text class="c-t" x="624" y="168" text-anchor="end">8.8 km</text><text class="c-t" x="680" y="168" text-anchor="end">37</text><text class="c-d" x="690" y="168">a3f2 Hilltop Rptr</text>
+  <text class="c-y" x="12" y="185">★</text><text class="c-t" x="24" y="185">Pine Hill RPT 🌲</text><text class="c-kr" x="170" y="185">📡 repeater</text><text class="c-t" x="262" y="185">6m ago</text><text class="c-g" x="352" y="185" text-anchor="end">8.0</text><text class="c-g" x="398" y="185" text-anchor="end">-96</text><text class="c-g" x="432" y="185" text-anchor="end">1</text><text class="c-t" x="444" y="185">12.2875, 45.7012</text><text class="c-t" x="624" y="185" text-anchor="end">10.2 km</text><text class="c-t" x="680" y="185" text-anchor="end">144</text><text class="c-d" x="690" y="185">a3f2 Hilltop Rptr</text>
+  <text class="c-c" x="12" y="202">•</text><text class="c-t" x="24" y="202">RPT-North-07</text><text class="c-kr" x="170" y="202">📡 repeater</text><text class="c-t" x="262" y="202">9m ago</text><text class="c-y" x="352" y="202" text-anchor="end">-3.5</text><text class="c-y" x="398" y="202" text-anchor="end">-114</text><text class="c-y" x="432" y="202" text-anchor="end">4</text><text class="c-t" x="444" y="202">12.5102, 45.8890</text><text class="c-t" x="624" y="202" text-anchor="end">31.4 km</text><text class="c-t" x="680" y="202" text-anchor="end">58</text><text class="c-d" x="690" y="202">7c10 Pine Hill RPT 🌲</text>
+  <text class="c-c" x="12" y="219">•</text><text class="c-t" x="24" y="219">Mara 🐾</text><text class="c-kc" x="170" y="219">💬 chat</text><text class="c-t" x="262" y="219">12m ago</text><text class="c-g" x="352" y="219" text-anchor="end">6.2</text><text class="c-g" x="398" y="219" text-anchor="end">-99</text><text class="c-g" x="432" y="219" text-anchor="end">1</text><text class="c-t" x="680" y="219" text-anchor="end">22</text><text class="c-d" x="690" y="219">a3f2 Hilltop Rptr</text>
+  <text class="c-c" x="12" y="236">•</text><text class="c-t" x="24" y="236">Lakeside Room</text><text class="c-kp" x="170" y="236">🏠 room</text><text class="c-t" x="262" y="236">15m ago</text><text class="c-y" x="352" y="236" text-anchor="end">-0.5</text><text class="c-y" x="398" y="236" text-anchor="end">-109</text><text class="c-y" x="432" y="236" text-anchor="end">3</text><text class="c-t" x="444" y="236">12.6033, 45.5531</text><text class="c-t" x="624" y="236" text-anchor="end">20.6 km</text><text class="c-t" x="680" y="236" text-anchor="end">64</text><text class="c-d" x="690" y="236">4e91c2 Forest Edge RPT</text>
+  <text class="c-y" x="12" y="253">★</text><text class="c-t" x="24" y="253">Forest Edge RPT</text><text class="c-kr" x="170" y="253">📡 repeater</text><text class="c-t" x="262" y="253">18m ago</text><text class="c-y" x="352" y="253" text-anchor="end">2.2</text><text class="c-y" x="398" y="253" text-anchor="end">-107</text><text class="c-g" x="432" y="253" text-anchor="end">2</text><text class="c-t" x="444" y="253">12.5544, 45.6120</text><text class="c-t" x="624" y="253" text-anchor="end">16.4 km</text><text class="c-t" x="680" y="253" text-anchor="end">97</text><text class="c-d" x="690" y="253">a3f2 Hilltop Rptr</text>
+  <text class="c-c" x="12" y="270">•</text><text class="c-t" x="24" y="270">KX-Mobile 🚗</text><text class="c-kc" x="170" y="270">💬 chat</text><text class="c-t" x="262" y="270">22m ago</text><text class="c-r" x="352" y="270" text-anchor="end">-7.5</text><text class="c-r" x="398" y="270" text-anchor="end">-121</text><text class="c-y" x="432" y="270" text-anchor="end">6</text><text class="c-t" x="444" y="270">12.0811, 45.7433</text><text class="c-t" x="624" y="270" text-anchor="end">24.6 km</text><text class="c-t" x="680" y="270" text-anchor="end">9</text><text class="c-d" x="690" y="270">4e07b1 Tower-East-2</text>
+  <text class="c-c" x="12" y="287">•</text><text class="c-t" x="24" y="287">Tower-East-2</text><text class="c-kr" x="170" y="287">📡 repeater</text><text class="c-t" x="262" y="287">31m ago</text><text class="c-g" x="352" y="287" text-anchor="end">9.5</text><text class="c-g" x="398" y="287" text-anchor="end">-88</text><text class="c-y" x="432" y="287" text-anchor="end">3</text><text class="c-t" x="444" y="287">12.7015, 45.6698</text><text class="c-t" x="624" y="287" text-anchor="end">28.3 km</text><text class="c-t" x="680" y="287" text-anchor="end">131</text><text class="c-d" x="690" y="287">7c10 Pine Hill RPT 🌲</text>
+  <text class="c-c" x="12" y="304">•</text><text class="c-t" x="24" y="304">Old Mill 🌻</text><text class="c-kc" x="170" y="304">💬 chat</text><text class="c-t" x="262" y="304">44m ago</text><text class="c-y" x="352" y="304" text-anchor="end">0.8</text><text class="c-y" x="398" y="304" text-anchor="end">-110</text><text class="c-y" x="432" y="304" text-anchor="end">5</text><text class="c-t" x="444" y="304">12.2208, 45.4921</text><text class="c-t" x="624" y="304" text-anchor="end">17.9 km</text><text class="c-t" x="680" y="304" text-anchor="end">15</text><text class="c-d" x="690" y="304">b20e Ridge Relay ⚡</text>
+  <text class="c-c" x="12" y="321">•</text><text class="c-t" x="24" y="321">Garden Sensor</text><text class="c-ks" x="170" y="321">📟 sensor</text><text class="c-t" x="262" y="321">1h ago</text><text class="c-y" x="352" y="321" text-anchor="end">3.0</text><text class="c-y" x="398" y="321" text-anchor="end">-105</text><text class="c-g" x="432" y="321" text-anchor="end">1</text><text class="c-t" x="444" y="321">12.3552, 45.6304</text><text class="c-t" x="624" y="321" text-anchor="end">1.3 km</text><text class="c-t" x="680" y="321" text-anchor="end">48</text><text class="c-d" x="690" y="321">a3f2 Hilltop Rptr</text>
+  <text class="c-c" x="12" y="338">•</text><text class="c-t" x="24" y="338">Quarry RPT ⛏</text><text class="c-kr" x="170" y="338">📡 repeater</text><text class="c-t" x="262" y="338">1h ago</text><text class="c-r" x="352" y="338" text-anchor="end">-9.0</text><text class="c-r" x="398" y="338" text-anchor="end">-124</text><text class="c-r" x="432" y="338" text-anchor="end">7</text><text class="c-t" x="444" y="338">12.8836, 45.9514</text><text class="c-t" x="624" y="338" text-anchor="end">55.0 km</text><text class="c-t" x="680" y="338" text-anchor="end">76</text><text class="c-d" x="690" y="338">4e07b1 Tower-East-2</text>
+  <text class="c-c" x="12" y="355">•</text><text class="c-t" x="24" y="355">EchoBot 🤖</text><text class="c-kc" x="170" y="355">💬 chat</text><text class="c-t" x="262" y="355">1h ago</text><text class="c-g" x="352" y="355" text-anchor="end">5.5</text><text class="c-g" x="398" y="355" text-anchor="end">-100</text><text class="c-y" x="432" y="355" text-anchor="end">3</text><text class="c-t" x="444" y="355">12.6140, 45.7210</text><text class="c-t" x="624" y="355" text-anchor="end">23.5 km</text><text class="c-t" x="680" y="355" text-anchor="end">412</text><text class="c-d" x="690" y="355">4e91c2 Forest Edge RPT</text>
+  <text class="c-c" x="12" y="372">•</text><text class="c-t" x="24" y="372">Ridge Relay ⚡</text><text class="c-kr" x="170" y="372">📡 repeater</text><text class="c-t" x="262" y="372">2h ago</text><text class="c-g" x="352" y="372" text-anchor="end">12.0</text><text class="c-g" x="398" y="372" text-anchor="end">-58</text><text class="c-g" x="432" y="372" text-anchor="end">0</text><text class="c-t" x="444" y="372">12.3302, 45.6155</text><text class="c-t" x="624" y="372" text-anchor="end">1.2 km</text><text class="c-t" x="680" y="372" text-anchor="end">188</text><text class="c-d" x="690" y="372">direct</text>
+  <text class="c-c" x="12" y="389">•</text><text class="c-t" x="24" y="389">Sunny Bot ☀</text><text class="c-kc" x="170" y="389">💬 chat</text><text class="c-t" x="262" y="389">2h ago</text><text class="c-y" x="352" y="389" text-anchor="end">-4.2</text><text class="c-r" x="398" y="389" text-anchor="end">-117</text><text class="c-r" x="432" y="389" text-anchor="end">8</text><text class="c-t" x="444" y="389">12.9284, 45.9933</text><text class="c-t" x="624" y="389" text-anchor="end">61.4 km</text><text class="c-t" x="680" y="389" text-anchor="end">83</text><text class="c-d" x="690" y="389">7c10 Pine Hill RPT 🌲</text>
+  <text class="c-c" x="12" y="406">•</text><text class="c-t" x="24" y="406">NB-Repeater-3</text><text class="c-kr" x="170" y="406">📡 repeater</text><text class="c-t" x="262" y="406">2h ago</text><text class="c-y" x="352" y="406" text-anchor="end">1.5</text><text class="c-y" x="398" y="406" text-anchor="end">-111</text><text class="c-y" x="432" y="406" text-anchor="end">5</text><text class="c-t" x="444" y="406">12.5867, 45.4402</text><text class="c-t" x="624" y="406" text-anchor="end">27.1 km</text><text class="c-t" x="680" y="406" text-anchor="end">41</text><text class="c-d" x="690" y="406">b20e Ridge Relay ⚡</text>
+  <text class="c-c" x="12" y="423">•</text><text class="c-t" x="24" y="423">Camp Room 🏕</text><text class="c-kp" x="170" y="423">🏠 room</text><text class="c-t" x="262" y="423">3h ago</text><text class="c-g" x="352" y="423" text-anchor="end">7.0</text><text class="c-g" x="398" y="423" text-anchor="end">-95</text><text class="c-g" x="432" y="423" text-anchor="end">2</text><text class="c-t" x="444" y="423">12.4011, 45.6780</text><text class="c-t" x="624" y="423" text-anchor="end">7.7 km</text><text class="c-t" x="680" y="423" text-anchor="end">26</text><text class="c-d" x="690" y="423">b20e Ridge Relay ⚡</text>
+  <text class="c-b" x="10" y="466">q</text><text class="c-d" x="24" y="466">quit</text>
+  <text class="c-b" x="68" y="466">Tab</text><text class="c-d" x="94" y="466">switch</text>
+  <text class="c-b" x="150" y="466">↑↓</text><text class="c-d" x="168" y="466">select</text>
+  <text class="c-b" x="224" y="466">Enter</text><text class="c-d" x="262" y="466">open</text>
+  <text class="c-b" x="300" y="466">t</text><text class="c-d" x="314" y="466">type</text>
+  <text class="c-b" x="352" y="466">c</text><text class="c-d" x="366" y="466">• contacts only</text>
+  <text class="c-b" x="478" y="466">s</text><text class="c-d" x="492" y="466">sort</text>
+  <text class="c-b" x="530" y="466">+/-</text><text class="c-d" x="556" y="466">period (24 h)</text>
+  <text class="c-d" x="664" y="466">updated 19:42:10</text>
+</svg>
+<figcaption>L'onglet Noeuds : votre propre radio d'abord, en jaune ; la ligne choisie mise en évidence, <kbd>Enter</kbd> l'ouvre. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Touche</th><th>Action</th></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd>, <kbd>Enter</kbd></td><td class="w">Déplacer la sélection ; ouvrir le noeud (voir <a href="#tab-node">Un noeud</a>).</td></tr>
+<tr><td><kbd>t</kbd></td><td class="w">Type : tous → répéteurs → chat → salons → capteurs.</td></tr>
+<tr><td><kbd>c</kbd></td><td class="w">Qui : tous les noeuds → • contacts seuls → ★ favoris seuls.</td></tr>
+<tr><td><kbd>m</kbd></td><td class="w">Message : sur un noeud chat présent dans les contacts du compagnon (dans la liste ou ouvert), ouvre sa conversation dans l'onglet Chat, prête à écrire.</td></tr>
+<tr><td><kbd>s</kbd></td><td class="w">Tri : dernier entendu → signal → distance → nom.</td></tr>
+<tr><td><kbd>+</kbd> <kbd>-</kbd></td><td class="w">Période, du direct (15 dernières min) jusqu'à « depuis toujours ».</td></tr>
+</table></div>
+
+<h3 id="tab-node">Un noeud</h3>
+<p>S'ouvre depuis la liste des noeuds avec <kbd>Enter</kbd>, ou avec <code>mcproxy history &lt;name&gt;</code>. Tout ce qui est enregistré sur ce noeud :
+son en-tête (nom, type, clé, distance), les courbes de sa réception (SNR, RSSI, votre bruit de fond), chaque annonce entendue (heure, signal, sauts, répéteur par lequel elle est arrivée),
+et pour les répéteurs que vous suivez, leur état et leur télémétrie.</p>
+<div class="wrap"><table>
+<tr><th>Touche</th><th>Action</th></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd>, <kbd>Enter</kbd></td><td class="w">Choisir une annonce ; ouvrir le répéteur par lequel elle est arrivée (suivre le chemin saut par saut).</td></tr>
+<tr><td><kbd>+</kbd> <kbd>-</kbd></td><td class="w">Période des courbes et des annonces.</td></tr>
+<tr><td><kbd>m</kbd></td><td class="w">Message : sur un noeud chat présent dans les contacts du compagnon, ouvre sa conversation dans l'onglet Chat.</td></tr>
+<tr><td><kbd>Esc</kbd></td><td class="w">Retour au noeud précédent, puis à la liste.</td></tr>
+</table></div>
+
+<h3 id="tab-mesh">3 · Mesh</h3>
+<p>Tout le mesh tel que votre radio l'entend : son activité (paquets par heure, ou par minute en direct), les types de trafic, le signal moyen,
+et les répéteurs qui vous l'apportent (le dernier saut des paquets flood : vos voisins directs).</p>
+<figure class="con">
+<svg viewBox="0 0 960 536" role="img" aria-label="Onglet Mesh : paquets entendus et signal moyen, courbes des paquets par heure et du SNR moyen, paquets par type et répéteurs par lesquels ils sont entendus">
+  <rect class="c-bg" x="0" y="0" width="960" height="536"/>
+  <text class="c-h" x="10" y="20">mcproxy</text><text class="c-d" x="66" y="20">by FED1291</text>
+  <text class="c-t" x="150" y="20">1 Status</text><text class="c-t" x="218" y="20">2 Nodes</text>
+  <rect class="c-fy" x="275" y="7" width="50" height="17"/><text class="c-k" x="280" y="20">3 Mesh</text>
+  <text class="c-t" x="336" y="20">4 History</text><text class="c-t" x="410" y="20">5 Logs</text><text class="c-t" x="466" y="20">6 Chat</text>
+  <rect class="c-box" x="6.5" y="34.5" width="947" height="46"/>
+  <rect class="c-bg" x="14" y="28" width="124" height="14"/><text class="c-h" x="16" y="38"> Mesh · last 24 h </text>
+  <text class="c-t" x="14" y="56">21480 packets heard</text><text class="c-d" x="160" y="56">~895 per hour</text>
+  <text class="c-d" x="14" y="73">average SNR</text><text class="c-y" x="94" y="73">2.1 dB</text><text class="c-d" x="160" y="73">average RSSI</text><text class="c-y" x="246" y="73">-106 dBm</text>
+  <rect class="c-box" x="6.5" y="88.5" width="470" height="150"/>
+  <rect class="c-bg" x="14" y="82" width="124" height="14"/><text class="c-b" x="16" y="92"> Packets per hour </text>
+  <rect class="c-bg" x="432" y="82" width="34" height="14"/><text class="c-c" x="464" y="92" text-anchor="end">612</text>
+  <text class="c-t" x="14" y="110">1240</text><text class="c-t" x="14" y="202">380</text>
+  <path d="M60 100 V 210 H 470" stroke="#8a8a8a" stroke-width="1" fill="none"/>
+  <path d="M64 196 L72 168 L84 140 L98 122 L112 116 L130 126 L150 132 L172 130 L192 128 L212 134 L232 146 L252 160 L270 166 L290 164 L310 156 L330 140 L350 124 L368 108 L380 104 L394 112 L412 124 L430 132 L446 140 L458 156 L466 170" stroke="#3a96dd" stroke-width="2.2" stroke-dasharray="1.4 2.6" stroke-linecap="round" fill="none"/>
+  <text class="c-t" x="14" y="230">21.11 19:00</text><text class="c-t" x="468" y="230" text-anchor="end">22.11 19:00</text>
+  <rect class="c-box" x="482.5" y="88.5" width="471" height="150"/>
+  <rect class="c-bg" x="490" y="82" width="100" height="14"/><text class="c-b" x="492" y="92"> Average SNR </text>
+  <rect class="c-bg" x="888" y="82" width="58" height="14"/><text class="c-g" x="944" y="92" text-anchor="end">2.40 dB</text>
+  <text class="c-t" x="490" y="110">3.10</text><text class="c-t" x="490" y="202">0.95</text>
+  <path d="M536 100 V 210 H 946" stroke="#8a8a8a" stroke-width="1" fill="none"/>
+  <path d="M540 160 L556 170 L572 150 L586 140 L600 168 L614 190 L630 176 L646 154 L662 146 L680 128 L696 120 L710 140 L726 162 L742 158 L758 166 L774 150 L790 160 L806 182 L820 170 L836 140 L852 136 L866 152 L880 128 L896 106 L910 112 L926 134 L942 124" stroke="#16c60c" stroke-width="2.2" stroke-dasharray="1.4 2.6" stroke-linecap="round" fill="none"/>
+  <text class="c-t" x="490" y="230">21.11 19:00</text><text class="c-t" x="944" y="230" text-anchor="end">22.11 19:00</text>
+  <rect class="c-box" x="6.5" y="246.5" width="370" height="262"/>
+  <rect class="c-bg" x="14" y="240" width="64" height="14"/><text class="c-b" x="16" y="250"> By type </text>
+  <g class="c-d"><text x="14" y="268">type</text><text x="300" y="268" text-anchor="end">packets</text><text x="368" y="268" text-anchor="end">avg snr</text></g>
+  <g class="c-t">
+    <text x="14" y="285">request</text><text x="300" y="285" text-anchor="end">10418</text>
+    <text x="14" y="302">channel</text><text x="300" y="302" text-anchor="end">3962</text>
+    <text x="14" y="319">dm</text><text x="300" y="319" text-anchor="end">1874</text>
+    <text x="14" y="336">advert</text><text x="300" y="336" text-anchor="end">1311</text>
+    <text x="14" y="353">path</text><text x="300" y="353" text-anchor="end">1102</text>
+    <text x="14" y="370">anon-request</text><text x="300" y="370" text-anchor="end">987</text>
+    <text x="14" y="387">channel-data</text><text x="300" y="387" text-anchor="end">804</text>
+    <text x="14" y="404">response</text><text x="300" y="404" text-anchor="end">655</text>
+    <text x="14" y="421">ack</text><text x="300" y="421" text-anchor="end">288</text>
+    <text x="14" y="438">trace</text><text x="300" y="438" text-anchor="end">41</text>
+    <text x="14" y="455">control</text><text x="300" y="455" text-anchor="end">33</text>
+    <text x="14" y="472">multipart</text><text x="300" y="472" text-anchor="end">4</text>
+    <text x="14" y="489">raw</text><text x="300" y="489" text-anchor="end">1</text>
+  </g>
+  <g text-anchor="end">
+    <text class="c-y" x="368" y="285">1.8</text><text class="c-y" x="368" y="302">2.0</text><text class="c-y" x="368" y="319">3.4</text><text class="c-y" x="368" y="336">2.9</text>
+    <text class="c-y" x="368" y="353">3.1</text><text class="c-y" x="368" y="370">2.6</text><text class="c-y" x="368" y="387">1.2</text><text class="c-y" x="368" y="404">2.2</text>
+    <text class="c-y" x="368" y="421">4.0</text><text class="c-g" x="368" y="438">6.8</text><text class="c-y" x="368" y="455">-0.9</text><text class="c-g" x="368" y="472">8.1</text><text class="c-y" x="368" y="489">0.5</text>
+  </g>
+  <rect class="c-box" x="382.5" y="246.5" width="571" height="262"/>
+  <rect class="c-bg" x="390" y="240" width="300" height="14"/><text class="c-b" x="392" y="250"> Heard through (last repeater of flood packets) </text>
+  <g class="c-d"><text x="390" y="268">hash</text><text x="446" y="268">repeater</text><text x="880" y="268" text-anchor="end">packets</text><text x="944" y="268" text-anchor="end">avg snr</text></g>
+  <g class="c-d">
+    <text x="390" y="285">a3f2c8</text><text x="390" y="302">7c10e4</text><text x="390" y="319">b20e57</text><text x="390" y="336">4e91c2</text><text x="390" y="353">4e07b1</text>
+    <text x="390" y="370">d5a031</text><text x="390" y="387">19bb6f</text><text x="390" y="404">4e</text><text x="390" y="421">c7e2a9</text><text x="390" y="438">58f013</text>
+    <text x="390" y="455">e04d7a</text><text x="390" y="472">92ac10</text><text x="390" y="489">f1d3</text>
+  </g>
+  <g class="c-y">
+    <text x="446" y="285">Hilltop Rptr</text><text x="446" y="302">Pine Hill RPT 🌲</text><text x="446" y="319">Ridge Relay ⚡</text><text x="446" y="336">Forest Edge RPT</text>
+    <text x="446" y="353">Tower-East-2</text><text x="446" y="370">RPT-North-07</text><text x="446" y="387">Quarry RPT ⛏</text><text x="446" y="404">one of 4e91c2, 4e07b1</text>
+    <text x="446" y="421">NB-Repeater-3</text><text x="446" y="438">Lakeside Room</text><text x="446" y="455">Solar Node 2 🔆</text><text x="446" y="472">West Gate RPT</text><text x="446" y="489">?</text>
+  </g>
+  <g class="c-t" text-anchor="end">
+    <text x="880" y="285">3218</text><text x="880" y="302">2604</text><text x="880" y="319">2477</text><text x="880" y="336">1830</text><text x="880" y="353">1512</text>
+    <text x="880" y="370">1096</text><text x="880" y="387">742</text><text x="880" y="404">388</text><text x="880" y="421">215</text><text x="880" y="438">96</text>
+    <text x="880" y="455">47</text><text x="880" y="472">12</text><text x="880" y="489">1</text>
+  </g>
+  <g text-anchor="end">
+    <text class="c-g" x="944" y="285">10.8</text><text class="c-g" x="944" y="302">7.2</text><text class="c-g" x="944" y="319">11.6</text><text class="c-y" x="944" y="336">1.9</text>
+    <text class="c-g" x="944" y="353">6.4</text><text class="c-y" x="944" y="370">-3.8</text><text class="c-r" x="944" y="387">-8.9</text><text class="c-y" x="944" y="404">-1.5</text>
+    <text class="c-r" x="944" y="421">-6.1</text><text class="c-y" x="944" y="438">-0.4</text><text class="c-r" x="944" y="455">-10.2</text><text class="c-r" x="944" y="472">-7.7</text><text class="c-r" x="944" y="489">-13.0</text>
+  </g>
+  <text class="c-b" x="10" y="526">q</text><text class="c-d" x="24" y="526">quit</text>
+  <text class="c-b" x="68" y="526">Tab</text><text class="c-d" x="94" y="526">switch</text>
+  <text class="c-b" x="150" y="526">+/-</text><text class="c-d" x="176" y="526">period (24 h)</text>
+  <text class="c-b" x="270" y="526">↑↓</text><text class="c-d" x="288" y="526">scroll</text>
+  <text class="c-d" x="344" y="526">updated 19:42:10</text>
+</svg>
+<figcaption>L'onglet Mesh. « one of … » marque un id court que plusieurs répéteurs utilisent ; « ? » un répéteur pas encore connu. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Touche</th><th>Action</th></tr>
+<tr><td><kbd>+</kbd> <kbd>-</kbd></td><td class="w">Période ; en dessous de 1 h, passe en direct : les 15 dernières minutes, par minute, mises à jour toutes les 2 s.</td></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td class="w">Défiler dans la liste « Entendus via ».</td></tr>
+</table></div>
+
+<h3 id="tab-history">4 · Suivi</h3>
+<p>Votre propre radio au fil du temps, d'après les mesures que le proxy prend régulièrement : batterie, température, bruit de fond, paquets reçus et envoyés.</p>
+<div class="wrap"><table>
+<tr><th>Touche</th><th>Action</th></tr>
+<tr><td><kbd>p</kbd></td><td class="w">Changer les courbes : batterie et température ↔ paquets reçus et envoyés.</td></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td class="w">Défiler dans les mesures.</td></tr>
+</table></div>
+
+<h3 id="tab-logs">5 · Logs</h3>
+<p>Le log du proxy, le plus récent en bas : connexions, liaison radio, problèmes. Avertissements en <span class="warn">ambre</span>, erreurs en <span class="bad">rouge</span>.</p>
+<div class="wrap"><table>
+<tr><th>Touche</th><th>Action</th></tr>
+<tr><td><kbd>f</kbd></td><td class="w">Filtre : tout → apps → radio → soucis.</td></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td class="w">Lignes plus anciennes / plus récentes.</td></tr>
+</table></div>
+
+<h3 id="tab-chat">6 · Chat</h3>
+<p>Chaque conversation enregistrée par le proxy : d'abord les canaux, puis les messages directs. Les messages les plus récents sont en bas, et vous pouvez écrire.</p>
+<figure class="con">
+<svg viewBox="0 0 960 462" role="img" aria-label="Onglet Chat : les chats à gauche (canaux avec leur région, puis messages directs), les messages du canal choisi à droite avec taille d'id, sauts, expéditeur, texte et région, et la zone de saisie">
+  <rect class="c-bg" x="0" y="0" width="960" height="462"/>
+  <text class="c-h" x="10" y="20">mcproxy</text><text class="c-d" x="66" y="20">by FED1291</text>
+  <text class="c-t" x="150" y="20">1 Status</text><text class="c-t" x="218" y="20">2 Nodes</text><text class="c-t" x="280" y="20">3 Mesh</text>
+  <text class="c-t" x="336" y="20">4 History</text><text class="c-t" x="410" y="20">5 Logs</text>
+  <rect class="c-fy" x="461" y="7" width="50" height="17"/><text class="c-k" x="466" y="20">6 Chat</text>
+  <rect class="c-box" x="6.5" y="34.5" width="210" height="380"/>
+  <rect class="c-bg" x="14" y="28" width="50" height="14"/><text class="c-b" x="16" y="38"> Chats </text>
+  <text class="c-d" x="12" y="56">channels</text>
+  <rect class="c-fy" x="10" y="61" width="203" height="16"/><text class="c-k" x="14" y="73">#hiking</text><text class="c-k" x="150" y="73">#eu</text><text class="c-k" x="196" y="73">5m</text>
+  <text class="c-t" x="14" y="90">Public</text><rect class="c-fm" x="148" y="78" width="42" height="16"/><text class="c-k" x="150" y="90">#eu</text><text class="c-t" x="190" y="90">21m</text>
+  <text class="c-t" x="14" y="107">#weather</text><rect class="c-fm" x="148" y="95" width="42" height="16"/><text class="c-k" x="150" y="107">#eu</text><text class="c-t" x="196" y="107">1h</text>
+  <text class="c-t" x="14" y="124">#help</text><text class="c-t" x="196" y="124">3h</text>
+  <text class="c-t" x="14" y="141">#bots</text><rect class="c-fm" x="142" y="129" width="48" height="16"/><text class="c-k" x="144" y="141">#eu-se</text><text class="c-t" x="196" y="141">2d</text>
+  <text class="c-t" x="14" y="158">Ops</text><text class="c-t" x="196" y="158">9d</text>
+  <text class="c-d" x="12" y="192">direct</text>
+  <text class="c-t" x="14" y="209">Mara 🐾</text><text class="c-t" x="196" y="209">1h</text>
+  <text class="c-t" x="14" y="226">Valley Node 🚲</text><text class="c-t" x="196" y="226">4h</text>
+  <text class="c-t" x="14" y="243">KX-Mobile 🚗</text><text class="c-t" x="196" y="243">2d</text>
+  <text class="c-t" x="14" y="260">Lakeside Room 🏠</text><text class="c-t" x="196" y="260">6d</text>
+  <text class="c-t" x="14" y="277">Old Mill 🌻</text><text class="c-t" x="190" y="277">12d</text>
+  <rect class="c-box" x="222.5" y="34.5" width="731" height="336"/>
+  <rect class="c-bg" x="230" y="28" width="236" height="14"/><text class="c-h" x="232" y="38"> #hiking · 2140 messages · </text>
+  <rect class="c-fm" x="416" y="28" width="42" height="14"/><text class="c-k" x="418" y="38">#eu</text>
+  <g class="c-t">
+    <text x="230" y="56">17:58</text><text x="230" y="73">18:02</text><text x="230" y="90">18:05</text><text x="230" y="107">18:11</text><text x="230" y="124">18:11</text>
+    <text x="230" y="141">18:20</text><text x="230" y="158">18:20</text><text x="230" y="175">18:31</text><text x="230" y="192">18:34</text><text x="230" y="209">18:40</text>
+    <text x="230" y="226">18:52</text><text x="230" y="243">19:05</text><text x="230" y="260">19:05</text><text x="230" y="311">19:12</text><text x="230" y="328">19:21</text>
+  </g>
+  <g class="c-fb">
+    <rect x="268" y="44" width="22" height="16"/><rect x="268" y="61" width="22" height="16"/><rect x="268" y="95" width="22" height="16"/>
+    <rect x="268" y="129" width="22" height="16"/><rect x="268" y="163" width="22" height="16"/><rect x="268" y="197" width="22" height="16"/>
+    <rect x="268" y="231" width="22" height="16"/><rect x="268" y="299" width="22" height="16"/><rect x="268" y="316" width="22" height="16"/>
+  </g>
+  <g class="c-fg"><rect x="268" y="78" width="22" height="16"/><rect x="268" y="112" width="22" height="16"/><rect x="268" y="146" width="22" height="16"/><rect x="268" y="180" width="22" height="16"/><rect x="268" y="248" width="22" height="16"/></g>
+  <rect class="c-fgr" x="268" y="214" width="22" height="16"/>
+  <g class="c-w"><text x="272" y="56">2B</text><text x="272" y="73">2B</text><text x="272" y="107">2B</text><text x="272" y="141">2B</text><text x="272" y="175">2B</text><text x="272" y="209">2B</text><text x="272" y="243">2B</text><text x="272" y="311">2B</text><text x="272" y="328">2B</text><text x="272" y="226">1B</text></g>
+  <g class="c-k"><text x="272" y="90">3B</text><text x="272" y="124">3B</text><text x="272" y="158">3B</text><text x="272" y="192">3B</text><text x="272" y="260">3B</text></g>
+  <g text-anchor="end">
+    <text class="c-y" x="314" y="56">3</text><text class="c-y" x="314" y="73">5</text><text class="c-y" x="314" y="90">4</text><text class="c-g" x="314" y="107">2</text><text class="c-y" x="314" y="124">4</text>
+    <text class="c-r" x="314" y="141">7</text><text class="c-y" x="314" y="158">6</text><text class="c-r" x="314" y="175">8</text><text class="c-g" x="314" y="192">»4</text><text class="c-y" x="314" y="209">3</text>
+    <text class="c-g" x="314" y="226">1</text><text class="c-y" x="314" y="243">5</text><text class="c-y" x="314" y="260">6</text><text class="c-y" x="314" y="311">4</text><text class="c-r" x="314" y="328">9</text>
+  </g>
+  <text class="c-b" x="322" y="56" style="fill:#61d6d6">Valley Node 🚲</text>
+  <text class="c-b" x="322" y="73" style="fill:#3b78ff">Pine Hill Hiker</text>
+  <text class="c-b" x="322" y="90" style="fill:#e74856">EchoBot 🤖</text>
+  <text class="c-b" x="322" y="107" style="fill:#16c60c">Mara 🐾</text>
+  <text class="c-b" x="322" y="124" style="fill:#e74856">EchoBot 🤖</text>
+  <text class="c-b" x="322" y="141" style="fill:#d670d6">KX-Mobile 🚗</text>
+  <text class="c-b" x="322" y="158" style="fill:#3a96dd">PathBot 🛰</text>
+  <text class="c-b" x="322" y="175" style="fill:#c33ec3">Lakeside Joe</text>
+  <text class="c-h" x="322" y="192">↳ me</text>
+  <text class="c-b" x="322" y="209" style="fill:#61d6d6">Valley Node 🚲</text>
+  <text class="c-b" x="322" y="226" style="fill:#13a10e">Old Mill 🌻</text>
+  <text class="c-b" x="322" y="243" style="fill:#3b78ff">Pine Hill Hiker</text>
+  <text class="c-b" x="322" y="260" style="fill:#3a96dd">PathBot 🛰</text>
+  <text class="c-b" x="322" y="311" style="fill:#16c60c">Mara 🐾</text>
+  <text class="c-b" x="322" y="328" style="fill:#d670d6">Sunny Bot ☀</text>
+  <g class="c-t">
+    <text x="452" y="56">anyone up on the ridge tonight?</text>
+    <text x="452" y="73">yes, from 9 pm at the north hut</text>
+    <text x="452" y="90">🤖 Copy, Pine Hill Hiker! 5 hops @ 18:02</text>
+    <text x="452" y="107">ping</text>
+    <text x="452" y="124">🤖 Copy, Mara! 2 hops @ 18:11</text>
+    <text x="452" y="141">Path</text>
+    <text x="452" y="158">@[KX-Mobile]: Path: a3f2 → 7c10 → 4e07 - 3 hops</text>
+    <text x="452" y="175">test from the lake, anyone?</text>
+    <text x="452" y="192">heard you fine, see you at the hut 👍</text>
+    <text x="452" y="209">@[Ridge Base ⛰] 👍</text>
+    <text x="452" y="226">anyone with a spare LoRa antenna?</text>
+    <text x="452" y="243">Path</text>
+    <text x="452" y="260">@[Pine Hill Hiker]</text>
+    <text x="452" y="277">a3f2: Hilltop Rptr</text>
+    <text x="452" y="294">7c10: Pine Hill RPT 🌲</text>
+    <text x="452" y="311">on my way 🚶</text>
+    <text x="452" y="328">☀ 18 °C, light wind, clear sky</text>
+  </g>
+  <g class="c-m" text-anchor="end">
+    <text x="944" y="56">#eu</text><text x="944" y="73">#eu</text><text x="944" y="90">#eu</text><text x="944" y="107">#eu</text><text x="944" y="124">#eu</text>
+    <text x="944" y="141">#?</text><text x="944" y="158">#eu</text><text x="944" y="209">#eu</text><text x="944" y="226">#eu</text><text x="944" y="243">#eu</text>
+    <text x="944" y="294">#eu</text><text x="944" y="311">#eu</text><text x="944" y="328">#eu-se</text>
+  </g>
+  <rect class="c-box" x="222.5" y="376.5" width="731" height="38"/>
+  <rect class="c-bg" x="230" y="370" width="74" height="14"/><text class="c-d" x="232" y="380"> to #hiking </text>
+  <text class="c-d" x="232" y="402">› press i to write a message</text>
+  <g class="c-b"><text x="10" y="434">q</text><text x="68" y="434">Tab</text><text x="150" y="434">&lt; &gt;</text><text x="208" y="434">i</text><text x="258" y="434">↑↓</text>
+    <text x="320" y="434">Home/End</text><text x="482" y="434">g</text><text x="594" y="434">n</text><text x="690" y="434">x</text><text x="806" y="434">m</text></g>
+  <g class="c-d"><text x="24" y="434">quit</text><text x="94" y="434">switch</text><text x="176" y="434">chat</text><text x="222" y="434">write</text><text x="276" y="434">scroll</text>
+    <text x="378" y="434">oldest / newest</text><text x="496" y="434">channel region</text><text x="608" y="434">new channel</text><text x="704" y="434">remove channel</text><text x="820" y="434">send again</text>
+    <text x="10" y="451">show: d details · b id size · r regions · s delivery</text><text x="380" y="451">updated 19:42:10</text></g>
+</svg>
+<figcaption>L'onglet Chat. À gauche : les chats, avec la région de chaque canal. À droite : les messages (taille d'id de chemin, sauts, expéditeur, texte, région) ; "»4" sous les vôtres : repris par 4 répéteurs entendus. En bas : la zone de saisie. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Partie</th><th>Ce qu'elle indique</th></tr>
+<tr><td>Badge de taille d'id</td><td class="w">La taille d'id de chemin du paquet du message : <b>1o</b> gris, <b>2o</b> bleu, <b>3o</b> vert.</td></tr>
+<tr><td>Sauts</td><td class="w">Par combien de répéteurs il est passé (0 = entendu directement), en couleur.</td></tr>
+<tr><td>Région</td><td class="w">La région (portée flood) du canal, dans la liste et l'en-tête : la sienne, celle du compagnon « (compagnon) », ou « partout ».
+  Sur un message : la région dans laquelle il a été envoyé, ou <code>#?</code> quand il en a une que le proxy ne connaît pas.</td></tr>
+<tr><td>Détails</td><td class="w">À la fin de chaque message : combien de fois il a été entendu, le répéteur par lequel il est arrivé, son SNR. Les nôtres : combien de fois ils ont été réentendus.</td></tr>
+</table></div>
+<div class="wrap"><table>
+<tr><th>Touche</th><th>Action</th></tr>
+<tr><td><kbd>&lt;</kbd> <kbd>&gt;</kbd> (ou <kbd>,</kbd> <kbd>.</kbd>, <kbd>←</kbd> <kbd>→</kbd>)</td><td class="w">Chat précédent / suivant.</td></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd>, <kbd>PgUp</kbd> <kbd>PgDn</kbd>, <kbd>Home</kbd> <kbd>End</kbd></td><td class="w">Défiler ; début / fin.</td></tr>
+<tr><td><kbd>i</kbd> (ou <kbd>Enter</kbd>)</td><td class="w">Écrire. <kbd>Enter</kbd> envoie (une fois, jamais répété) et la zone reste ouverte pour le message suivant ; <kbd>Esc</kbd> arrête d'écrire.</td></tr>
+<tr><td><kbd>m</kbd></td><td class="w">Renvoyer (affiché seulement quand l'un de vos messages peut repartir) : choisit votre DM le plus récent qui n'a pas été remis (<code>×</code>) ou qui n'est peut-être pas parti (<code>?</code>), ou votre message de canal qu'aucun répéteur n'a été entendu reprendre (de 30 s à 10 min après l'envoi). <kbd>↑</kbd> <kbd>↓</kbd> en choisissent un autre, <kbd>Enter</kbd> le renvoie, <kbd>d</kbd> direct, <kbd>f</kbd> flood (DM), <kbd>Esc</kbd> retour.
+  C'est le même message, pas un nouveau : il reste sur une seule ligne. Sur un canal, c'est exactement le même paquet : une radio qui l'a déjà l'ignore. Un DM part comme essai suivant : si seul l'ACK s'est perdu, l'app du destinataire peut l'afficher deux fois.</td></tr>
+<tr><td><kbd>n</kbd></td><td class="w">Nouveau canal hashtag : tapez son nom (lettres, chiffres, <code>-</code> <code>_</code>) et <kbd>Enter</kbd>. Il prend le premier emplacement vide du compagnon sous la forme <code>#name</code> ; tous ceux qui ajoutent le même nom le lisent.</td></tr>
+<tr><td><kbd>x</kbd></td><td class="w">Sur un canal : le retire du compagnon, après <kbd>y</kbd> / <kbd>n</kbd> ; une deuxième question demande si ses messages gardés sont aussi effacés du proxy. Sur un chat direct : efface cette conversation du proxy, après <kbd>y</kbd> / <kbd>n</kbd> (le contact reste).</td></tr>
+<tr><td><kbd>d</kbd></td><td class="w">Afficher / masquer les détails (masqués au départ).</td></tr>
+<tr><td><kbd>b</kbd></td><td class="w">Afficher / masquer les badges de taille d'id (affichés au départ).</td></tr>
+<tr><td><kbd>r</kbd></td><td class="w">Afficher / masquer les régions (affichées au départ).</td></tr>
+<tr><td><kbd>s</kbd></td><td class="w">Afficher / masquer la remise de vos messages, à côté du badge de taille d'id (affichée au départ) : <code>..</code> en route, <code>√</code> envoyé, <code>√√</code> remis (message direct : le destinataire l'a confirmé), <code>»3</code> repris par 3 répéteurs (canal), <code>2/3</code> renvoyé (essai 2 sur 3), <code>×</code> non remis, <code>?</code> on ne sait pas s'il est parti (le compagnon n'a pas répondu ; il peut être renvoyé).</td></tr>
+<tr><td><kbd>g</kbd></td><td class="w">La région du canal choisi : tapez son nom et <kbd>Enter</kbd> (vide = la région du compagnon, <code>*</code> = aucune région). Enregistrée dans le proxy : toutes les apps et interfaces l'utilisent, et la dernière réglée l'emporte.
+  Quand une app MeshCore envoie dans un canal avec sa propre région, le proxy apprend cette région tout seul (noms de 4 caractères au plus ; un nom plus long se règle ici une fois).</td></tr>
+</table></div>
+
+<h3 id="colours">Couleurs</h3>
+<p>Les valeurs sont colorées selon leur qualité, partout dans la console et les apps.</p>
+<div class="wrap"><table>
+<tr><th>Valeur</th><th><span class="good">Bon</span></th><th><span class="warn">Moyen</span></th><th><span class="bad">Mauvais</span></th><th>Signification</th></tr>
+<tr><td>SNR</td><td>≥ 5 dB</td><td>−5 à 5 dB</td><td>&lt; −5 dB</td><td class="w">De combien un paquet dépassait le bruit de fond. LoRa décode encore en dessous de 0.</td></tr>
+<tr><td>RSSI</td><td>≥ −100 dBm</td><td>−115 à −100</td><td>&lt; −115 dBm</td><td class="w">Puissance reçue brute.</td></tr>
+<tr><td>Bruit de fond</td><td>≤ −110 dBm</td><td>−110 à −95</td><td>&gt; −95 dBm</td><td class="w">Le bruit ambiant à votre radio : plus il est bas, mieux c'est.</td></tr>
+<tr><td>Batterie</td><td>≥ 3,9 V</td><td>3,6 à 3,9 V</td><td>&lt; 3,6 V</td><td class="w">Tension d'un élément lithium.</td></tr>
+</table></div>
+</section>
+
+<section class="panel" id="api" role="tabpanel">
+<h2>Apps et API</h2>
+
+<div class="wrap"><table>
+<tr><th>App</th><th>Port</th><th>Comment</th></tr>
+<tr><td>Apps MeshCore, meshcore-cli, Home Assistant</td><td><code>5000</code></td><td class="w">Leur connexion <b>TCP</b> habituelle : le proxy parle le protocole de la radio elle-même.</td></tr>
+<tr><td>mcproxy desk, Android, pages web, scripts</td><td><code>5080</code></td><td class="w">L'<b>API de données</b> : HTTPS + événements en direct, avec l'historique que garde le proxy. Chaque endpoint est décrit dans <code>API.md</code>, à côté de ce guide.</td></tr>
+</table></div>
+
+<ol class="steps">
+<li>
+  <h4>Obtenir l'adresse et l'empreinte <span class="where pi">dans PowerShell</span></h4>
+  <div class="cmd"><pre>.\mcproxy api</pre></div>
+  <p>Affiche l'adresse (par ex. <code>https://192.168.1.50:5080/api/v1</code>), l'empreinte du certificat et si un jeton est défini.
+  Le proxy fait son propre certificat à son premier démarrage.</p>
+</li>
+<li>
+  <h4>Connecter l'app</h4>
+  <p>Entrez l'adresse dans l'app (<span class="where pc">sur votre ordinateur</span> l'app desk, <span class="where phone">sur le téléphone</span> l'app Android). À la première connexion, l'app affiche
+  l'empreinte du certificat : <b>comparez-la avec celle de l'étape 1</b> et acceptez-la. L'app la retient.</p>
+  <p>L'app desk sur le même PC que le proxy peut utiliser <code>https://127.0.0.1:5080/api/v1</code>.</p>
+  <div class="alert"><b>Empreinte changée</b> N'acceptez une nouvelle empreinte qu'après avoir réinstallé le proxy ou effacé sa clé. Sinon, c'est un autre appareil qui répond à cette adresse.</div>
+</li>
+</ol>
+
+<h3>Réglages</h3>
+<p>Dans <code>config\config.toml</code> (dans le dossier de mcproxy), section <code>[api]</code>, puis redémarrez le proxy (<kbd>Ctrl</kbd>+<kbd>C</kbd> et <code>.\mcproxy run</code>, ou redémarrez la <a href="#task">tâche de fond</a>) :</p>
+<div class="wrap"><table>
+<tr><th>Réglage</th><th>Par défaut</th><th>Signification</th></tr>
+<tr><td><code>enabled</code></td><td><code>true</code></td><td class="w">L'API de données activée ou non.</td></tr>
+<tr><td><code>listen</code></td><td><code>0.0.0.0:5080</code></td><td class="w">Où elle répond.</td></tr>
+<tr><td><code>token</code></td><td><code>""</code></td><td class="w">Vide = pas de jeton. Définissez-en un pour le demander à chaque app.</td></tr>
+<tr><td><code>[server] allow</code></td><td><code>[]</code></td><td class="w">Vide = tout le monde, ou par ex. <code>["192.168.1.0/24"]</code> : qui peut se connecter (les deux ports).</td></tr>
+</table></div>
+</section>
+
+<section class="panel" id="update" role="tabpanel">
+<h2>Mettre à jour</h2>
+<p class="sub">Une mise à jour ne remplace que le fichier du programme. La configuration et les données sont conservées.</p>
+
+<ol class="steps">
+<li>
+  <h4>Arrêter le proxy</h4>
+  <p>Windows ne peut pas remplacer un programme qui tourne. <kbd>Ctrl</kbd>+<kbd>C</kbd> dans sa fenêtre ou, pour la tâche de fond, <span class="where admin">en administrateur</span> :</p>
+  <div class="cmd"><pre>Stop-ScheduledTask mcproxy</pre></div>
+</li>
+<li>
+  <h4>Remplacer le programme</h4>
+  <p>Copiez le nouveau <code>mcproxy.exe</code> sur l'ancien dans le dossier de mcproxy. Un nouveau <code>GUIDE.html</code> ou <code>API.md</code> remplace l'ancien.
+  La tâche de fond et la règle du pare-feu désignent le fichier par son chemin : elles continuent de marcher.</p>
+</li>
+<li>
+  <h4>Redémarrer</h4>
+  <p><code>.\mcproxy run</code>, ou <span class="where admin">en administrateur</span> :</p>
+  <div class="cmd"><pre>Start-ScheduledTask mcproxy</pre></div>
+  <p>Vérifiez ensuite avec <code>.\mcproxy status</code>.</p>
+</li>
+</ol>
+
+<div class="note"><b>Les nouveaux réglages</b> sont ajoutés à votre config avec leurs valeurs par défaut au démarrage de la nouvelle version ; les valeurs existantes ne sont jamais changées.</div>
+</section>
+
+<section class="panel" id="remove" role="tabpanel">
+<h2>Désinstaller</h2>
+<p class="sub">Chaque étape annule une étape d'installation. Suivez-les dans l'ordre, ou seulement celles qu'il vous faut.</p>
+
+<ol class="steps">
+<li>
+  <h4>Oublier le compagnon en Bluetooth <span class="where pi">dans PowerShell</span></h4>
+  <p>Seulement pour un compagnon Bluetooth, avec le proxy arrêté, avec le compte Windows qui a lancé setup :</p>
+  <div class="cmd"><pre>.\mcproxy unpair</pre></div>
+  <p>Ou Paramètres → Périphériques → Bluetooth, le compagnon, <b>Supprimer l'appareil</b>.</p>
+</li>
+<li>
+  <h4>Retirer la tâche de fond et les règles du pare-feu <span class="where admin">en administrateur</span></h4>
+  <p>Dans le dossier de mcproxy. Cela retire aussi la règle que Windows a créée au moment de sa question sur le pare-feu.</p>
+  <div class="cmd"><pre>cd C:\mcproxy
+Stop-ScheduledTask mcproxy -ErrorAction SilentlyContinue
+Unregister-ScheduledTask mcproxy -Confirm:$false -ErrorAction SilentlyContinue
+Get-NetFirewallApplicationFilter -Program (Resolve-Path .\mcproxy.exe).Path | Get-NetFirewallRule | Remove-NetFirewallRule</pre></div>
+</li>
+<li>
+  <h4>Effacer le dossier</h4>
+  <p>Avec le proxy arrêté, effacez le dossier de mcproxy : le programme, le guide, la config, la base de données et les logs y sont tous. Pour garder une langue que vous avez traduite, copiez d'abord son dossier depuis <code>config\locales\</code>.</p>
+  <div class="cmd"><pre>cd \
+Remove-Item -Recurse C:\mcproxy</pre></div>
+</li>
+<li>
+  <h4>Effacer la clé des messages et le certificat de l'API <span class="where pi">dans PowerShell</span></h4>
+  <p>Avec le compte Windows qui faisait tourner mcproxy :</p>
+  <div class="cmd"><pre>Remove-Item -Recurse "$env:APPDATA\mcproxy"</pre></div>
+  <div class="alert"><b>Sans la clé</b>, les textes des messages stockés ne pourront plus jamais être lus. Les apps demanderont d'accepter un nouveau certificat après une réinstallation.</div>
+</li>
+</ol>
+<div class="tip"><b>Rien d'autre à annuler :</b> rien n'est installé dans Windows et aucun réglage du système n'est changé.</div>
+</section>
+
+<section class="panel" id="trouble" role="tabpanel">
+<h2>Problèmes</h2>
+<p class="sub"><span class="where pi">dans PowerShell</span> <code>.\mcproxy doctor</code> vérifie la configuration, le Bluetooth ou le port USB, l'appairage, le proxy et la liaison radio, et propose une solution à chaque problème. Dans la console et le log, les raisons données par le proxy sont en anglais : elles sont ici entre parenthèses.</p>
+<div class="cmd"><pre>.\mcproxy doctor
+.\mcproxy logs --problems</pre></div>
+<div class="wrap"><table>
+<tr><th>Vous voyez</th><th>Que faire</th></tr>
+<tr><td>« le Bluetooth est désactivé », « bloqué » (« Bluetooth is switched off », « disabled »)</td><td class="w">Paramètres → Périphériques → Bluetooth : activez-le. Vérifiez le mode avion, un interrupteur Bluetooth sur le PC, et que la clé USB est bien branchée.</td></tr>
+<tr><td>« Windows ne laisse pas les programmes utiliser le Bluetooth » (« Windows does not let programs use Bluetooth »)</td><td class="w">Paramètres → Confidentialité → Radios : laissez les apps l'utiliser. « désactivé par une stratégie » : c'est l'administrateur du PC qui décide.</td></tr>
+<tr><td>« n'a pas le Bluetooth Low Energy » (« no Bluetooth Low Energy »)</td><td class="w">L'adaptateur est trop ancien : utilisez une clé Bluetooth 4.0 ou plus récente.</td></tr>
+<tr><td>Bluetooth : « introuvable » (« not found »)</td><td class="w">Le compagnon est éteint, hors de portée, ou connecté à un téléphone : il n'accepte qu'une connexion Bluetooth, déconnectez-l'en donc.</td></tr>
+<tr><td>Bluetooth : « appairage refusé : mauvais PIN ? » (« pairing refused: wrong PIN? »)</td><td class="w">Relancez <code>.\mcproxy setup</code>, avec le PIN de l'écran du compagnon, sinon <code>123456</code>. Un proxy qui tourne réessaie toutes les 10 minutes, ou aussitôt avec <code>.\mcproxy reconnect</code>.</td></tr>
+<tr><td>Bluetooth : « le PIN a 6 chiffres » (« the PIN is 6 digits »)</td><td class="w">Corrigez <code>[radio] pin</code> et redémarrez le proxy, ou relancez <code>.\mcproxy setup</code>.</td></tr>
+<tr><td>Bluetooth : « the companion no longer knows this pairing »</td><td class="w">Le proxy appaire à nouveau tout seul après deux tentatives. Si le message reste, cela n'a pas marché : <code>.\mcproxy unpair</code> avec le proxy arrêté, puis <code>.\mcproxy setup</code>.</td></tr>
+<tr><td>« mcproxy, qui tourne, appairerait aussitôt à nouveau »</td><td class="w"><code>unpair</code> demande que le proxy soit arrêté : <kbd>Ctrl</kbd>+<kbd>C</kbd> dans sa fenêtre, ou <code>Stop-ScheduledTask mcproxy</code> en administrateur.</td></tr>
+<tr><td>Bluetooth : « the pairing is missing on one side »</td><td class="w"><code>.\mcproxy unpair</code> avec le proxy arrêté, puis <code>.\mcproxy setup</code>.</td></tr>
+<tr><td>« no MeshCore service on this device »</td><td class="w">Le compagnon a besoin du firmware compagnon <b>Bluetooth</b>.</td></tr>
+<tr><td>« aucun compagnon MeshCore sur les ports USB »</td><td class="w">Utilisez un câble USB de <b>données</b> (certains câbles ne font que charger). Dans le Gestionnaire de périphériques, sous « Ports (COM et LPT) », la carte doit avoir un port COM ; sinon, installez le pilote USB-série de sa puce (CP210x ou CH34x).</td></tr>
+<tr><td>USB : « utilisé par un autre programme » (« in use by another program »)</td><td class="w">Fermez l'onglet du flasher web, un moniteur série, ou un autre programme qui utilise la radio ; puis <code>.\mcproxy reconnect</code>.</td></tr>
+<tr><td>USB : « pas de réponse » (« no answer »)</td><td class="w">La radio a besoin du firmware compagnon <b>USB</b> (pas de celui pour le Bluetooth).</td></tr>
+<tr><td>Câble USB débranché</td><td class="w">Remarqué après environ 6 s ; la liaison revient d'elle-même quand il est rebranché.</td></tr>
+<tr><td>TCP : « another program connected to it directly »</td><td class="w">Une app ou un outil est réglé sur l'adresse du compagnon lui-même : donnez-lui plutôt celle de mcproxy. mcproxy reprend le compagnon après 5 s, puis attend plus longtemps chaque fois qu'il est pris.</td></tr>
+<tr><td>TCP : « pas de réponse en … s » / « introuvable » (« no answer in … s » / « cannot find »)</td><td class="w">Le compagnon est éteint, hors de portée du Wi-Fi, ou a reçu une autre adresse : donnez-lui une adresse fixe dans le routeur (réservation DHCP). Sa propre console l'affiche : <code>get wifi.ip</code>.</td></tr>
+<tr><td><span class="bad">● radio COUPÉE</span> après la veille du PC</td><td class="w">La liaison revient d'elle-même après quelques secondes. Pour l'éviter, réglez le PC pour qu'il ne se mette jamais en veille quand il est branché.</td></tr>
+<tr><td>Les apps d'autres appareils ne peuvent pas se connecter</td><td class="w">Le pare-feu les bloque : autorisez mcproxy sur les réseaux privés (Installer, étapes 5 et 7), et vérifiez que le réseau est défini comme <b>Privé</b> dans Windows (Paramètres → Réseau).</td></tr>
+<tr><td>Une app se déconnecte sans cesse</td><td class="w">Console, onglet Logs, <kbd>f</kbd> jusqu'à « apps » : chaque déconnexion avec sa raison.</td></tr>
+<tr><td>« Le service mcproxy ne tourne pas »</td><td class="w"><code>.\mcproxy run</code>, ou <code>Start-ScheduledTask mcproxy</code> pour la tâche de fond ; pourquoi il s'est arrêté : <code>.\mcproxy logs --problems</code>.</td></tr>
+<tr><td>« Arrêter d'abord mcproxy, qui tourne »</td><td class="w">Setup a besoin de la radio pour lui seul : <kbd>Ctrl</kbd>+<kbd>C</kbd> dans la fenêtre du proxy, ou <code>Stop-ScheduledTask mcproxy</code> en administrateur.</td></tr>
+<tr><td>Port 5000 ou 5080 utilisé</td><td class="w">Un autre proxy tourne encore. Quel programme : <code>Get-Process -Id (Get-NetTCPConnection -LocalPort 5000,5080 -State Listen).OwningProcess</code>.</td></tr>
+<tr><td>Tâche de fond : State « Ready », pas « Running »</td><td class="w">Elle s'est arrêtée : <code>.\mcproxy logs --problems</code>. Vérifiez qu'elle a été enregistrée avec le compte qui a lancé setup.</td></tr>
+<tr><td>Une langue ajoutée s'affiche en anglais, en tout ou en partie</td><td class="w"><code>mcproxy language</code> indique son fichier et les lignes qui contiennent une erreur (voir <a href="#language">Langue</a>).</td></tr>
+<tr><td>Textes du chat « illisible ici »</td><td class="w">Lancez la console avec le compte Windows qui fait tourner le proxy : la clé des messages est dans le profil de ce compte.</td></tr>
+</table></div>
+</section>
+
+<footer>mcproxy · by FED1291</footer>
+</main>
+
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('nav.tabs button'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('section.panel'));
+  function show(id, target) {
+    var found = false;
+    panels.forEach(function (p) { var on = p.id === id; p.classList.toggle('on', on); found = found || on; });
+    if (!found) { return false; }
+    tabs.forEach(function (b) { b.setAttribute('aria-selected', b.dataset.tab === id ? 'true' : 'false'); });
+    if (target) { target.scrollIntoView(); } else { window.scrollTo(0, 0); }
+    return true;
+  }
+  function go(hash) {
+    var el = hash && document.getElementById(hash.slice(1));
+    var panel = el && (el.classList.contains('panel') ? el : el.closest('section.panel'));
+    if (!panel) { return show('overview'); }
+    show(panel.id, el === panel ? null : el);
+  }
+  tabs.forEach(function (b) {
+    b.addEventListener('click', function () { history.replaceState(null, '', '#' + b.dataset.tab); show(b.dataset.tab); });
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href^="#"]');
+    if (!a) { return; }
+    e.preventDefault();
+    history.replaceState(null, '', a.getAttribute('href'));
+    go(a.getAttribute('href'));
+  });
+  window.addEventListener('hashchange', function () { go(location.hash); });
+  go(location.hash);
+  document.querySelector('.lang a').addEventListener('click', function () { this.hash = location.hash; });
+
+  document.querySelectorAll('.cmd').forEach(function (box) {
+    var pre = box.querySelector('pre');
+    var b = document.createElement('button');
+    b.className = 'copy'; b.type = 'button'; b.textContent = 'Copier';
+    b.addEventListener('click', function () {
+      var clone = pre.cloneNode(true);
+      clone.querySelectorAll('.c, .where').forEach(function (n) { n.remove(); });
+      var text = clone.textContent.split('\n').map(function (l) { return l.replace(/\s+$/, ''); })
+        .filter(function (l) { return l.length; }).join('\n');
+      var done = function () { b.textContent = 'Copié'; b.classList.add('done');
+        setTimeout(function () { b.textContent = 'Copier'; b.classList.remove('done'); }, 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); });
+      } else { fallback(text); done(); }
+    });
+    box.appendChild(b);
+  });
+  function fallback(text) {
+    var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t);
+    t.select(); try { document.execCommand('copy'); } catch (e) {} t.remove();
+  }
+})();
+</script>
+</body>
+</html>

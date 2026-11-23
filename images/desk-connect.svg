@@ -1,0 +1,247 @@
+<svg class="app" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650" role="img" aria-label="The Connection and settings page: the Proxy card with its state, address, token, recent addresses and buttons, the Certificate card with the pinned fingerprint, the This app card with the language, Add a language and API fields, and the About card">
+<style>
+
+
+:root {
+  --bg: #f7f7f4; --panel: #ffffff; --ink: #1d1f21; --dim: #6b6f75; --line: #dcdcd6;
+  --accent: #b7791f; --accent-soft: #fbf1dc; --cyan: #127a8a; --cyan-soft: #e1f2f4;
+  --good: #2f8a3e; --good-soft: #e5f3e7; --warn: #b7791f; --bad: #c0392b; --bad-soft: #fbe6e3;
+  --violet: #6b4fbb; --violet-soft: #eee9fa;
+  --term: #15171a; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #3a3f45;
+  --code-bg: #efefea;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+    --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+    --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+    --violet: #a993f0; --violet-soft: #231d36;
+    --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+    --code-bg: #24272b;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+a { color: var(--cyan); }
+code, kbd, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: .92em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+kbd { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 5px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); white-space: nowrap; }
+main { max-width: 1000px; margin: 0 auto; padding: 0 16px 64px; }
+
+
+header.top { padding: 24px 0 14px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); margin: 0; }
+nav.tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; scrollbar-width: thin; }
+nav.tabs button { font: inherit; font-size: .95rem; color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: 8px 14px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button .n { display: inline-block; width: 1.4em; color: var(--accent); font-weight: 700; }
+section.panel { padding-top: 26px; }
+.js section.panel:not(.on) { display: none; }
+
+
+h2 { font-size: 1.5rem; margin: 0 0 4px; }
+h3 { font-size: 1.12rem; margin: 30px 0 8px; padding-left: 10px; border-left: 4px solid var(--accent); }
+h4 { font-size: 1rem; margin: 20px 0 6px; }
+p { margin: 8px 0; }
+.sub { color: var(--dim); margin: 0 0 14px; }
+.good { color: var(--good); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+
+
+.note, .tip, .alert { border-left: 4px solid; padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+.note { background: var(--accent-soft); border-color: var(--accent); }
+.tip { background: var(--good-soft); border-color: var(--good); }
+.alert { background: var(--bad-soft); border-color: var(--bad); }
+.note b:first-child, .tip b:first-child, .alert b:first-child { margin-right: 4px; }
+
+
+.where { display: inline-block; font: 600 .72rem/1 "IBM Plex Sans", "Segoe UI", sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 999px; vertical-align: middle; }
+.where.pi { background: var(--cyan-soft); color: var(--cyan); }
+.where.pc { background: var(--accent-soft); color: var(--accent); }
+.where.phone { background: var(--violet-soft); color: var(--violet); }
+
+
+.cmd { position: relative; margin: 8px 0; }
+.cmd pre { background: var(--term); color: var(--term-ink); padding: 12px 70px 12px 14px; border-radius: 8px;
+  overflow-x: auto; margin: 0; line-height: 1.5; }
+.cmd pre .c { color: var(--term-dim); }
+.cmd button.copy { position: absolute; top: 8px; right: 8px; font: 600 .75rem "IBM Plex Sans", sans-serif;
+  background: #2a2e33; color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+.cmd button.copy:hover { border-color: var(--accent); }
+.cmd button.copy.done { color: #111; background: var(--good); border-color: var(--good); }
+
+
+ol.steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+ol.steps > li { counter-increment: step; position: relative; padding: 14px 16px 14px 60px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); color: #111; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps > li > h4 { margin: 3px 0 6px; }
+ol.steps > li > h4 .where { margin-left: 6px; }
+
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card b { display: block; margin-bottom: 4px; }
+.card p { margin: 0; color: var(--dim); font-size: .94rem; }
+
+
+.wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--code-bg); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.w { white-space: normal; }
+
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips a { font-family: "IBM Plex Mono", monospace; font-size: .85rem; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); padding: 3px 10px; border-radius: 4px; }
+.chips a:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+figure { margin: 16px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--dim); font-size: .88rem; margin-top: 6px; }
+footer { margin-top: 56px; color: var(--dim); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+
+.s-term { fill: var(--term); }
+.s-box { fill: none; stroke: var(--term-line); stroke-width: 1.5; }
+.s-t { fill: var(--term-ink); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-td { fill: var(--term-dim); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-ta { fill: var(--accent); font: 600 13px "IBM Plex Mono", Consolas, monospace; }
+.s-tc { fill: var(--cyan); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-tab { fill: var(--accent); }
+.s-tabt { fill: #111; font: 700 12px "IBM Plex Mono", Consolas, monospace; }
+.s-good { fill: var(--good); } .s-warn { fill: var(--warn); } .s-bad { fill: var(--bad); }
+
+.s-goodt { fill: var(--good); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-warnt { fill: var(--warn); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-badt { fill: var(--bad); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-lc { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.s-ink { fill: var(--ink); font: 600 14px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-dim { fill: var(--dim); font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-line { stroke: var(--dim); stroke-width: 2; fill: none; }
+.s-acc { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.s-node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+.s-hub { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.s-pill { fill: #6b4fbb; } .s-pillt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+.s-reg { fill: #b04fa0; } .s-regt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+
+svg.app { border-radius: 10px; border: 1px solid var(--line); }
+.a-bg { fill: #16181d; } .a-panel { fill: #1c1f26; } .a-card { fill: #242831; } .a-hover { fill: #2c313c; }
+.a-edge { fill: none; stroke: #333844; stroke-width: 1; }
+.a-sel { fill: #4f8cff; fill-opacity: .22; stroke: #4f8cff; stroke-width: 1.2; }
+.a-acc { fill: #4f8cff; } .a-good { fill: #4cb87a; } .a-warn { fill: #e8a317; } .a-bad { fill: #e66767; }
+.a-s1 { fill: #3987e5; } .a-s2 { fill: #199e70; } .a-s3 { fill: #d95926; } .a-s4 { fill: #c98500; }
+.a-chat { fill: #6f9fd8; } .a-rpt { fill: #5fae8e; } .a-room { fill: #c9a35a; }
+.a-line { fill: none; stroke: #c98500; stroke-width: 1.6; } .a-grid { stroke: #333844; stroke-width: 1; }
+.a-t { fill: #e6e8ee; font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-b { fill: #e6e8ee; font: 600 13.5px "IBM Plex Sans Condensed", "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-big { fill: #e6e8ee; font: 600 20px "IBM Plex Sans Condensed", "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-h { fill: #e6e8ee; font: 600 19px "IBM Plex Sans Condensed", "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-m { fill: #8d94a5; font: 11.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-f { fill: #5a6070; font: 11px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tg { fill: #4cb87a; font: 11.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tw { fill: #e8a317; font: 11.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-ta { fill: #4f8cff; font: 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tc { fill: #6f9fd8; font: 600 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-tr { fill: #5fae8e; font: 600 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.a-dark { fill: #16181d; font: 600 12px "IBM Plex Sans", "Segoe UI", sans-serif; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  ol.steps > li { padding-left: 52px; }
+  ol.steps > li::before { left: 12px; }
+}
+
+</style>
+
+  <rect class="a-bg" x="0" y="0" width="1000" height="650"/>
+  
+  <rect x="16" y="14" width="26" height="26" rx="6" fill="#e2261e"/><path d="M29 19 v16 M21 27 h16" stroke="#fff" stroke-width="4.5"/>
+  <text class="a-b" x="50" y="33" style="font-size:17px">mcproxy</text><text class="a-m" x="120" y="33" style="font-size:13px">desk</text><text class="a-f" x="152" y="33">by FED1291</text>
+  <g class="a-edge"><rect x="220" y="13" width="84" height="28" rx="5"/><rect x="310" y="13" width="66" height="28" rx="5"/><rect x="382" y="13" width="78" height="28" rx="5"/><rect x="466" y="13" width="88" height="28" rx="5"/><rect x="560" y="13" width="56" height="28" rx="5"/><rect x="622" y="13" width="60" height="28" rx="5"/></g>
+  <g fill="none" stroke="#8d94a5" stroke-width="1.4">
+    <rect x="228" y="21" width="5" height="5"/><rect x="235" y="21" width="5" height="5"/><rect x="228" y="28" width="5" height="5"/><rect x="235" y="28" width="5" height="5"/>
+    <circle cx="322" cy="22" r="2.5"/><circle cx="317" cy="32" r="2.5"/><circle cx="327" cy="32" r="2.5"/><path d="M322 24.5 L317 29.5 M322 24.5 L327 29.5"/>
+    <path d="M390 21 l5 -2 l5 2 l5 -2 v13 l-5 2 l-5 -2 l-5 2 z M395 19 v13 M400 21 v13"/>
+    <path d="M568 27 h3 l2 -6 l3 12 l2 -6 h3"/>
+    <rect x="630" y="20" width="10" height="13" rx="1.5"/><path d="M633 24 h4 M633 27 h4 M633 30 h4"/>
+  </g>
+  <text class="a-m" x="474" y="32" style="font-size:14px">#</text>
+  <g class="a-t"><text x="244" y="32">Overview</text><text x="334" y="32">Mesh</text><text x="408" y="32">Explore</text><text x="486" y="32">Channels</text><text x="584" y="32">Live</text><text x="646" y="32">Logs</text></g>
+  <rect class="a-card" x="700" y="15" width="158" height="24" rx="12"/><circle class="a-good" cx="714" cy="27" r="4"/>
+  <text class="a-t" x="724" y="31">192.168.1.50:5080</text><text class="a-m" x="830" y="31">· live</text>
+  <text class="a-m" x="866" y="31">mcproxy · up 3 d 18 h</text>
+  <path d="M974 21 h14 M974 27 h14 M974 33 h14" stroke="#8d94a5" stroke-width="1.4"/><circle cx="984" cy="21" r="2" fill="#16181d" stroke="#8d94a5"/><circle cx="978" cy="27" r="2" fill="#16181d" stroke="#8d94a5"/><circle cx="984" cy="33" r="2" fill="#16181d" stroke="#8d94a5"/>
+  <path class="a-grid" d="M0 54.5 H 1000"/>
+  
+  <text class="a-h" x="24" y="94">Connection &amp; settings</text><text class="a-m" x="232" y="94">Which mcproxy this app shows, and how it looks.</text>
+  
+  <rect class="a-panel" x="24" y="112" width="500" height="340" rx="6"/><rect class="a-edge" x="24" y="112" width="500" height="340" rx="6"/>
+  <path d="M44 128 v5 M50 128 v5 M41 133 h12 v3 a6 6 0 0 1 -12 0 z M47 142 v4" stroke="#4f8cff" stroke-width="1.5" fill="none"/>
+  <text class="a-b" x="62" y="142">Proxy</text>
+  <rect x="436" y="128" width="72" height="20" rx="3" fill="#4cb87a" fill-opacity=".14" stroke="#4cb87a" stroke-opacity=".6"/><text class="a-tg" x="472" y="142" text-anchor="middle">Connected</text>
+  <text class="a-m" x="40" y="168">mcproxy · API v1 · radio connected (Ridge Base)</text>
+  <path class="a-grid" d="M40 184 H 508"/>
+  <text class="a-b" x="40" y="208">API address</text>
+  <rect class="a-bg" x="40" y="218" width="468" height="26" rx="4"/><rect class="a-edge" x="40" y="218" width="468" height="26" rx="4"/>
+  <text class="a-t" x="50" y="235">https://192.168.1.50:5080</text>
+  <text class="a-m" x="40" y="262">Usually https://&lt;Pi address&gt;:5080. Type http:// only if the proxy runs without TLS.</text>
+  <text class="a-b" x="40" y="292">Token (only if the proxy sets [api] token)</text>
+  <rect class="a-bg" x="40" y="302" width="468" height="26" rx="4"/><rect class="a-edge" x="40" y="302" width="468" height="26" rx="4"/>
+  <text class="a-t" x="50" y="320" style="letter-spacing:1px">••••••••••••••••••••••••••••••••••••••••••••</text>
+  <text class="a-m" x="40" y="346">Only when the proxy sets [api] token; leave empty otherwise.</text>
+  <text class="a-m" x="40" y="378">Recent</text>
+  <rect class="a-sel" x="84" y="364" width="166" height="20" rx="4"/><text class="a-t" x="92" y="378">https://192.168.1.50:5080</text>
+  <rect class="a-hover" x="258" y="364" width="148" height="20" rx="4"/><text class="a-t" x="266" y="378">https://10.0.0.20:5080</text>
+  <path class="a-grid" d="M40 400 H 508"/>
+  <rect class="a-hover" x="214" y="412" width="124" height="28" rx="4"/><text class="a-t" x="276" y="431" text-anchor="middle">Open the overview</text>
+  <rect class="a-hover" x="344" y="412" width="80" height="28" rx="4"/><text class="a-t" x="384" y="431" text-anchor="middle">Disconnect</text>
+  <rect class="a-acc" x="430" y="412" width="78" height="28" rx="4"/><text class="a-t" x="469" y="431" text-anchor="middle" style="fill:#fff">Connect</text>
+  
+  <rect class="a-panel" x="24" y="464" width="500" height="170" rx="6"/><rect class="a-edge" x="24" y="464" width="500" height="170" rx="6"/>
+  <circle cx="47" cy="488" r="7.5" fill="none" stroke="#4f8cff" stroke-width="1.5"/><path d="M43.5 488 l2.5 2.5 l4.5 -5" stroke="#4f8cff" stroke-width="1.5" fill="none"/>
+  <text class="a-b" x="62" y="493">Certificate</text>
+  <text class="a-m" x="40" y="518">Pinned the first time you trusted it. It should match what `mcproxy api`</text>
+  <text class="a-m" x="40" y="534">prints on the Pi.</text>
+  <path class="a-grid" d="M40 550 H 508"/>
+  <text class="a-m" x="40" y="572">Certificate pinned</text>
+  <rect class="a-bg" x="40" y="582" width="468" height="42" rx="4"/><rect class="a-edge" x="40" y="582" width="468" height="42" rx="4"/>
+  <rect x="49" y="592" width="9" height="10" rx="1.5" fill="none" stroke="#8d94a5" stroke-width="1.3"/><rect x="53" y="596" width="9" height="10" rx="1.5" fill="#16181d" stroke="#8d94a5" stroke-width="1.3"/>
+  <text class="a-t" x="72" y="599" style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">3F:9A:1C:7E:52:D0:8B:44:E1:06:A9:3D:5C:72:BF:18:</text>
+  <text class="a-t" x="72" y="616" style="font-family:'IBM Plex Mono',monospace;font-size:11.5px">90:2A:C4:61:7D:E5:0F:B3:28:94:6E:A1:D7:5B:C2:71</text>
+  
+  <rect class="a-panel" x="536" y="112" width="440" height="388" rx="6"/><rect class="a-edge" x="536" y="112" width="440" height="388" rx="6"/>
+  <path d="M552 131 h16 M552 138 h16 M552 145 h16" stroke="#4f8cff" stroke-width="1.4"/><path d="M563 128 v6 M557 135 v6 M563 142 v6" stroke="#4f8cff" stroke-width="1.4"/>
+  <text class="a-b" x="576" y="142">This app</text>
+  <path class="a-grid" d="M552 160 H 960"/>
+  <text class="a-b" x="552" y="192">Language</text>
+  <g class="a-m"><text x="552" y="214">English and French are in</text><text x="552" y="230">the program. Other</text><text x="552" y="246">languages: one file each,</text><text x="552" y="262">&lt;folder&gt;\locales\&lt;code&gt;\</text><text x="552" y="278">desk.ftl. The model to</text><text x="552" y="294">translate, written again at</text><text x="552" y="310">each start with this</text><text x="552" y="326">version's texts and never</text><text x="552" y="342">read back:</text><text x="552" y="358">&lt;folder&gt;\locales\en\</text><text x="552" y="374">desk.ftl</text></g>
+  <rect class="a-bg" x="740" y="266" width="220" height="26" rx="4"/><rect class="a-edge" x="740" y="266" width="220" height="26" rx="4"/>
+  <path d="M754.5 285 l1.2 -3.4 a6 6 0 1 1 2.4 2.2 z" fill="none" stroke="#8d94a5" stroke-width="1.3"/>
+  <text class="a-t" x="774" y="284">System (en-US)</text><path d="M940 277 l4 5 l4 -5 z" fill="#e6e8ee"/>
+  <rect class="a-hover" x="552" y="388" width="130" height="24" rx="4"/><path d="M561 400 h10 M566 395 v10" stroke="#8d94a5" stroke-width="1.4"/>
+  <text class="a-t" x="578" y="404">Add a language</text>
+  <path class="a-grid" d="M552 424 H 960"/>
+  <text class="a-b" x="552" y="450">Show API fields</text>
+  <rect class="a-hover" x="928" y="456" width="32" height="16" rx="8"/><circle cx="937" cy="464" r="6" fill="#e6e8ee"/>
+  <text class="a-m" x="552" y="470">Every number shows the API field it comes from</text>
+  <text class="a-m" x="552" y="486">(handy when writing your own client).</text>
+  
+  <rect class="a-panel" x="536" y="512" width="440" height="122" rx="6"/><rect class="a-edge" x="536" y="512" width="440" height="122" rx="6"/>
+  <circle cx="560" cy="536" r="8" fill="none" stroke="#4f8cff" stroke-width="1.5"/><text x="560" y="540.5" text-anchor="middle" style="fill:#4f8cff;font:600 11px 'IBM Plex Sans',sans-serif">?</text>
+  <text class="a-b" x="576" y="541">About</text>
+  <path class="a-grid" d="M552 558 H 960"/>
+  <text class="a-m" x="552" y="588">Author</text><text class="a-t" x="652" y="588">by FED1291</text>
+  <text class="a-m" x="552" y="616">Settings file</text><text class="a-t" x="652" y="616">&lt;folder&gt;\mcproxy-desk.toml</text>
+</svg>

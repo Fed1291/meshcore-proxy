@@ -1,0 +1,257 @@
+<svg class="con" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 462" role="img" aria-label="Chat tab: the chats on the left (channels with their region, then direct messages), the messages of the selected channel on the right with id size, hops, sender, text and region, and the box to write in">
+<style>
+
+
+:root {
+  --bg: #f7f7f4; --panel: #ffffff; --ink: #1d1f21; --dim: #6b6f75; --line: #dcdcd6;
+  --accent: #b7791f; --accent-soft: #fbf1dc; --cyan: #127a8a; --cyan-soft: #e1f2f4;
+  --good: #2f8a3e; --good-soft: #e5f3e7; --warn: #b7791f; --bad: #c0392b; --bad-soft: #fbe6e3;
+  --violet: #6b4fbb; --violet-soft: #eee9fa;
+  --term: #15171a; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #3a3f45;
+  --code-bg: #efefea;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+    --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+    --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+    --violet: #a993f0; --violet-soft: #231d36;
+    --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+    --code-bg: #24272b;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+a { color: var(--cyan); }
+code, kbd, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: .92em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+kbd { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 5px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); white-space: nowrap; }
+main { max-width: 1000px; margin: 0 auto; padding: 0 16px 64px; }
+
+
+header.top { padding: 24px 0 14px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); margin: 0; }
+nav.tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; scrollbar-width: thin; }
+nav.tabs button { font: inherit; font-size: .95rem; color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: 8px 14px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button .n { display: inline-block; width: 1.4em; color: var(--accent); font-weight: 700; }
+section.panel { padding-top: 26px; }
+.js section.panel:not(.on) { display: none; }
+
+
+h2 { font-size: 1.5rem; margin: 0 0 4px; }
+h3 { font-size: 1.12rem; margin: 30px 0 8px; padding-left: 10px; border-left: 4px solid var(--accent); }
+h4 { font-size: 1rem; margin: 20px 0 6px; }
+p { margin: 8px 0; }
+.sub { color: var(--dim); margin: 0 0 14px; }
+.good { color: var(--good); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+
+
+.note, .tip, .alert { border-left: 4px solid; padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+.note { background: var(--accent-soft); border-color: var(--accent); }
+.tip { background: var(--good-soft); border-color: var(--good); }
+.alert { background: var(--bad-soft); border-color: var(--bad); }
+.note b:first-child, .tip b:first-child, .alert b:first-child { margin-right: 4px; }
+
+
+.where { display: inline-block; font: 600 .72rem/1 "IBM Plex Sans", "Segoe UI", sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 999px; vertical-align: middle; }
+.where.pi { background: var(--cyan-soft); color: var(--cyan); }
+.where.pc { background: var(--accent-soft); color: var(--accent); }
+.where.phone { background: var(--violet-soft); color: var(--violet); }
+
+
+.cmd { position: relative; margin: 8px 0; }
+.cmd pre { background: var(--term); color: var(--term-ink); padding: 12px 70px 12px 14px; border-radius: 8px;
+  overflow-x: auto; margin: 0; line-height: 1.5; }
+.cmd pre .c { color: var(--term-dim); }
+.cmd button.copy { position: absolute; top: 8px; right: 8px; font: 600 .75rem "IBM Plex Sans", sans-serif;
+  background: #2a2e33; color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+.cmd button.copy:hover { border-color: var(--accent); }
+.cmd button.copy.done { color: #111; background: var(--good); border-color: var(--good); }
+
+
+ol.steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+ol.steps > li { counter-increment: step; position: relative; padding: 14px 16px 14px 60px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); color: #111; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps > li > h4 { margin: 3px 0 6px; }
+ol.steps > li > h4 .where { margin-left: 6px; }
+
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card b { display: block; margin-bottom: 4px; }
+.card p { margin: 0; color: var(--dim); font-size: .94rem; }
+
+
+.wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--code-bg); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.w { white-space: normal; }
+
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips a { font-family: "IBM Plex Mono", monospace; font-size: .85rem; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); padding: 3px 10px; border-radius: 4px; }
+.chips a:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+figure { margin: 16px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--dim); font-size: .88rem; margin-top: 6px; }
+footer { margin-top: 56px; color: var(--dim); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+
+.s-term { fill: var(--term); }
+.s-box { fill: none; stroke: var(--term-line); stroke-width: 1.5; }
+.s-t { fill: var(--term-ink); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-td { fill: var(--term-dim); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-ta { fill: var(--accent); font: 600 13px "IBM Plex Mono", Consolas, monospace; }
+.s-tc { fill: var(--cyan); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-tab { fill: var(--accent); }
+.s-tabt { fill: #111; font: 700 12px "IBM Plex Mono", Consolas, monospace; }
+.s-good { fill: var(--good); } .s-warn { fill: var(--warn); } .s-bad { fill: var(--bad); }
+
+.s-goodt { fill: var(--good); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-warnt { fill: var(--warn); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-badt { fill: var(--bad); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-lc { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.s-ink { fill: var(--ink); font: 600 14px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-dim { fill: var(--dim); font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-line { stroke: var(--dim); stroke-width: 2; fill: none; }
+.s-acc { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.s-node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+.s-hub { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.s-pill { fill: #6b4fbb; } .s-pillt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+.s-reg { fill: #b04fa0; } .s-regt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+
+svg.con { border-radius: 10px; border: 1px solid var(--line); }
+.c-bg { fill: #0c0c0c; } .c-box { fill: none; stroke: #8a8a8a; stroke-width: 1; }
+.c-t, .c-b, .c-d, .c-y, .c-h, .c-g, .c-r, .c-c, .c-lb, .c-m, .c-lm, .c-k, .c-w, .c-kc, .c-kr, .c-kp, .c-ks {
+  font: 12px "Cascadia Mono", Consolas, "IBM Plex Mono", ui-monospace, monospace; white-space: pre; }
+.c-t { fill: #cccccc; } .c-b { fill: #f2f2f2; font-weight: 700; } .c-d { fill: #8a8a8a; }
+.c-y { fill: #c19c00; } .c-h { fill: #c19c00; font-weight: 700; } .c-g { fill: #16c60c; } .c-r { fill: #e74856; }
+.c-c { fill: #3a96dd; } .c-lb { fill: #3b78ff; font-weight: 700; } .c-m { fill: #c33ec3; } .c-lm { fill: #d670d6; font-weight: 700; }
+.c-k { fill: #0c0c0c; font-weight: 700; } .c-w { fill: #ffffff; font-weight: 700; }
+.c-kc { fill: #87af87; } .c-kr { fill: #87afd7; } .c-kp { fill: #af87af; } .c-ks { fill: #d7af87; }
+.c-fy { fill: #c19c00; } .c-fsel { fill: #cccccc; } .c-fb { fill: #0037da; } .c-fg { fill: #13a10e; } .c-fgr { fill: #767676; }
+.c-fm { fill: #c33ec3; } .c-fr { fill: #e74856; } .c-dc { fill: #3a96dd; } .c-dg { fill: #16c60c; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  ol.steps > li { padding-left: 52px; }
+  ol.steps > li::before { left: 12px; }
+}
+
+</style>
+
+  <rect class="c-bg" x="0" y="0" width="960" height="462"/>
+  <text class="c-h" x="10" y="20">mcproxy</text><text class="c-d" x="66" y="20">by FED1291</text>
+  <text class="c-t" x="150" y="20">1 Status</text><text class="c-t" x="218" y="20">2 Nodes</text><text class="c-t" x="280" y="20">3 Mesh</text>
+  <text class="c-t" x="336" y="20">4 History</text><text class="c-t" x="410" y="20">5 Logs</text>
+  <rect class="c-fy" x="461" y="7" width="50" height="17"/><text class="c-k" x="466" y="20">6 Chat</text>
+  
+  <rect class="c-box" x="6.5" y="34.5" width="210" height="380"/>
+  <rect class="c-bg" x="14" y="28" width="50" height="14"/><text class="c-b" x="16" y="38"> Chats </text>
+  <text class="c-d" x="12" y="56">channels</text>
+  <rect class="c-fy" x="10" y="61" width="203" height="16"/><text class="c-k" x="14" y="73">#hiking</text><text class="c-k" x="150" y="73">#eu</text><text class="c-k" x="196" y="73">5m</text>
+  <text class="c-t" x="14" y="90">Public</text><rect class="c-fm" x="148" y="78" width="42" height="16"/><text class="c-k" x="150" y="90">#eu</text><text class="c-t" x="190" y="90">21m</text>
+  <text class="c-t" x="14" y="107">#weather</text><rect class="c-fm" x="148" y="95" width="42" height="16"/><text class="c-k" x="150" y="107">#eu</text><text class="c-t" x="196" y="107">1h</text>
+  <text class="c-t" x="14" y="124">#help</text><text class="c-t" x="196" y="124">3h</text>
+  <text class="c-t" x="14" y="141">#bots</text><rect class="c-fm" x="142" y="129" width="48" height="16"/><text class="c-k" x="144" y="141">#eu-se</text><text class="c-t" x="196" y="141">2d</text>
+  <text class="c-t" x="14" y="158">Ops</text><text class="c-t" x="196" y="158">9d</text>
+  <text class="c-d" x="12" y="192">direct</text>
+  <text class="c-t" x="14" y="209">Mara 🐾</text><text class="c-t" x="196" y="209">1h</text>
+  <text class="c-t" x="14" y="226">Valley Node 🚲</text><text class="c-t" x="196" y="226">4h</text>
+  <text class="c-t" x="14" y="243">KX-Mobile 🚗</text><text class="c-t" x="196" y="243">2d</text>
+  <text class="c-t" x="14" y="260">Lakeside Room 🏠</text><text class="c-t" x="196" y="260">6d</text>
+  <text class="c-t" x="14" y="277">Old Mill 🌻</text><text class="c-t" x="190" y="277">12d</text>
+  
+  <rect class="c-box" x="222.5" y="34.5" width="731" height="336"/>
+  <rect class="c-bg" x="230" y="28" width="236" height="14"/><text class="c-h" x="232" y="38"> #hiking · 2140 messages · </text>
+  <rect class="c-fm" x="416" y="28" width="42" height="14"/><text class="c-k" x="418" y="38">#eu</text>
+  <g class="c-t">
+    <text x="230" y="56">17:58</text><text x="230" y="73">18:02</text><text x="230" y="90">18:05</text><text x="230" y="107">18:11</text><text x="230" y="124">18:11</text>
+    <text x="230" y="141">18:20</text><text x="230" y="158">18:20</text><text x="230" y="175">18:31</text><text x="230" y="192">18:34</text><text x="230" y="209">18:40</text>
+    <text x="230" y="226">18:52</text><text x="230" y="243">19:05</text><text x="230" y="260">19:05</text><text x="230" y="311">19:12</text><text x="230" y="328">19:21</text>
+  </g>
+  
+  <g class="c-fb">
+    <rect x="268" y="44" width="22" height="16"/><rect x="268" y="61" width="22" height="16"/><rect x="268" y="95" width="22" height="16"/>
+    <rect x="268" y="129" width="22" height="16"/><rect x="268" y="163" width="22" height="16"/><rect x="268" y="197" width="22" height="16"/>
+    <rect x="268" y="231" width="22" height="16"/><rect x="268" y="299" width="22" height="16"/><rect x="268" y="316" width="22" height="16"/>
+  </g>
+  <g class="c-fg"><rect x="268" y="78" width="22" height="16"/><rect x="268" y="112" width="22" height="16"/><rect x="268" y="146" width="22" height="16"/><rect x="268" y="180" width="22" height="16"/><rect x="268" y="248" width="22" height="16"/></g>
+  <rect class="c-fgr" x="268" y="214" width="22" height="16"/>
+  <g class="c-w"><text x="272" y="56">2B</text><text x="272" y="73">2B</text><text x="272" y="107">2B</text><text x="272" y="141">2B</text><text x="272" y="175">2B</text><text x="272" y="209">2B</text><text x="272" y="243">2B</text><text x="272" y="311">2B</text><text x="272" y="328">2B</text><text x="272" y="226">1B</text></g>
+  <g class="c-k"><text x="272" y="90">3B</text><text x="272" y="124">3B</text><text x="272" y="158">3B</text><text x="272" y="192">3B</text><text x="272" y="260">3B</text></g>
+  
+  <g text-anchor="end">
+    <text class="c-y" x="314" y="56">3</text><text class="c-y" x="314" y="73">5</text><text class="c-y" x="314" y="90">4</text><text class="c-g" x="314" y="107">2</text><text class="c-y" x="314" y="124">4</text>
+    <text class="c-r" x="314" y="141">7</text><text class="c-y" x="314" y="158">6</text><text class="c-r" x="314" y="175">8</text><text class="c-g" x="314" y="192">»4</text><text class="c-y" x="314" y="209">3</text>
+    <text class="c-g" x="314" y="226">1</text><text class="c-y" x="314" y="243">5</text><text class="c-y" x="314" y="260">6</text><text class="c-y" x="314" y="311">4</text><text class="c-r" x="314" y="328">9</text>
+  </g>
+  
+  <text class="c-b" x="322" y="56" style="fill:#61d6d6">Valley Node 🚲</text>
+  <text class="c-b" x="322" y="73" style="fill:#3b78ff">Pine Hill Hiker</text>
+  <text class="c-b" x="322" y="90" style="fill:#e74856">EchoBot 🤖</text>
+  <text class="c-b" x="322" y="107" style="fill:#16c60c">Mara 🐾</text>
+  <text class="c-b" x="322" y="124" style="fill:#e74856">EchoBot 🤖</text>
+  <text class="c-b" x="322" y="141" style="fill:#d670d6">KX-Mobile 🚗</text>
+  <text class="c-b" x="322" y="158" style="fill:#3a96dd">PathBot 🛰</text>
+  <text class="c-b" x="322" y="175" style="fill:#c33ec3">Lakeside Joe</text>
+  <text class="c-h" x="322" y="192">↳ me</text>
+  <text class="c-b" x="322" y="209" style="fill:#61d6d6">Valley Node 🚲</text>
+  <text class="c-b" x="322" y="226" style="fill:#13a10e">Old Mill 🌻</text>
+  <text class="c-b" x="322" y="243" style="fill:#3b78ff">Pine Hill Hiker</text>
+  <text class="c-b" x="322" y="260" style="fill:#3a96dd">PathBot 🛰</text>
+  <text class="c-b" x="322" y="311" style="fill:#16c60c">Mara 🐾</text>
+  <text class="c-b" x="322" y="328" style="fill:#d670d6">Sunny Bot ☀</text>
+  
+  <g class="c-t">
+    <text x="452" y="56">anyone up on the ridge tonight?</text>
+    <text x="452" y="73">yes, from 9 pm at the north hut</text>
+    <text x="452" y="90">🤖 Copy, Pine Hill Hiker! 5 hops @ 18:02</text>
+    <text x="452" y="107">ping</text>
+    <text x="452" y="124">🤖 Copy, Mara! 2 hops @ 18:11</text>
+    <text x="452" y="141">Path</text>
+    <text x="452" y="158">@[KX-Mobile]: Path: a3f2 → 7c10 → 4e07 - 3 hops</text>
+    <text x="452" y="175">test from the lake, anyone?</text>
+    <text x="452" y="192">heard you fine, see you at the hut 👍</text>
+    <text x="452" y="209">@[Ridge Base ⛰] 👍</text>
+    <text x="452" y="226">anyone with a spare LoRa antenna?</text>
+    <text x="452" y="243">Path</text>
+    <text x="452" y="260">@[Pine Hill Hiker]</text>
+    <text x="452" y="277">a3f2: Hilltop Rptr</text>
+    <text x="452" y="294">7c10: Pine Hill RPT 🌲</text>
+    <text x="452" y="311">on my way 🚶</text>
+    <text x="452" y="328">☀ 18 °C, light wind, clear sky</text>
+  </g>
+  
+  <g class="c-m" text-anchor="end">
+    <text x="944" y="56">#eu</text><text x="944" y="73">#eu</text><text x="944" y="90">#eu</text><text x="944" y="107">#eu</text><text x="944" y="124">#eu</text>
+    <text x="944" y="141">#?</text><text x="944" y="158">#eu</text><text x="944" y="209">#eu</text><text x="944" y="226">#eu</text><text x="944" y="243">#eu</text>
+    <text x="944" y="294">#eu</text><text x="944" y="311">#eu</text><text x="944" y="328">#eu-se</text>
+  </g>
+  
+  <rect class="c-box" x="222.5" y="376.5" width="731" height="38"/>
+  <rect class="c-bg" x="230" y="370" width="74" height="14"/><text class="c-d" x="232" y="380"> to #hiking </text>
+  <text class="c-d" x="232" y="402">› press i to write a message</text>
+  
+  <g class="c-b"><text x="10" y="434">q</text><text x="68" y="434">Tab</text><text x="150" y="434">&lt; &gt;</text><text x="208" y="434">i</text><text x="258" y="434">↑↓</text>
+    <text x="320" y="434">Home/End</text><text x="482" y="434">g</text><text x="594" y="434">n</text><text x="690" y="434">x</text><text x="806" y="434">m</text></g>
+  <g class="c-d"><text x="24" y="434">quit</text><text x="94" y="434">switch</text><text x="176" y="434">chat</text><text x="222" y="434">write</text><text x="276" y="434">scroll</text>
+    <text x="378" y="434">oldest / newest</text><text x="496" y="434">channel region</text><text x="608" y="434">new channel</text><text x="704" y="434">remove channel</text><text x="820" y="434">send again</text>
+    <text x="10" y="451">show: d details · b id size · r regions · s delivery</text><text x="380" y="451">updated 19:42:10</text></g>
+</svg>

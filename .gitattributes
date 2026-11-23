@@ -1,0 +1,3 @@
+*.html linguist-documentation
+images/*.svg linguist-language=Rust
+images/android-*.svg linguist-language=Kotlin

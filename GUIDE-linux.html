@@ -1,0 +1,993 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>mcproxy guide</title>
+<style>
+:root {
+  --bg: #f7f7f4; --panel: #ffffff; --ink: #1d1f21; --dim: #6b6f75; --line: #dcdcd6;
+  --accent: #b7791f; --accent-soft: #fbf1dc; --cyan: #127a8a; --cyan-soft: #e1f2f4;
+  --good: #2f8a3e; --good-soft: #e5f3e7; --warn: #b7791f; --bad: #c0392b; --bad-soft: #fbe6e3;
+  --violet: #6b4fbb; --violet-soft: #eee9fa;
+  --term: #15171a; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #3a3f45;
+  --code-bg: #efefea;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+    --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+    --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+    --violet: #a993f0; --violet-soft: #231d36;
+    --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+    --code-bg: #24272b;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+  --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+  --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+  --violet: #a993f0; --violet-soft: #231d36;
+  --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+  --code-bg: #24272b;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+a { color: var(--cyan); }
+code, kbd, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: .92em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+kbd { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 5px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); white-space: nowrap; }
+main { max-width: 1000px; margin: 0 auto; padding: 0 16px 64px; }
+
+header.top { padding: 24px 0 14px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); margin: 0; }
+.lang { float: right; margin: 0 0 0 16px; color: var(--dim); font-size: .95rem; }
+nav.tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; scrollbar-width: none; }
+nav.tabs::-webkit-scrollbar { display: none; }
+@media (min-width: 601px) { nav.tabs { flex-wrap: wrap; } }
+@media (min-width: 601px) and (max-width: 960px) { html { scroll-padding-top: 116px; } }
+nav.tabs button { font: inherit; font-size: .95rem; color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: 8px 10px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button .n { display: inline-block; width: 1.4em; color: var(--accent); font-weight: 700; }
+section.panel { padding-top: 26px; }
+.js section.panel:not(.on) { display: none; }
+
+h2 { font-size: 1.5rem; margin: 0 0 4px; }
+h3 { font-size: 1.12rem; margin: 30px 0 8px; padding-left: 10px; border-left: 4px solid var(--accent); }
+h4 { font-size: 1rem; margin: 20px 0 6px; }
+p { margin: 8px 0; }
+.sub { color: var(--dim); margin: 0 0 14px; }
+.good { color: var(--good); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+
+.note, .tip, .alert { border-left: 4px solid; padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+.note { background: var(--accent-soft); border-color: var(--accent); }
+.tip { background: var(--good-soft); border-color: var(--good); }
+.alert { background: var(--bad-soft); border-color: var(--bad); }
+.note b:first-child, .tip b:first-child, .alert b:first-child { margin-right: 4px; }
+
+.where { display: inline-block; font: 600 .72rem/1 "IBM Plex Sans", "Segoe UI", sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 999px; vertical-align: middle; }
+.where.pi { background: var(--cyan-soft); color: var(--cyan); }
+.where.pc { background: var(--accent-soft); color: var(--accent); }
+.where.phone { background: var(--violet-soft); color: var(--violet); }
+
+.cmd { position: relative; margin: 8px 0; }
+.cmd pre { background: var(--term); color: var(--term-ink); padding: 12px 70px 12px 14px; border-radius: 8px;
+  overflow-x: auto; margin: 0; line-height: 1.5; }
+.cmd pre .c { color: var(--term-dim); }
+.cmd button.copy { position: absolute; top: 8px; right: 8px; font: 600 .75rem "IBM Plex Sans", sans-serif;
+  background: #2a2e33; color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+.cmd button.copy:hover { border-color: var(--accent); }
+.cmd button.copy.done { color: #111; background: var(--good); border-color: var(--good); }
+
+ol.steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+ol.steps > li { counter-increment: step; position: relative; padding: 14px 16px 14px 60px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); color: #111; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps > li > h4 { margin: 3px 0 6px; }
+ol.steps > li > h4 .where { margin-left: 6px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card b { display: block; margin-bottom: 4px; }
+.card p { margin: 0; color: var(--dim); font-size: .94rem; }
+
+.wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--code-bg); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.w { white-space: normal; }
+#trouble td:first-child { white-space: normal; min-width: 180px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips a { font-family: "IBM Plex Mono", monospace; font-size: .85rem; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); padding: 3px 10px; border-radius: 4px; }
+.chips a:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+figure { margin: 16px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--dim); font-size: .88rem; margin-top: 6px; }
+footer { margin-top: 56px; color: var(--dim); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+.s-term { fill: var(--term); }
+.s-box { fill: none; stroke: var(--term-line); stroke-width: 1.5; }
+.s-t { fill: var(--term-ink); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-td { fill: var(--term-dim); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-ta { fill: var(--accent); font: 600 13px "IBM Plex Mono", Consolas, monospace; }
+.s-tc { fill: var(--cyan); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-tab { fill: var(--accent); }
+.s-tabt { fill: #111; font: 700 12px "IBM Plex Mono", Consolas, monospace; }
+.s-good { fill: var(--good); } .s-warn { fill: var(--warn); } .s-bad { fill: var(--bad); }
+.s-goodt { fill: var(--good); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-warnt { fill: var(--warn); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-badt { fill: var(--bad); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-lc { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.s-ink { fill: var(--ink); font: 600 14px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-dim { fill: var(--dim); font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-line { stroke: var(--dim); stroke-width: 2; fill: none; }
+.s-acc { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.s-node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+.s-hub { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.s-pill { fill: #6b4fbb; } .s-pillt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+.s-reg { fill: #b04fa0; } .s-regt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+figure.con svg { border-radius: 10px; border: 1px solid var(--line); }
+.c-bg { fill: #0c0c0c; } .c-box { fill: none; stroke: #8a8a8a; stroke-width: 1; }
+.c-t, .c-b, .c-d, .c-y, .c-h, .c-g, .c-r, .c-c, .c-lb, .c-m, .c-lm, .c-k, .c-w, .c-kc, .c-kr, .c-kp, .c-ks {
+  font: 12px "Cascadia Mono", Consolas, "IBM Plex Mono", ui-monospace, monospace; white-space: pre; }
+.c-t { fill: #cccccc; } .c-b { fill: #f2f2f2; font-weight: 700; } .c-d { fill: #8a8a8a; }
+.c-y { fill: #c19c00; } .c-h { fill: #c19c00; font-weight: 700; } .c-g { fill: #16c60c; } .c-r { fill: #e74856; }
+.c-c { fill: #3a96dd; } .c-lb { fill: #3b78ff; font-weight: 700; } .c-m { fill: #c33ec3; } .c-lm { fill: #d670d6; font-weight: 700; }
+.c-k { fill: #0c0c0c; font-weight: 700; } .c-w { fill: #ffffff; font-weight: 700; }
+.c-kc { fill: #87af87; } .c-kr { fill: #87afd7; } .c-kp { fill: #af87af; } .c-ks { fill: #d7af87; }
+.c-fy { fill: #c19c00; } .c-fsel { fill: #cccccc; } .c-fb { fill: #0037da; } .c-fg { fill: #13a10e; } .c-fgr { fill: #767676; }
+.c-fm { fill: #c33ec3; } .c-fr { fill: #e74856; } .c-dc { fill: #3a96dd; } .c-dg { fill: #16c60c; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  ol.steps > li { padding-left: 52px; }
+  ol.steps > li::before { left: 12px; }
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js');</script>
+<main>
+
+<header class="top">
+  <p class="lang">English · <a href="GUIDE-linux.fr.html" lang="fr">Français</a></p>
+  <h1>mc<span>proxy</span> guide</h1>
+  <p class="lead">Share one MeshCore companion radio with every app on your network, and keep a history of everything it hears. The proxy runs on a small Linux machine next to the radio.</p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Guide sections">
+  <button role="tab" data-tab="overview"><span class="n">1</span>Overview</button>
+  <button role="tab" data-tab="install"><span class="n">2</span>Install</button>
+  <button role="tab" data-tab="commands"><span class="n">3</span>Commands</button>
+  <button role="tab" data-tab="console"><span class="n">4</span>Console</button>
+  <button role="tab" data-tab="api"><span class="n">5</span>Apps &amp; API</button>
+  <button role="tab" data-tab="update"><span class="n">6</span>Update</button>
+  <button role="tab" data-tab="remove"><span class="n">7</span>Remove</button>
+  <button role="tab" data-tab="trouble"><span class="n">8</span>Problems</button>
+</nav>
+
+<section class="panel" id="overview" role="tabpanel">
+<h2>Overview</h2>
+
+<p>A MeshCore companion radio talks to one app at a time, over Bluetooth, USB or the network (TCP). mcproxy runs on a small Linux
+machine next to the radio. It holds that one connection and lets any number of MeshCore apps connect to it over
+your network (TCP port <code>5000</code>), as if each had the radio to itself.</p>
+<div class="note"><b>Any MeshCore app connects on port 5000</b> The official MeshCore apps, meshcore-cli, the Home Assistant integration, and anything else that speaks the MeshCore companion protocol over TCP connect to the proxy machine's IP address on port <code>5000</code>, exactly as they would connect to a Wi-Fi companion on the network. Nothing to install in the app, no special mode. Several apps can be connected at once. <code>mcproxy status</code> (the console's Status tab) shows the address to use; the port is set by <code>[server] listen</code>. The data API on port <code>5080</code> is separate: it serves the apps built around the proxy (mcproxy desk, mcproxy for Android), web pages and scripts.</div>
+<div class="tip"><b>mcproxy is the main program</b> and works on its own: its console shows the radio, the nodes, the mesh, the history and the logs, and has a chat to read and write messages; the <code>mcproxy</code> commands do the rest. The mcproxy desk and Android apps are optional extras that show the same data in a window or on a phone.</div>
+
+<figure>
+<svg viewBox="0 0 900 340" role="img" aria-label="The companion radio is connected by Bluetooth, USB or TCP to mcproxy. mcproxy serves the regular MeshCore apps on TCP port 5000, and the apps built around the proxy, web pages and scripts on the data API, HTTPS port 5080">
+  <rect class="s-node" x="20" y="130" width="150" height="80" rx="10"/>
+  <text class="s-ink" x="95" y="165" text-anchor="middle">Companion</text>
+  <text class="s-dim" x="95" y="185" text-anchor="middle">MeshCore radio</text>
+  <path class="s-line" d="M170 157 H 320" stroke-dasharray="6 5"/>
+  <text class="s-dim" x="245" y="147" text-anchor="middle">Bluetooth</text>
+  <path class="s-line" d="M170 185 H 320"/>
+  <text class="s-dim" x="245" y="205" text-anchor="middle">or USB cable, or TCP</text>
+  <rect class="s-hub" x="320" y="55" width="250" height="230" rx="12"/>
+  <text class="s-ink" x="445" y="86" text-anchor="middle">mcproxy</text>
+  <text class="s-dim" x="445" y="106" text-anchor="middle">a small Linux machine</text>
+  <rect class="s-node" x="340" y="122" width="210" height="30" rx="6"/>
+  <text class="s-dim" x="445" y="142" text-anchor="middle">relays every command</text>
+  <rect class="s-node" x="340" y="160" width="210" height="30" rx="6"/>
+  <text class="s-dim" x="445" y="180" text-anchor="middle">records: messages, nodes, mesh</text>
+  <rect class="s-node" x="340" y="198" width="210" height="30" rx="6"/>
+  <text class="s-dim" x="445" y="218" text-anchor="middle">console and commands: works alone</text>
+  <path class="s-acc" d="M570 110 C 630 110, 630 60, 690 60"/>
+  <path class="s-acc" d="M570 110 C 630 110, 630 128, 690 128"/>
+  <text class="s-ink" x="636" y="34" text-anchor="middle" style="font-size:12.5px">TCP 5000</text>
+  <text class="s-dim" x="636" y="48" text-anchor="middle" style="font-size:11px">MeshCore protocol</text>
+  <rect class="s-node" x="690" y="38" width="195" height="44" rx="8"/>
+  <text class="s-ink" x="787" y="65" text-anchor="middle">MeshCore apps</text>
+  <rect class="s-node" x="690" y="106" width="195" height="44" rx="8"/>
+  <text class="s-ink" x="787" y="133" text-anchor="middle">Home Assistant, CLI…</text>
+  <path class="s-lc" d="M570 240 C 630 240, 630 214, 690 214"/>
+  <path class="s-lc" d="M570 240 C 630 240, 630 282, 690 282"/>
+  <text class="s-ink" x="636" y="320" text-anchor="middle" style="font-size:12.5px">HTTPS 5080</text>
+  <text class="s-dim" x="636" y="334" text-anchor="middle" style="font-size:11px">data API</text>
+  <rect class="s-node" x="690" y="192" width="195" height="44" rx="8"/>
+  <text class="s-ink" x="787" y="219" text-anchor="middle">mcproxy desk / Android</text>
+  <rect class="s-node" x="690" y="260" width="195" height="44" rx="8"/>
+  <text class="s-ink" x="787" y="287" text-anchor="middle">web pages, scripts</text>
+</svg>
+<figcaption>Two doors: the regular MeshCore apps use TCP port 5000, as with a Wi-Fi companion; the apps built around the proxy, web pages and scripts use the data API on HTTPS port 5080. The radio keeps its own settings; mcproxy relays every command and stores a history the radio cannot hold.</figcaption>
+</figure>
+
+<h3>Features</h3>
+<div class="cards">
+  <div class="card"><b>Many apps at once</b><p>Phone, tablet and desktop connected together; each sees every message.</p></div>
+  <div class="card"><b>Message history</b><p>Stored encrypted: an app that was offline gets what it missed when it reconnects.</p></div>
+  <div class="card"><b>Mesh observer</b><p>Every packet heard is recorded: who is out there, through which repeater, at what signal, in which region.</p></div>
+  <div class="card"><b>Auto-reconnect</b><p>The radio link comes back by itself after a drop, unplug or reboot.</p></div>
+  <div class="card"><b>Live console</b><p>A full-screen terminal view: radio, nodes, mesh, history, logs and chat.</p></div>
+  <div class="card"><b>Data API</b><p>HTTPS + live events for the mcproxy desk and Android apps, web pages and scripts.</p></div>
+</div>
+
+<h3>Requirements</h3>
+<div class="wrap"><table>
+<tr><th>Item</th><th>Details</th></tr>
+<tr><td>Machine</td><td class="w">64-bit Linux with systemd. The <code>linux-arm64</code> download: Raspberry Pi 3 / 4 / 5 or Zero 2 with a 64-bit OS, or another ARM64 board. The <code>linux-x64</code> download: an x86 PC, mini PC or server (Intel / AMD).</td></tr>
+<tr><td>Radio</td><td class="w">A MeshCore companion: the <b>Bluetooth</b> companion firmware, the <b>USB</b> companion firmware on a USB cable, or a companion firmware with <b>Wi-Fi or Ethernet</b> on your network (TCP).</td></tr>
+<tr><td>Bluetooth</td><td class="w">Only for a Bluetooth companion: the built-in Bluetooth or a USB dongle (BlueZ, standard on most Linux systems).</td></tr>
+<tr><td>Files</td><td class="w">A folder with <code>mcproxy</code> (the program), <code>deploy/</code> (install script, service file), this guide and <code>API.md</code> (the data API reference).</td></tr>
+</table></div>
+
+</section>
+
+<section class="panel" id="install" role="tabpanel">
+<h2>Install</h2>
+<p class="sub">Each step can be reverted; see <a href="#remove">Remove</a>.</p>
+
+<ol class="steps">
+<li>
+  <h4>Copy the files to the machine</h4>
+  <p>Put the folder (<code>mcproxy</code>, <code>deploy/</code>, <code>GUIDE.html</code>) in your home on the machine, e.g. <code>~/mcproxy</code>, any way you like. From another computer, for example:</p>
+  <div class="cmd"><pre>scp -r mcproxy deploy GUIDE.html user@192.168.1.50:~/mcproxy/</pre></div>
+  <p>The service runs as the user who owns this folder: don't use a folder owned by root.</p>
+</li>
+<li>
+  <h4>Free the radio <span class="where pi">on the proxy machine</span></h4>
+  <p>The companion takes <b>one</b> Bluetooth connection: disconnect your phone from it, and stop any other program that uses it.
+  Over USB, close any serial monitor that has its port open. Over TCP, the companion also serves one client: a new
+  connection to it cuts the previous one, so the apps connect to mcproxy, never to the companion itself.</p>
+</li>
+<li>
+  <h4>Install <span class="where pi">on the proxy machine</span></h4>
+  <div class="cmd"><pre>bash ~/mcproxy/deploy/install.sh</pre></div>
+  <p>Creates the config, adds the <code>mcproxy</code> command, gives your user access to Bluetooth and USB serial ports,
+  and installs the service (started at boot, not started yet). Safe to run again.</p>
+  <div class="alert"><b>Log out and back in</b> (or reboot) if it says it added you to a group: the new access only counts after that.</div>
+</li>
+<li>
+  <h4>Setup: find the radio <span class="where pi">on the proxy machine</span></h4>
+  <div class="cmd"><pre>mcproxy setup</pre></div>
+  <div class="wrap"><table>
+  <tr><th>Radio on</th><th>What setup does</th></tr>
+  <tr><td>USB cable</td><td class="w">Plug it in first. Setup finds it, shows its name and asks "Use it over USB?". Nothing to pair.</td></tr>
+  <tr><td>Bluetooth</td><td class="w">Scans with every adapter, lists each radio with its signal, suggests the best adapter, asks for the PIN (MeshCore default <code>123456</code>) and pairs.</td></tr>
+  <tr><td>Network (TCP)</td><td class="w"><code>mcproxy setup --tcp 192.168.1.60</code> (add <code>:port</code> when not 5000, or give a name). Setup asks the companion who it is and saves its address. Give it a fixed address in the router (DHCP reservation) so it is always found.</td></tr>
+  </table></div>
+  <p>Then it saves everything and starts the service. <code>--usb</code> takes a USB radio without asking, <code>--ble</code> skips USB, <code>--tcp</code> uses the companion at that address.</p>
+</li>
+<li>
+  <h4>Check <span class="where pi">on the proxy machine</span></h4>
+  <div class="cmd"><pre>mcproxy status</pre></div>
+  <p>The console opens on its Status tab: you should see <span class="good">● radio connected</span> and the address apps use. <kbd>q</kbd> quits (the proxy keeps running).</p>
+</li>
+<li>
+  <h4>Connect your apps</h4>
+  <div class="wrap"><table>
+  <tr><th>App</th><th>Connect to</th></tr>
+  <tr><td>MeshCore apps</td><td class="w"><b>TCP/IP</b>, the address from step 5, e.g. <code>192.168.1.50</code> port <code>5000</code>.</td></tr>
+  <tr><td>mcproxy desk, Android</td><td class="w">The data API: see the tab <a href="#api">Apps &amp; API</a>.</td></tr>
+  </table></div>
+</li>
+</ol>
+
+<div class="tip"><b>Changing hardware</b> After replacing the radio, the Bluetooth adapter or the antenna, run <code>mcproxy setup</code> again.</div>
+</section>
+
+<section class="panel" id="commands" role="tabpanel">
+<h2>Commands</h2>
+<p class="sub"><span class="where pi">on the proxy machine</span> Commands work from any folder, locally or over SSH. <code>mcproxy &lt;command&gt; --help</code> describes each one.</p>
+
+<h3>Look</h3>
+<div class="wrap"><table>
+<tr><th>Command</th><th>Shows</th></tr>
+<tr><td><code>mcproxy status</code></td><td class="w">The console, Status tab: radio link, battery, connected apps, live activity.</td></tr>
+<tr><td><code>mcproxy nodes</code></td><td class="w">The console, Nodes tab: every node heard. <code>--hours 24</code>, <code>--type repeater</code>.</td></tr>
+<tr><td><code>mcproxy mesh</code></td><td class="w">The console, Mesh tab: traffic by type and hour, the repeaters you hear through.</td></tr>
+<tr><td><code>mcproxy history</code></td><td class="w">The console, History tab: your radio over time (battery, temperature, noise, packets).</td></tr>
+<tr><td><code>mcproxy history &lt;name&gt;</code></td><td class="w">One node: its adverts, signal, status and telemetry.</td></tr>
+<tr><td><code>mcproxy watch</code></td><td class="w">Every frame and event, live, as plain lines (<code>--hex</code> adds the bytes). <kbd>Ctrl</kbd>+<kbd>C</kbd> stops.</td></tr>
+<tr><td><code>mcproxy logs</code></td><td class="w">The service log. <code>-f</code> follows, <code>-n 200</code> lines, <code>--apps</code>, <code>--radio</code>, <code>--problems</code>, <code>--grep &lt;text&gt;</code>. <code>--purge-own</code> removes the lines about messages your node sent from the log files (asks first).</td></tr>
+<tr><td><code>mcproxy contacts</code></td><td class="w">The radio's contacts: type, last advert, path, distance.</td></tr>
+<tr><td><code>mcproxy doctor</code></td><td class="w">Checks everything (config, Bluetooth or USB, pairing, service, link) and gives hints.</td></tr>
+</table></div>
+<p>Add <code>--plain</code> to a console command for plain text (handy to copy or pipe), <code>--json</code> to <code>status</code> for raw data.</p>
+
+<h3>Messages</h3>
+<div class="wrap"><table>
+<tr><th>Command</th><th>Does</th></tr>
+<tr><td><code>mcproxy send --channel Public hi</code></td><td class="w">Sends a channel message; <code>--to &lt;name&gt;</code> for a direct message. Sent once, never repeated. A channel message goes out once the companion has confirmed which slot holds that channel; for a channel that is not on the companion it is refused.</td></tr>
+<tr><td><code>mcproxy mirror</code></td><td class="w">Copies of what one device sends, for your other devices: <code>mirror channel on|off</code>, <code>mirror dm on|off</code>.</td></tr>
+<tr><td><code>mcproxy text own hide|show</code></td><td class="w">Whether the text of messages your node sends shows in the console, watch, log and API.</td></tr>
+<tr><td><code>mcproxy polite on|off</code></td><td class="w">Polite sending, on by default, for all apps together: up to 4 commands that go on air (messages, adverts, requests to repeaters) go out at once, then one every 3 s; at most 6 DMs wait for their ACK at once (the companion recognises 8); the exact same message sent twice goes out once. Nothing is refused: a command waits its turn. Manual resends and DM retries always go out. <code>off</code> = everything goes out as it comes. <code>[polite]</code> in the config sets the numbers.</td></tr>
+</table></div>
+
+<h3>Radio and contacts</h3>
+<div class="wrap"><table>
+<tr><th>Command</th><th>Does</th></tr>
+<tr><td><code>mcproxy reconnect</code></td><td class="w">Drops the radio link and reconnects now. With <code>serial_port = ""</code>, it also asks the other serial ports again.</td></tr>
+<tr><td><code>mcproxy kick &lt;id&gt;</code></td><td class="w">Disconnects one app (its id is in <code>mcproxy status</code>).</td></tr>
+<tr><td><code>mcproxy track add &lt;name&gt;</code></td><td class="w">Asks a repeater, room server or sensor (a contact of the companion) for its status and telemetry regularly; <code>track remove</code> stops.</td></tr>
+<tr><td><code>mcproxy prune --days 30</code></td><td class="w">Removes contacts the radio hasn't heard for 30 days (favourites stay). Lists them and asks first; <code>--auto 30</code> does it daily.</td></tr>
+<tr><td><code>mcproxy contacts --overwrite-oldest on|off</code></td><td class="w">When the radio's list is full: replace the oldest contact, or add nothing (the radio's own setting).</td></tr>
+<tr><td><code>mcproxy channels</code></td><td class="w">The radio's channels. <code>channels add "#name"</code> adds a hashtag channel, <code>channels add Name --key &lt;32 hex&gt;</code> a private one, <code>channels remove &lt;name|id|slot&gt;</code> removes one (its messages stay; with <code>--delete-messages</code> they are deleted from the proxy too). A channel is its key: removed and added again, it is the same channel in any slot, with its messages.</td></tr>
+<tr><td><code>mcproxy login &lt;name&gt;</code></td><td class="w">Logs in to a repeater or room server and shows your role (admin, read-write, read-only or guest). Blank works when the node has you on its access list, or has a blank guest password; otherwise <code>--password &lt;password&gt;</code>. The password is kept nowhere. Guests can read status, basic telemetry, neighbours and owner info, not run commands.</td></tr>
+<tr><td><code>mcproxy cli &lt;name&gt; &lt;command&gt;</code></td><td class="w">Runs a command on a repeater, room server or sensor and prints its reply, e.g. <code>mcproxy cli "Hilltop Rptr" ver</code>. It needs an admin role and goes out once: when no reply comes it may still have run. <code>mcproxy cli --list</code> shows the commands.</td></tr>
+<tr><td><code>mcproxy backup</code> / <code>restore</code></td><td class="w">What the proxy saved (contacts, channels), and putting it back on the radio after a reflash or reset. <code>backup --keys on</code> also keeps the channels' secret keys (encrypted), so <code>restore</code> can recreate private channels; <code>restore --contacts</code> or <code>--channels</code> puts back only one part.</td></tr>
+</table></div>
+
+<h3>Data</h3>
+<div class="wrap"><table>
+<tr><th>Command</th><th>Does</th></tr>
+<tr><td><code>mcproxy retention</code></td><td class="w">How long data is kept, and the database size. Options change it (lowering deletes older data right away).</td></tr>
+<tr><td><code>mcproxy reset</code></td><td class="w">Start over: wipes what the proxy gathered (<code>--messages</code>, <code>--mesh</code>, <code>--contacts</code>, <code>--history</code> or <code>--all</code>). Shows what goes and asks you to type <code>yes</code>. The radio, config and pairing are never touched.<br>Each companion has its own data: connecting another one sets the current data aside and starts empty; the previous companion gets its own data back when it is connected again. <code>reset</code> wipes the connected companion's data.</td></tr>
+<tr><td><code>mcproxy sync</code></td><td class="w">What a MeshCore app on port 5000 gets when it comes back: messages of the last 2 days, and of those the newest 200 of each channel, so an app is not flooded after days away. DMs are not capped per channel. <code>--days 7 --per-channel 500</code> changes it, <code>0</code> = no limit. What is left out stays in the proxy (console, desk, Android) but never reaches that app. A device seen for the first time starts 24 hours back.</td></tr>
+<tr><td><code>mcproxy api</code></td><td class="w">The data API's address, certificate fingerprint and token (see <a href="#api">Apps &amp; API</a>).</td></tr>
+</table></div>
+
+<h3>Setup, Bluetooth and USB</h3>
+<div class="wrap"><table>
+<tr><th>Command</th><th>Does</th></tr>
+<tr><td><code>mcproxy setup</code></td><td class="w">Guided setup (see <a href="#install">Install</a>).</td></tr>
+<tr><td><code>mcproxy adapters</code></td><td class="w">The Bluetooth adapters and which one is used.</td></tr>
+<tr><td><code>mcproxy scan</code></td><td class="w">Every MeshCore companion it can find: over Bluetooth on every adapter (<code>--all</code>: every device), and on the USB ports, with the board each USB id points to. The one mcproxy uses shows as "in use".</td></tr>
+<tr><td><code>config/devices.toml</code></td><td class="w">Optional: add or correct boards (same format as the built-in list). mcproxy knows the MeshCore boards from the firmware and the web flasher, and the USB ids of their chips.</td></tr>
+<tr><td><code>mcproxy pair</code> / <code>unpair</code></td><td class="w">Pair or forget the Bluetooth companion by hand (stop the service first).</td></tr>
+<tr><td><code>[radio] serial_port</code></td><td class="w">In <code>config/config.toml</code>. <code>""</code> = the companion is found by itself: the port that answered last, then the boards known to run MeshCore. Other serial ports are asked only when there is no such board, 3 times each, then again after they are plugged in anew or after <code>mcproxy reconnect</code>.</td></tr>
+<tr><td><code>[radio] connect_timeout_secs</code></td><td class="w">Gives up one connection attempt after this time (Bluetooth: 5 to 120 s).</td></tr>
+</table></div>
+
+<h3 id="language">Language</h3>
+<p>The console, the commands and their <code>--help</code> come in English and French and follow the system's language. In every language, the log, the data API,
+the names of commands and options and part of the command output are in English.</p>
+<div class="wrap"><table>
+<tr><th>Command</th><th>Does</th></tr>
+<tr><td><code>mcproxy language</code></td><td class="w">Lists the languages and marks the one chosen.</td></tr>
+<tr><td><code>mcproxy language fr</code></td><td class="w">Always uses that language; <code>auto</code> = the system's. Saved as <code>[ui] language</code> in <code>config/config.toml</code>. In the console, <kbd>l</kbd> on the Status tab changes to the next one; a console already open elsewhere takes the change when it is opened again.</td></tr>
+<tr><td><code>mcproxy language new de</code></td><td class="w">Adds another language: makes <code>config/locales/de/mcproxy.ftl</code> with the English texts, to translate. A file already there is never overwritten.</td></tr>
+</table></div>
+<p>In that file, translate the text after each <code>=</code>, keep the names before it and the <code>{ $variables }</code>, and put the language's own name in
+<code>language-name</code>. Then <code>mcproxy language de</code>. A file made by someone else goes to the same place.
+It is plain UTF-8 text of at most 1 MB. A text that is missing or has a mistake shows in English; once the language is chosen, <code>mcproxy language</code> names the lines with a mistake.
+A regional language such as <code>pt-BR</code> takes from <code>pt</code> what it lacks.</p>
+<div class="note"><b>The English model</b> The service writes <code>config/locales/en/mcproxy.ftl</code> when it starts, to translate from. Changes to it, or a <code>fr</code> file there, are not used.</div>
+
+<h3>The service</h3>
+<div class="cmd"><pre>sudo systemctl restart mcproxy     <span class="c"># restart (after an update)</span>
+sudo systemctl stop mcproxy        <span class="c"># stop</span>
+sudo systemctl start mcproxy       <span class="c"># start</span>
+systemctl status mcproxy           <span class="c"># is it running?</span></pre></div>
+</section>
+
+<section class="panel" id="console" role="tabpanel">
+<h2>Console</h2>
+<p class="sub">A full-screen terminal view, refreshed live. <code>mcproxy status</code>, <code>nodes</code>, <code>mesh</code> and <code>history</code> each open it on the matching tab.</p>
+<p>The Status tab needs the service running; the other tabs read the database directly, so they work even when it's stopped. Quitting the console never stops the proxy.</p>
+
+<figure class="con">
+<svg viewBox="0 0 960 112" role="img" aria-label="Console frame: the tabs at the top, the view of the tab in the middle, the keys at the bottom">
+  <rect class="c-bg" x="0" y="0" width="960" height="112"/>
+  <text class="c-h" x="10" y="20">mcproxy</text><text class="c-d" x="66" y="20">by FED1291</text>
+  <rect class="c-fy" x="145" y="7" width="63" height="17"/><text class="c-k" x="150" y="20">1 Status</text>
+  <text class="c-t" x="218" y="20">2 Nodes</text><text class="c-t" x="280" y="20">3 Mesh</text><text class="c-t" x="336" y="20">4 History</text>
+  <text class="c-t" x="410" y="20">5 Logs</text><text class="c-t" x="466" y="20">6 Chat</text>
+  <rect class="c-box" x="6.5" y="34.5" width="947" height="44"/>
+  <rect class="c-bg" x="14" y="28" width="110" height="14"/><text class="c-h" x="16" y="38"> Status </text>
+  <text class="c-d" x="480" y="62" text-anchor="middle">the view of the tab</text>
+  <text class="c-b" x="10" y="100">q</text><text class="c-d" x="24" y="100">quit</text>
+  <text class="c-b" x="68" y="100">Tab</text><text class="c-d" x="94" y="100">switch</text>
+  <text class="c-b" x="150" y="100">d</text><text class="c-d" x="164" y="100">show packet details</text>
+  <text class="c-b" x="310" y="100">l</text><text class="c-d" x="324" y="100">language (auto: English)</text>
+  <text class="c-d" x="504" y="100">updated 19:42:10</text>
+</svg>
+<figcaption>Top: the tabs (the current one highlighted). Bottom: the keys that work right now; a tab's show / hide switches are grouped after <code>show:</code>, bright when shown. On a narrow window the keys take a second line.</figcaption>
+</figure>
+
+<h3>Keys everywhere</h3>
+<div class="wrap"><table>
+<tr><th>Key</th><th>Action</th></tr>
+<tr><td><kbd>Tab</kbd> / <kbd>Shift</kbd>+<kbd>Tab</kbd>, <kbd>1</kbd>–<kbd>6</kbd></td><td class="w">Next / previous tab, or jump to one.</td></tr>
+<tr><td><kbd>q</kbd>, <kbd>Ctrl</kbd>+<kbd>C</kbd></td><td class="w">Quit (the proxy keeps running).</td></tr>
+<tr><td><kbd>+</kbd> <kbd>-</kbd> (or <kbd>→</kbd> <kbd>←</kbd>)</td><td class="w">Longer / shorter period: 1 h, 3 h, 6 h, 12 h, 24 h, 3 days, 7 days, 30 days. Nodes and Mesh also go live (last 15 min) below 1 h; Nodes also has "all". In Chat, <kbd>←</kbd> <kbd>→</kbd> change the chat instead.</td></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd>, <kbd>PgUp</kbd> <kbd>PgDn</kbd></td><td class="w">Scroll, or move the selection.</td></tr>
+<tr><td><kbd>Esc</kbd>, <kbd>Backspace</kbd></td><td class="w">Back (from one node to the list; in Chat, stop writing).</td></tr>
+</table></div>
+
+<div class="chips">
+  <a href="#tab-status">1 Status</a><a href="#tab-nodes">2 Nodes</a><a href="#tab-node">One node</a>
+  <a href="#tab-mesh">3 Mesh</a><a href="#tab-history">4 History</a><a href="#tab-logs">5 Logs</a><a href="#tab-chat">6 Chat</a><a href="#colours">Colours</a>
+</div>
+
+<h3 id="tab-status">1 · Status</h3>
+<p>The state of the proxy: radio link, companion, stored data, connected apps and live activity.</p>
+<figure class="con">
+<svg viewBox="0 0 960 596" role="img" aria-label="Status tab: the service and its radio link, the companion, the data kept, the apps connected, the tracked nodes and the live activity">
+  <rect class="c-bg" x="0" y="0" width="960" height="596"/>
+  <text class="c-h" x="10" y="20">mcproxy</text><text class="c-d" x="66" y="20">by FED1291</text>
+  <rect class="c-fy" x="145" y="7" width="63" height="17"/><text class="c-k" x="150" y="20">1 Status</text>
+  <text class="c-t" x="218" y="20">2 Nodes</text><text class="c-t" x="280" y="20">3 Mesh</text><text class="c-t" x="336" y="20">4 History</text>
+  <text class="c-t" x="410" y="20">5 Logs</text><text class="c-t" x="466" y="20">6 Chat</text>
+  <rect class="c-box" x="6.5" y="34.5" width="947" height="62"/>
+  <rect class="c-bg" x="14" y="28" width="170" height="14"/><text class="c-h" x="16" y="38"> mcproxy · running 3d04h </text>
+  <text class="c-g" x="14" y="58">● radio connected 2h10m</text><text class="c-t" x="180" y="58">📶</text><text class="c-lb" x="200" y="58">Bluetooth</text><text class="c-d" x="282" y="58">MeshCore-Ridge</text>
+  <text class="c-d" x="14" y="76">apps connect to</text><text class="c-b" x="120" y="76">192.168.1.50 port 5000</text>
+  <rect class="c-box" x="6.5" y="104.5" width="426" height="134"/>
+  <rect class="c-bg" x="14" y="98" width="82" height="14"/><text class="c-b" x="16" y="108"> Companion </text>
+  <text class="c-d" x="14" y="128">node</text><text class="c-t" x="80" y="128">Ridge Base ⛰</text>
+  <text class="c-d" x="14" y="145">board</text><text class="c-t" x="80" y="145">RAK WisBlock 4631 · nRF52840 · v1.17.1</text>
+  <text class="c-d" x="14" y="162">battery</text><text class="c-g" x="80" y="162">🔋 4.07 V  85%</text><text class="c-d" x="186" y="162">(2m14s ago)</text>
+  <text class="c-d" x="14" y="179">drops</text><text class="c-t" x="80" y="179">1  last: link lost</text>
+  <text class="c-d" x="14" y="196">frames</text><text class="c-t" x="80" y="196">48213 from radio, 9120 to radio</text>
+  <text class="c-d" x="14" y="213">commands</text><text class="c-t" x="80" y="213">0 waiting, now: -</text>
+  <rect class="c-box" x="436.5" y="104.5" width="517" height="134"/>
+  <rect class="c-bg" x="444" y="98" width="50" height="14"/><text class="c-b" x="446" y="108"> Data </text>
+  <text class="c-d" x="444" y="128">messages</text><text class="c-t" x="510" y="128">18402 with text (365 d), 52114 metadata</text>
+  <text class="c-d" x="444" y="145">packets</text><text class="c-t" x="510" y="145">412870 heard (180 d)</text>
+  <text class="c-d" x="444" y="162">nodes</text><text class="c-t" x="510" y="162">96543 history rows (forever)</text>
+  <text class="c-d" x="444" y="179">database</text><text class="c-t" x="510" y="179">214.6 MB, 4 devices</text>
+  <text class="c-y" x="444" y="196">contacts  347 / 350 cached</text>
+  <rect class="c-box" x="6.5" y="246.5" width="947" height="100"/>
+  <rect class="c-bg" x="14" y="240" width="72" height="14"/><text class="c-b" x="16" y="250"> Apps (3) </text>
+  <text class="c-d" x="47" y="270">address</text><text class="c-d" x="192" y="270">app</text><text class="c-d" x="324" y="270">since</text><text class="c-d" x="383" y="270">in / out</text><text class="c-d" x="469" y="270">messages</text>
+  <text class="c-t" x="14" y="287">#12</text><text class="c-t" x="47" y="287">192.168.1.23:51544</text><text class="c-t" x="192" y="287">MeshCore</text><text class="c-t" x="324" y="287">1h12m</text><text class="c-t" x="383" y="287">612 / 4180</text>
+  <text class="c-t" x="14" y="304">#14</text><text class="c-t" x="47" y="304">192.168.1.31:40212</text><text class="c-t" x="192" y="304">meshcore-cli</text><text class="c-t" x="324" y="304">3d02h</text><text class="c-t" x="383" y="304">96 / 2241</text>
+  <text class="c-t" x="14" y="321">#15</text><text class="c-t" x="47" y="321">192.168.1.40:39876</text><text class="c-t" x="192" y="321">Home Assistant</text><text class="c-t" x="324" y="321">18m40s</text><text class="c-t" x="383" y="321">31 / 208</text><text class="c-y" x="469" y="321">2 waiting</text>
+  <rect class="c-box" x="6.5" y="354.5" width="947" height="66"/>
+  <rect class="c-bg" x="14" y="348" width="104" height="14"/><text class="c-b" x="16" y="358"> Tracked nodes </text>
+  <text class="c-t" x="14" y="378">Hilltop Rptr</text><text class="c-g" x="199" y="378">status ok, telemetry ok</text><text class="c-t" x="660" y="378">41m ago</text>
+  <text class="c-t" x="14" y="395">Quarry RPT ⛏</text><text class="c-y" x="199" y="395">no answer (2 tries)</text><text class="c-t" x="660" y="395">3h05m ago</text>
+  <rect class="c-box" x="6.5" y="428.5" width="947" height="134"/>
+  <rect class="c-bg" x="14" y="422" width="112" height="14"/><text class="c-b" x="16" y="432"> Activity (live) </text>
+  <text class="c-d" x="14" y="452">19:41:48</text><text class="c-c" x="80" y="452">radio -></text><text class="c-g" x="186" y="452">HEARD</text><text class="c-t" x="325" y="452">flood advert   snr </text><text class="c-g" x="450" y="452">7.25</text><text class="c-t" x="480" y="452"> rssi </text><text class="c-g" x="520" y="452">-91</text><text class="c-y" x="552" y="452">  "Valley Node 🚲"</text>
+  <text class="c-d" x="14" y="469">19:41:52</text><text class="c-c" x="80" y="469">radio -></text><text class="c-g" x="186" y="469">HEARD</text><text class="c-t" x="325" y="469">flood channel  snr </text><text class="c-y" x="450" y="469">-2.50</text><text class="c-t" x="486" y="469"> rssi </text><text class="c-y" x="526" y="469">-112</text><text class="c-t" x="558" y="469">  </text><text class="c-y" x="572" y="469">4</text><text class="c-t" x="580" y="469"> hops</text>
+  <text class="c-d" x="14" y="486">19:41:53</text><text class="c-c" x="80" y="486">radio ->  all</text><text class="c-b" x="186" y="486">CHANNEL_MSG</text><text class="c-t" x="325" y="486">#hiking  </text><text class="c-y" x="384" y="486">"Valley Node 🚲"</text><text class="c-t" x="502" y="486">  snr </text><text class="c-y" x="542" y="486">-2.5</text>
+  <text class="c-d" x="14" y="503">19:42:01</text><text class="c-lb" x="80" y="503">#12 -> radio</text><text class="c-b" x="186" y="503">SEND_CHANNEL_TXT_MSG</text><text class="c-t" x="340" y="503">#hiking  12 B</text>
+  <text class="c-d" x="14" y="520">19:42:01</text><text class="c-c" x="80" y="520">radio -> #12</text><text class="c-b" x="186" y="520">SENT</text><text class="c-t" x="325" y="520">flood</text>
+  <text class="c-d" x="14" y="537">19:42:03</text><text class="c-c" x="80" y="537">radio -></text><text class="c-g" x="186" y="537">HEARD</text><text class="c-t" x="325" y="537">repeat of ours snr </text><text class="c-g" x="450" y="537">11.0</text><text class="c-t" x="480" y="537"> rssi </text><text class="c-g" x="520" y="537">-64</text><text class="c-t" x="552" y="537">  via Hilltop Rptr</text>
+  <text class="c-d" x="14" y="554">19:42:09</text><text class="c-h" x="80" y="554">app #15 connected from 192.168.1.40</text>
+  <text class="c-b" x="10" y="584">q</text><text class="c-d" x="24" y="584">quit</text>
+  <text class="c-b" x="68" y="584">Tab</text><text class="c-d" x="94" y="584">switch</text>
+  <text class="c-b" x="150" y="584">d</text><text class="c-d" x="164" y="584">show packet details</text>
+  <text class="c-b" x="310" y="584">l</text><text class="c-d" x="324" y="584">language (auto: English)</text>
+  <text class="c-d" x="504" y="584">updated 19:42:10</text>
+</svg>
+<figcaption>The Status tab. Example data.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Part</th><th>What it tells you</th></tr>
+<tr><td>Top line</td><td class="w">How long the service has run; <span class="good">● radio connected</span> (for how long) or <span class="bad">● radio DOWN</span> with the reason; the address apps should use.</td></tr>
+<tr><td>Companion</td><td class="w">Your radio: node name, battery, link drops, frames from / to the radio, commands waiting.</td></tr>
+<tr><td>Data</td><td class="w">What is stored: messages (and how long they're kept), packets heard, database size, contacts cached.</td></tr>
+<tr><td>Apps</td><td class="w">Each app connected: id, address, name, since when, frames in / out.</td></tr>
+<tr><td>Tracked nodes</td><td class="w">Repeaters asked for status regularly (<code>mcproxy track</code>), with their name and last answer.</td></tr>
+<tr><td>Activity (live)</td><td class="w">What passes through, newest at the bottom. <kbd>d</kbd> shows / hides packet details.</td></tr>
+<tr><td>Language</td><td class="w"><kbd>l</kbd> changes to the next language: the system's (<code>auto</code>), English, French, then those added (see <a href="#language">Language</a>). Saved, used at once.</td></tr>
+</table></div>
+
+<h3 id="tab-nodes">2 · Nodes</h3>
+<p>Every node your radio has heard (and your contacts), with how well you hear it. Your own radio is the first line, in yellow.</p>
+<figure class="con">
+<svg viewBox="0 0 960 478" role="img" aria-label="Nodes tab: counts by type, then every node heard with its type, when, signal, hops, position, distance, adverts and the repeater it came through; the selected row is highlighted">
+  <rect class="c-bg" x="0" y="0" width="960" height="478"/>
+  <text class="c-h" x="10" y="20">mcproxy</text><text class="c-d" x="66" y="20">by FED1291</text>
+  <text class="c-t" x="150" y="20">1 Status</text>
+  <rect class="c-fy" x="213" y="7" width="56" height="17"/><text class="c-k" x="218" y="20">2 Nodes</text>
+  <text class="c-t" x="280" y="20">3 Mesh</text><text class="c-t" x="336" y="20">4 History</text>
+  <text class="c-t" x="410" y="20">5 Logs</text><text class="c-t" x="466" y="20">6 Chat</text>
+  <rect class="c-box" x="6.5" y="34.5" width="947" height="46"/>
+  <rect class="c-bg" x="14" y="28" width="170" height="14"/><text class="c-h" x="16" y="38"> Nodes heard · last 24 h </text>
+  <text class="c-t" x="14" y="56">412 nodes</text><text class="c-kc" x="90" y="56">💬 chat 143</text><text class="c-kr" x="180" y="56">📡 repeater 236</text><text class="c-kp" x="300" y="56">🏠 room 21</text><text class="c-ks" x="390" y="56">📟 sensor 12</text>
+  <text class="c-d" x="14" y="73">showing</text><text class="c-c" x="66" y="73">all types</text><text class="c-d" x="140" y="73">sorted by</text><text class="c-c" x="206" y="73">last heard</text><text class="c-d" x="290" y="73">412 shown</text>
+  <rect class="c-box" x="6.5" y="88.5" width="947" height="356"/>
+  <g class="c-d">
+    <text x="24" y="108">name</text><text x="170" y="108">type</text><text x="262" y="108">heard</text><text x="352" y="108" text-anchor="end">snr</text><text x="398" y="108" text-anchor="end">rssi</text>
+    <text x="432" y="108" text-anchor="end">hops</text><text x="444" y="108">position</text><text x="624" y="108" text-anchor="end">distance</text><text x="680" y="108" text-anchor="end">adverts</text><text x="690" y="108">via</text>
+  </g>
+  <g class="c-h">
+    <text x="24" y="125">Ridge Base ⛰</text><text x="170" y="125">💬 chat</text><text x="262" y="125">now</text><text x="352" y="125" text-anchor="end">-</text><text x="398" y="125" text-anchor="end">-</text><text x="432" y="125" text-anchor="end">-</text><text x="444" y="125">12.3417, 45.6231</text>
+  </g>
+  <path d="M14 133.5 H 946" stroke="#8a8a8a" stroke-width="1"/>
+  <rect class="c-fsel" x="8" y="139" width="944" height="16"/>
+  <rect class="c-fg" x="324" y="139" width="30" height="16"/><rect class="c-fg" x="374" y="139" width="26" height="16"/><rect class="c-fg" x="424" y="139" width="10" height="16"/>
+  <g class="c-k">
+    <text x="12" y="151">•</text><text x="24" y="151">Hilltop Rptr</text><text x="170" y="151">📡 repeater</text><text x="262" y="151">1m ago</text><text x="352" y="151" text-anchor="end">11.5</text><text x="398" y="151" text-anchor="end">-64</text>
+    <text x="432" y="151" text-anchor="end">0</text><text x="444" y="151">12.3911, 45.6402</text><text x="624" y="151" text-anchor="end">4.1 km</text><text x="680" y="151" text-anchor="end">212</text><text x="690" y="151">direct</text>
+  </g>
+  <text class="c-c" x="12" y="168">•</text><text class="c-t" x="24" y="168">Valley Node 🚲</text><text class="c-kc" x="170" y="168">💬 chat</text><text class="c-t" x="262" y="168">3m ago</text><text class="c-y" x="352" y="168" text-anchor="end">4.8</text><text class="c-r" x="398" y="168" text-anchor="end">-103</text><text class="c-g" x="432" y="168" text-anchor="end">2</text><text class="c-t" x="444" y="168">12.4520, 45.5987</text><text class="c-t" x="624" y="168" text-anchor="end">8.8 km</text><text class="c-t" x="680" y="168" text-anchor="end">37</text><text class="c-d" x="690" y="168">a3f2 Hilltop Rptr</text>
+  <text class="c-y" x="12" y="185">★</text><text class="c-t" x="24" y="185">Pine Hill RPT 🌲</text><text class="c-kr" x="170" y="185">📡 repeater</text><text class="c-t" x="262" y="185">6m ago</text><text class="c-g" x="352" y="185" text-anchor="end">8.0</text><text class="c-g" x="398" y="185" text-anchor="end">-96</text><text class="c-g" x="432" y="185" text-anchor="end">1</text><text class="c-t" x="444" y="185">12.2875, 45.7012</text><text class="c-t" x="624" y="185" text-anchor="end">10.2 km</text><text class="c-t" x="680" y="185" text-anchor="end">144</text><text class="c-d" x="690" y="185">a3f2 Hilltop Rptr</text>
+  <text class="c-c" x="12" y="202">•</text><text class="c-t" x="24" y="202">RPT-North-07</text><text class="c-kr" x="170" y="202">📡 repeater</text><text class="c-t" x="262" y="202">9m ago</text><text class="c-y" x="352" y="202" text-anchor="end">-3.5</text><text class="c-y" x="398" y="202" text-anchor="end">-114</text><text class="c-y" x="432" y="202" text-anchor="end">4</text><text class="c-t" x="444" y="202">12.5102, 45.8890</text><text class="c-t" x="624" y="202" text-anchor="end">31.4 km</text><text class="c-t" x="680" y="202" text-anchor="end">58</text><text class="c-d" x="690" y="202">7c10 Pine Hill RPT 🌲</text>
+  <text class="c-c" x="12" y="219">•</text><text class="c-t" x="24" y="219">Mara 🐾</text><text class="c-kc" x="170" y="219">💬 chat</text><text class="c-t" x="262" y="219">12m ago</text><text class="c-g" x="352" y="219" text-anchor="end">6.2</text><text class="c-g" x="398" y="219" text-anchor="end">-99</text><text class="c-g" x="432" y="219" text-anchor="end">1</text><text class="c-t" x="680" y="219" text-anchor="end">22</text><text class="c-d" x="690" y="219">a3f2 Hilltop Rptr</text>
+  <text class="c-c" x="12" y="236">•</text><text class="c-t" x="24" y="236">Lakeside Room</text><text class="c-kp" x="170" y="236">🏠 room</text><text class="c-t" x="262" y="236">15m ago</text><text class="c-y" x="352" y="236" text-anchor="end">-0.5</text><text class="c-y" x="398" y="236" text-anchor="end">-109</text><text class="c-y" x="432" y="236" text-anchor="end">3</text><text class="c-t" x="444" y="236">12.6033, 45.5531</text><text class="c-t" x="624" y="236" text-anchor="end">20.6 km</text><text class="c-t" x="680" y="236" text-anchor="end">64</text><text class="c-d" x="690" y="236">4e91c2 Forest Edge RPT</text>
+  <text class="c-y" x="12" y="253">★</text><text class="c-t" x="24" y="253">Forest Edge RPT</text><text class="c-kr" x="170" y="253">📡 repeater</text><text class="c-t" x="262" y="253">18m ago</text><text class="c-y" x="352" y="253" text-anchor="end">2.2</text><text class="c-y" x="398" y="253" text-anchor="end">-107</text><text class="c-g" x="432" y="253" text-anchor="end">2</text><text class="c-t" x="444" y="253">12.5544, 45.6120</text><text class="c-t" x="624" y="253" text-anchor="end">16.4 km</text><text class="c-t" x="680" y="253" text-anchor="end">97</text><text class="c-d" x="690" y="253">a3f2 Hilltop Rptr</text>
+  <text class="c-c" x="12" y="270">•</text><text class="c-t" x="24" y="270">KX-Mobile 🚗</text><text class="c-kc" x="170" y="270">💬 chat</text><text class="c-t" x="262" y="270">22m ago</text><text class="c-r" x="352" y="270" text-anchor="end">-7.5</text><text class="c-r" x="398" y="270" text-anchor="end">-121</text><text class="c-y" x="432" y="270" text-anchor="end">6</text><text class="c-t" x="444" y="270">12.0811, 45.7433</text><text class="c-t" x="624" y="270" text-anchor="end">24.6 km</text><text class="c-t" x="680" y="270" text-anchor="end">9</text><text class="c-d" x="690" y="270">4e07b1 Tower-East-2</text>
+  <text class="c-c" x="12" y="287">•</text><text class="c-t" x="24" y="287">Tower-East-2</text><text class="c-kr" x="170" y="287">📡 repeater</text><text class="c-t" x="262" y="287">31m ago</text><text class="c-g" x="352" y="287" text-anchor="end">9.5</text><text class="c-g" x="398" y="287" text-anchor="end">-88</text><text class="c-y" x="432" y="287" text-anchor="end">3</text><text class="c-t" x="444" y="287">12.7015, 45.6698</text><text class="c-t" x="624" y="287" text-anchor="end">28.3 km</text><text class="c-t" x="680" y="287" text-anchor="end">131</text><text class="c-d" x="690" y="287">7c10 Pine Hill RPT 🌲</text>
+  <text class="c-c" x="12" y="304">•</text><text class="c-t" x="24" y="304">Old Mill 🌻</text><text class="c-kc" x="170" y="304">💬 chat</text><text class="c-t" x="262" y="304">44m ago</text><text class="c-y" x="352" y="304" text-anchor="end">0.8</text><text class="c-y" x="398" y="304" text-anchor="end">-110</text><text class="c-y" x="432" y="304" text-anchor="end">5</text><text class="c-t" x="444" y="304">12.2208, 45.4921</text><text class="c-t" x="624" y="304" text-anchor="end">17.9 km</text><text class="c-t" x="680" y="304" text-anchor="end">15</text><text class="c-d" x="690" y="304">b20e Ridge Relay ⚡</text>
+  <text class="c-c" x="12" y="321">•</text><text class="c-t" x="24" y="321">Garden Sensor</text><text class="c-ks" x="170" y="321">📟 sensor</text><text class="c-t" x="262" y="321">1h ago</text><text class="c-y" x="352" y="321" text-anchor="end">3.0</text><text class="c-y" x="398" y="321" text-anchor="end">-105</text><text class="c-g" x="432" y="321" text-anchor="end">1</text><text class="c-t" x="444" y="321">12.3552, 45.6304</text><text class="c-t" x="624" y="321" text-anchor="end">1.3 km</text><text class="c-t" x="680" y="321" text-anchor="end">48</text><text class="c-d" x="690" y="321">a3f2 Hilltop Rptr</text>
+  <text class="c-c" x="12" y="338">•</text><text class="c-t" x="24" y="338">Quarry RPT ⛏</text><text class="c-kr" x="170" y="338">📡 repeater</text><text class="c-t" x="262" y="338">1h ago</text><text class="c-r" x="352" y="338" text-anchor="end">-9.0</text><text class="c-r" x="398" y="338" text-anchor="end">-124</text><text class="c-r" x="432" y="338" text-anchor="end">7</text><text class="c-t" x="444" y="338">12.8836, 45.9514</text><text class="c-t" x="624" y="338" text-anchor="end">55.0 km</text><text class="c-t" x="680" y="338" text-anchor="end">76</text><text class="c-d" x="690" y="338">4e07b1 Tower-East-2</text>
+  <text class="c-c" x="12" y="355">•</text><text class="c-t" x="24" y="355">EchoBot 🤖</text><text class="c-kc" x="170" y="355">💬 chat</text><text class="c-t" x="262" y="355">1h ago</text><text class="c-g" x="352" y="355" text-anchor="end">5.5</text><text class="c-g" x="398" y="355" text-anchor="end">-100</text><text class="c-y" x="432" y="355" text-anchor="end">3</text><text class="c-t" x="444" y="355">12.6140, 45.7210</text><text class="c-t" x="624" y="355" text-anchor="end">23.5 km</text><text class="c-t" x="680" y="355" text-anchor="end">412</text><text class="c-d" x="690" y="355">4e91c2 Forest Edge RPT</text>
+  <text class="c-c" x="12" y="372">•</text><text class="c-t" x="24" y="372">Ridge Relay ⚡</text><text class="c-kr" x="170" y="372">📡 repeater</text><text class="c-t" x="262" y="372">2h ago</text><text class="c-g" x="352" y="372" text-anchor="end">12.0</text><text class="c-g" x="398" y="372" text-anchor="end">-58</text><text class="c-g" x="432" y="372" text-anchor="end">0</text><text class="c-t" x="444" y="372">12.3302, 45.6155</text><text class="c-t" x="624" y="372" text-anchor="end">1.2 km</text><text class="c-t" x="680" y="372" text-anchor="end">188</text><text class="c-d" x="690" y="372">direct</text>
+  <text class="c-c" x="12" y="389">•</text><text class="c-t" x="24" y="389">Sunny Bot ☀</text><text class="c-kc" x="170" y="389">💬 chat</text><text class="c-t" x="262" y="389">2h ago</text><text class="c-y" x="352" y="389" text-anchor="end">-4.2</text><text class="c-r" x="398" y="389" text-anchor="end">-117</text><text class="c-r" x="432" y="389" text-anchor="end">8</text><text class="c-t" x="444" y="389">12.9284, 45.9933</text><text class="c-t" x="624" y="389" text-anchor="end">61.4 km</text><text class="c-t" x="680" y="389" text-anchor="end">83</text><text class="c-d" x="690" y="389">7c10 Pine Hill RPT 🌲</text>
+  <text class="c-c" x="12" y="406">•</text><text class="c-t" x="24" y="406">NB-Repeater-3</text><text class="c-kr" x="170" y="406">📡 repeater</text><text class="c-t" x="262" y="406">2h ago</text><text class="c-y" x="352" y="406" text-anchor="end">1.5</text><text class="c-y" x="398" y="406" text-anchor="end">-111</text><text class="c-y" x="432" y="406" text-anchor="end">5</text><text class="c-t" x="444" y="406">12.5867, 45.4402</text><text class="c-t" x="624" y="406" text-anchor="end">27.1 km</text><text class="c-t" x="680" y="406" text-anchor="end">41</text><text class="c-d" x="690" y="406">b20e Ridge Relay ⚡</text>
+  <text class="c-c" x="12" y="423">•</text><text class="c-t" x="24" y="423">Camp Room 🏕</text><text class="c-kp" x="170" y="423">🏠 room</text><text class="c-t" x="262" y="423">3h ago</text><text class="c-g" x="352" y="423" text-anchor="end">7.0</text><text class="c-g" x="398" y="423" text-anchor="end">-95</text><text class="c-g" x="432" y="423" text-anchor="end">2</text><text class="c-t" x="444" y="423">12.4011, 45.6780</text><text class="c-t" x="624" y="423" text-anchor="end">7.7 km</text><text class="c-t" x="680" y="423" text-anchor="end">26</text><text class="c-d" x="690" y="423">b20e Ridge Relay ⚡</text>
+  <text class="c-b" x="10" y="466">q</text><text class="c-d" x="24" y="466">quit</text>
+  <text class="c-b" x="68" y="466">Tab</text><text class="c-d" x="94" y="466">switch</text>
+  <text class="c-b" x="150" y="466">↑↓</text><text class="c-d" x="168" y="466">select</text>
+  <text class="c-b" x="224" y="466">Enter</text><text class="c-d" x="262" y="466">open</text>
+  <text class="c-b" x="300" y="466">t</text><text class="c-d" x="314" y="466">type</text>
+  <text class="c-b" x="352" y="466">c</text><text class="c-d" x="366" y="466">• contacts only</text>
+  <text class="c-b" x="478" y="466">s</text><text class="c-d" x="492" y="466">sort</text>
+  <text class="c-b" x="530" y="466">+/-</text><text class="c-d" x="556" y="466">period (24 h)</text>
+  <text class="c-d" x="664" y="466">updated 19:42:10</text>
+</svg>
+<figcaption>The Nodes tab: your own radio first, in yellow; the selected row highlighted, <kbd>Enter</kbd> opens it. Example data.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Key</th><th>Action</th></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd>, <kbd>Enter</kbd></td><td class="w">Move the selection; open the node (see <a href="#tab-node">One node</a>).</td></tr>
+<tr><td><kbd>t</kbd></td><td class="w">Type: all → repeaters → chat → rooms → sensors.</td></tr>
+<tr><td><kbd>c</kbd></td><td class="w">Who: all nodes → • contacts only → ★ favourites only.</td></tr>
+<tr><td><kbd>m</kbd></td><td class="w">Message: on a chat node in the companion's contacts (in the list or opened), opens its conversation in the Chat tab, ready to write.</td></tr>
+<tr><td><kbd>s</kbd></td><td class="w">Sort: last heard → signal → distance → name.</td></tr>
+<tr><td><kbd>+</kbd> <kbd>-</kbd></td><td class="w">Period, from live (last 15 min) up to "all time".</td></tr>
+</table></div>
+
+<h3 id="tab-node">One node</h3>
+<p>Opened from the Nodes list with <kbd>Enter</kbd>, or with <code>mcproxy history &lt;name&gt;</code>. Everything recorded about that node:
+its header (name, type, key, distance), charts of how you heard it (SNR, RSSI, your noise floor), each advert heard (time, signal, hops, the repeater it came through),
+and for repeaters you track their status and telemetry.</p>
+<div class="wrap"><table>
+<tr><th>Key</th><th>Action</th></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd>, <kbd>Enter</kbd></td><td class="w">Select an advert; open the repeater it came through (follow the path hop by hop).</td></tr>
+<tr><td><kbd>+</kbd> <kbd>-</kbd></td><td class="w">Period of the charts and adverts.</td></tr>
+<tr><td><kbd>m</kbd></td><td class="w">Message: on a chat node in the companion's contacts, opens its conversation in the Chat tab.</td></tr>
+<tr><td><kbd>Esc</kbd></td><td class="w">Back to the previous node, then to the list.</td></tr>
+</table></div>
+
+<h3 id="tab-mesh">3 · Mesh</h3>
+<p>The whole mesh as your radio hears it: how busy it is (packets per hour, or per minute in live mode), what kind of traffic, average signal,
+and which repeaters bring it to you (the last hop of flooded packets: your direct neighbours).</p>
+<figure class="con">
+<svg viewBox="0 0 960 536" role="img" aria-label="Mesh tab: packets heard and average signal, charts of packets per hour and average SNR, the packets by type, and the repeaters heard through">
+  <rect class="c-bg" x="0" y="0" width="960" height="536"/>
+  <text class="c-h" x="10" y="20">mcproxy</text><text class="c-d" x="66" y="20">by FED1291</text>
+  <text class="c-t" x="150" y="20">1 Status</text><text class="c-t" x="218" y="20">2 Nodes</text>
+  <rect class="c-fy" x="275" y="7" width="50" height="17"/><text class="c-k" x="280" y="20">3 Mesh</text>
+  <text class="c-t" x="336" y="20">4 History</text><text class="c-t" x="410" y="20">5 Logs</text><text class="c-t" x="466" y="20">6 Chat</text>
+  <rect class="c-box" x="6.5" y="34.5" width="947" height="46"/>
+  <rect class="c-bg" x="14" y="28" width="124" height="14"/><text class="c-h" x="16" y="38"> Mesh · last 24 h </text>
+  <text class="c-t" x="14" y="56">21480 packets heard</text><text class="c-d" x="160" y="56">~895 per hour</text>
+  <text class="c-d" x="14" y="73">average SNR</text><text class="c-y" x="94" y="73">2.1 dB</text><text class="c-d" x="160" y="73">average RSSI</text><text class="c-y" x="246" y="73">-106 dBm</text>
+  <rect class="c-box" x="6.5" y="88.5" width="470" height="150"/>
+  <rect class="c-bg" x="14" y="82" width="124" height="14"/><text class="c-b" x="16" y="92"> Packets per hour </text>
+  <rect class="c-bg" x="432" y="82" width="34" height="14"/><text class="c-c" x="464" y="92" text-anchor="end">612</text>
+  <text class="c-t" x="14" y="110">1240</text><text class="c-t" x="14" y="202">380</text>
+  <path d="M60 100 V 210 H 470" stroke="#8a8a8a" stroke-width="1" fill="none"/>
+  <path d="M64 196 L72 168 L84 140 L98 122 L112 116 L130 126 L150 132 L172 130 L192 128 L212 134 L232 146 L252 160 L270 166 L290 164 L310 156 L330 140 L350 124 L368 108 L380 104 L394 112 L412 124 L430 132 L446 140 L458 156 L466 170" stroke="#3a96dd" stroke-width="2.2" stroke-dasharray="1.4 2.6" stroke-linecap="round" fill="none"/>
+  <text class="c-t" x="14" y="230">21.11 19:00</text><text class="c-t" x="468" y="230" text-anchor="end">22.11 19:00</text>
+  <rect class="c-box" x="482.5" y="88.5" width="471" height="150"/>
+  <rect class="c-bg" x="490" y="82" width="100" height="14"/><text class="c-b" x="492" y="92"> Average SNR </text>
+  <rect class="c-bg" x="888" y="82" width="58" height="14"/><text class="c-g" x="944" y="92" text-anchor="end">2.40 dB</text>
+  <text class="c-t" x="490" y="110">3.10</text><text class="c-t" x="490" y="202">0.95</text>
+  <path d="M536 100 V 210 H 946" stroke="#8a8a8a" stroke-width="1" fill="none"/>
+  <path d="M540 160 L556 170 L572 150 L586 140 L600 168 L614 190 L630 176 L646 154 L662 146 L680 128 L696 120 L710 140 L726 162 L742 158 L758 166 L774 150 L790 160 L806 182 L820 170 L836 140 L852 136 L866 152 L880 128 L896 106 L910 112 L926 134 L942 124" stroke="#16c60c" stroke-width="2.2" stroke-dasharray="1.4 2.6" stroke-linecap="round" fill="none"/>
+  <text class="c-t" x="490" y="230">21.11 19:00</text><text class="c-t" x="944" y="230" text-anchor="end">22.11 19:00</text>
+  <rect class="c-box" x="6.5" y="246.5" width="370" height="262"/>
+  <rect class="c-bg" x="14" y="240" width="64" height="14"/><text class="c-b" x="16" y="250"> By type </text>
+  <g class="c-d"><text x="14" y="268">type</text><text x="300" y="268" text-anchor="end">packets</text><text x="368" y="268" text-anchor="end">avg snr</text></g>
+  <g class="c-t">
+    <text x="14" y="285">request</text><text x="300" y="285" text-anchor="end">10418</text>
+    <text x="14" y="302">channel</text><text x="300" y="302" text-anchor="end">3962</text>
+    <text x="14" y="319">dm</text><text x="300" y="319" text-anchor="end">1874</text>
+    <text x="14" y="336">advert</text><text x="300" y="336" text-anchor="end">1311</text>
+    <text x="14" y="353">path</text><text x="300" y="353" text-anchor="end">1102</text>
+    <text x="14" y="370">anon-request</text><text x="300" y="370" text-anchor="end">987</text>
+    <text x="14" y="387">channel-data</text><text x="300" y="387" text-anchor="end">804</text>
+    <text x="14" y="404">response</text><text x="300" y="404" text-anchor="end">655</text>
+    <text x="14" y="421">ack</text><text x="300" y="421" text-anchor="end">288</text>
+    <text x="14" y="438">trace</text><text x="300" y="438" text-anchor="end">41</text>
+    <text x="14" y="455">control</text><text x="300" y="455" text-anchor="end">33</text>
+    <text x="14" y="472">multipart</text><text x="300" y="472" text-anchor="end">4</text>
+    <text x="14" y="489">raw</text><text x="300" y="489" text-anchor="end">1</text>
+  </g>
+  <g text-anchor="end">
+    <text class="c-y" x="368" y="285">1.8</text><text class="c-y" x="368" y="302">2.0</text><text class="c-y" x="368" y="319">3.4</text><text class="c-y" x="368" y="336">2.9</text>
+    <text class="c-y" x="368" y="353">3.1</text><text class="c-y" x="368" y="370">2.6</text><text class="c-y" x="368" y="387">1.2</text><text class="c-y" x="368" y="404">2.2</text>
+    <text class="c-y" x="368" y="421">4.0</text><text class="c-g" x="368" y="438">6.8</text><text class="c-y" x="368" y="455">-0.9</text><text class="c-g" x="368" y="472">8.1</text><text class="c-y" x="368" y="489">0.5</text>
+  </g>
+  <rect class="c-box" x="382.5" y="246.5" width="571" height="262"/>
+  <rect class="c-bg" x="390" y="240" width="300" height="14"/><text class="c-b" x="392" y="250"> Heard through (last repeater of flood packets) </text>
+  <g class="c-d"><text x="390" y="268">hash</text><text x="446" y="268">repeater</text><text x="880" y="268" text-anchor="end">packets</text><text x="944" y="268" text-anchor="end">avg snr</text></g>
+  <g class="c-d">
+    <text x="390" y="285">a3f2c8</text><text x="390" y="302">7c10e4</text><text x="390" y="319">b20e57</text><text x="390" y="336">4e91c2</text><text x="390" y="353">4e07b1</text>
+    <text x="390" y="370">d5a031</text><text x="390" y="387">19bb6f</text><text x="390" y="404">4e</text><text x="390" y="421">c7e2a9</text><text x="390" y="438">58f013</text>
+    <text x="390" y="455">e04d7a</text><text x="390" y="472">92ac10</text><text x="390" y="489">f1d3</text>
+  </g>
+  <g class="c-y">
+    <text x="446" y="285">Hilltop Rptr</text><text x="446" y="302">Pine Hill RPT 🌲</text><text x="446" y="319">Ridge Relay ⚡</text><text x="446" y="336">Forest Edge RPT</text>
+    <text x="446" y="353">Tower-East-2</text><text x="446" y="370">RPT-North-07</text><text x="446" y="387">Quarry RPT ⛏</text><text x="446" y="404">one of 4e91c2, 4e07b1</text>
+    <text x="446" y="421">NB-Repeater-3</text><text x="446" y="438">Lakeside Room</text><text x="446" y="455">Solar Node 2 🔆</text><text x="446" y="472">West Gate RPT</text><text x="446" y="489">?</text>
+  </g>
+  <g class="c-t" text-anchor="end">
+    <text x="880" y="285">3218</text><text x="880" y="302">2604</text><text x="880" y="319">2477</text><text x="880" y="336">1830</text><text x="880" y="353">1512</text>
+    <text x="880" y="370">1096</text><text x="880" y="387">742</text><text x="880" y="404">388</text><text x="880" y="421">215</text><text x="880" y="438">96</text>
+    <text x="880" y="455">47</text><text x="880" y="472">12</text><text x="880" y="489">1</text>
+  </g>
+  <g text-anchor="end">
+    <text class="c-g" x="944" y="285">10.8</text><text class="c-g" x="944" y="302">7.2</text><text class="c-g" x="944" y="319">11.6</text><text class="c-y" x="944" y="336">1.9</text>
+    <text class="c-g" x="944" y="353">6.4</text><text class="c-y" x="944" y="370">-3.8</text><text class="c-r" x="944" y="387">-8.9</text><text class="c-y" x="944" y="404">-1.5</text>
+    <text class="c-r" x="944" y="421">-6.1</text><text class="c-y" x="944" y="438">-0.4</text><text class="c-r" x="944" y="455">-10.2</text><text class="c-r" x="944" y="472">-7.7</text><text class="c-r" x="944" y="489">-13.0</text>
+  </g>
+  <text class="c-b" x="10" y="526">q</text><text class="c-d" x="24" y="526">quit</text>
+  <text class="c-b" x="68" y="526">Tab</text><text class="c-d" x="94" y="526">switch</text>
+  <text class="c-b" x="150" y="526">+/-</text><text class="c-d" x="176" y="526">period (24 h)</text>
+  <text class="c-b" x="270" y="526">↑↓</text><text class="c-d" x="288" y="526">scroll</text>
+  <text class="c-d" x="344" y="526">updated 19:42:10</text>
+</svg>
+<figcaption>The Mesh tab. "one of …" marks a short id that more than one repeater uses; "?" a repeater not known yet. Example data.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Key</th><th>Action</th></tr>
+<tr><td><kbd>+</kbd> <kbd>-</kbd></td><td class="w">Period; below 1 h it goes live: the last 15 minutes, by minute, refreshed every 2 s.</td></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td class="w">Scroll the "Heard through" list.</td></tr>
+</table></div>
+
+<h3 id="tab-history">4 · History</h3>
+<p>Your own radio over time, from the samples the proxy takes regularly: battery, temperature, noise floor, packets received and sent.</p>
+<div class="wrap"><table>
+<tr><th>Key</th><th>Action</th></tr>
+<tr><td><kbd>p</kbd></td><td class="w">Switch the charts: battery &amp; temperature ↔ packets received &amp; sent.</td></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td class="w">Scroll the samples.</td></tr>
+</table></div>
+
+<h3 id="tab-logs">5 · Logs</h3>
+<p>The service's log, newest at the bottom: connections, the radio link, problems. Warnings in <span class="warn">amber</span>, errors in <span class="bad">red</span>.</p>
+<div class="wrap"><table>
+<tr><th>Key</th><th>Action</th></tr>
+<tr><td><kbd>f</kbd></td><td class="w">Filter: everything → apps → radio → problems.</td></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd></td><td class="w">Older / newer lines.</td></tr>
+</table></div>
+
+<h3 id="tab-chat">6 · Chat</h3>
+<p>Every conversation the proxy recorded: channels first, then direct messages. Newest messages at the bottom, and you can write.</p>
+<figure class="con">
+<svg viewBox="0 0 960 462" role="img" aria-label="Chat tab: the chats on the left (channels with their region, then direct messages), the messages of the selected channel on the right with id size, hops, sender, text and region, and the box to write in">
+  <rect class="c-bg" x="0" y="0" width="960" height="462"/>
+  <text class="c-h" x="10" y="20">mcproxy</text><text class="c-d" x="66" y="20">by FED1291</text>
+  <text class="c-t" x="150" y="20">1 Status</text><text class="c-t" x="218" y="20">2 Nodes</text><text class="c-t" x="280" y="20">3 Mesh</text>
+  <text class="c-t" x="336" y="20">4 History</text><text class="c-t" x="410" y="20">5 Logs</text>
+  <rect class="c-fy" x="461" y="7" width="50" height="17"/><text class="c-k" x="466" y="20">6 Chat</text>
+  <rect class="c-box" x="6.5" y="34.5" width="210" height="380"/>
+  <rect class="c-bg" x="14" y="28" width="50" height="14"/><text class="c-b" x="16" y="38"> Chats </text>
+  <text class="c-d" x="12" y="56">channels</text>
+  <rect class="c-fy" x="10" y="61" width="203" height="16"/><text class="c-k" x="14" y="73">#hiking</text><text class="c-k" x="150" y="73">#eu</text><text class="c-k" x="196" y="73">5m</text>
+  <text class="c-t" x="14" y="90">Public</text><rect class="c-fm" x="148" y="78" width="42" height="16"/><text class="c-k" x="150" y="90">#eu</text><text class="c-t" x="190" y="90">21m</text>
+  <text class="c-t" x="14" y="107">#weather</text><rect class="c-fm" x="148" y="95" width="42" height="16"/><text class="c-k" x="150" y="107">#eu</text><text class="c-t" x="196" y="107">1h</text>
+  <text class="c-t" x="14" y="124">#help</text><text class="c-t" x="196" y="124">3h</text>
+  <text class="c-t" x="14" y="141">#bots</text><rect class="c-fm" x="142" y="129" width="48" height="16"/><text class="c-k" x="144" y="141">#eu-se</text><text class="c-t" x="196" y="141">2d</text>
+  <text class="c-t" x="14" y="158">Ops</text><text class="c-t" x="196" y="158">9d</text>
+  <text class="c-d" x="12" y="192">direct</text>
+  <text class="c-t" x="14" y="209">Mara 🐾</text><text class="c-t" x="196" y="209">1h</text>
+  <text class="c-t" x="14" y="226">Valley Node 🚲</text><text class="c-t" x="196" y="226">4h</text>
+  <text class="c-t" x="14" y="243">KX-Mobile 🚗</text><text class="c-t" x="196" y="243">2d</text>
+  <text class="c-t" x="14" y="260">Lakeside Room 🏠</text><text class="c-t" x="196" y="260">6d</text>
+  <text class="c-t" x="14" y="277">Old Mill 🌻</text><text class="c-t" x="190" y="277">12d</text>
+  <rect class="c-box" x="222.5" y="34.5" width="731" height="336"/>
+  <rect class="c-bg" x="230" y="28" width="236" height="14"/><text class="c-h" x="232" y="38"> #hiking · 2140 messages · </text>
+  <rect class="c-fm" x="416" y="28" width="42" height="14"/><text class="c-k" x="418" y="38">#eu</text>
+  <g class="c-t">
+    <text x="230" y="56">17:58</text><text x="230" y="73">18:02</text><text x="230" y="90">18:05</text><text x="230" y="107">18:11</text><text x="230" y="124">18:11</text>
+    <text x="230" y="141">18:20</text><text x="230" y="158">18:20</text><text x="230" y="175">18:31</text><text x="230" y="192">18:34</text><text x="230" y="209">18:40</text>
+    <text x="230" y="226">18:52</text><text x="230" y="243">19:05</text><text x="230" y="260">19:05</text><text x="230" y="311">19:12</text><text x="230" y="328">19:21</text>
+  </g>
+  <g class="c-fb">
+    <rect x="268" y="44" width="22" height="16"/><rect x="268" y="61" width="22" height="16"/><rect x="268" y="95" width="22" height="16"/>
+    <rect x="268" y="129" width="22" height="16"/><rect x="268" y="163" width="22" height="16"/><rect x="268" y="197" width="22" height="16"/>
+    <rect x="268" y="231" width="22" height="16"/><rect x="268" y="299" width="22" height="16"/><rect x="268" y="316" width="22" height="16"/>
+  </g>
+  <g class="c-fg"><rect x="268" y="78" width="22" height="16"/><rect x="268" y="112" width="22" height="16"/><rect x="268" y="146" width="22" height="16"/><rect x="268" y="180" width="22" height="16"/><rect x="268" y="248" width="22" height="16"/></g>
+  <rect class="c-fgr" x="268" y="214" width="22" height="16"/>
+  <g class="c-w"><text x="272" y="56">2B</text><text x="272" y="73">2B</text><text x="272" y="107">2B</text><text x="272" y="141">2B</text><text x="272" y="175">2B</text><text x="272" y="209">2B</text><text x="272" y="243">2B</text><text x="272" y="311">2B</text><text x="272" y="328">2B</text><text x="272" y="226">1B</text></g>
+  <g class="c-k"><text x="272" y="90">3B</text><text x="272" y="124">3B</text><text x="272" y="158">3B</text><text x="272" y="192">3B</text><text x="272" y="260">3B</text></g>
+  <g text-anchor="end">
+    <text class="c-y" x="314" y="56">3</text><text class="c-y" x="314" y="73">5</text><text class="c-y" x="314" y="90">4</text><text class="c-g" x="314" y="107">2</text><text class="c-y" x="314" y="124">4</text>
+    <text class="c-r" x="314" y="141">7</text><text class="c-y" x="314" y="158">6</text><text class="c-r" x="314" y="175">8</text><text class="c-g" x="314" y="192">»4</text><text class="c-y" x="314" y="209">3</text>
+    <text class="c-g" x="314" y="226">1</text><text class="c-y" x="314" y="243">5</text><text class="c-y" x="314" y="260">6</text><text class="c-y" x="314" y="311">4</text><text class="c-r" x="314" y="328">9</text>
+  </g>
+  <text class="c-b" x="322" y="56" style="fill:#61d6d6">Valley Node 🚲</text>
+  <text class="c-b" x="322" y="73" style="fill:#3b78ff">Pine Hill Hiker</text>
+  <text class="c-b" x="322" y="90" style="fill:#e74856">EchoBot 🤖</text>
+  <text class="c-b" x="322" y="107" style="fill:#16c60c">Mara 🐾</text>
+  <text class="c-b" x="322" y="124" style="fill:#e74856">EchoBot 🤖</text>
+  <text class="c-b" x="322" y="141" style="fill:#d670d6">KX-Mobile 🚗</text>
+  <text class="c-b" x="322" y="158" style="fill:#3a96dd">PathBot 🛰</text>
+  <text class="c-b" x="322" y="175" style="fill:#c33ec3">Lakeside Joe</text>
+  <text class="c-h" x="322" y="192">↳ me</text>
+  <text class="c-b" x="322" y="209" style="fill:#61d6d6">Valley Node 🚲</text>
+  <text class="c-b" x="322" y="226" style="fill:#13a10e">Old Mill 🌻</text>
+  <text class="c-b" x="322" y="243" style="fill:#3b78ff">Pine Hill Hiker</text>
+  <text class="c-b" x="322" y="260" style="fill:#3a96dd">PathBot 🛰</text>
+  <text class="c-b" x="322" y="311" style="fill:#16c60c">Mara 🐾</text>
+  <text class="c-b" x="322" y="328" style="fill:#d670d6">Sunny Bot ☀</text>
+  <g class="c-t">
+    <text x="452" y="56">anyone up on the ridge tonight?</text>
+    <text x="452" y="73">yes, from 9 pm at the north hut</text>
+    <text x="452" y="90">🤖 Copy, Pine Hill Hiker! 5 hops @ 18:02</text>
+    <text x="452" y="107">ping</text>
+    <text x="452" y="124">🤖 Copy, Mara! 2 hops @ 18:11</text>
+    <text x="452" y="141">Path</text>
+    <text x="452" y="158">@[KX-Mobile]: Path: a3f2 → 7c10 → 4e07 - 3 hops</text>
+    <text x="452" y="175">test from the lake, anyone?</text>
+    <text x="452" y="192">heard you fine, see you at the hut 👍</text>
+    <text x="452" y="209">@[Ridge Base ⛰] 👍</text>
+    <text x="452" y="226">anyone with a spare LoRa antenna?</text>
+    <text x="452" y="243">Path</text>
+    <text x="452" y="260">@[Pine Hill Hiker]</text>
+    <text x="452" y="277">a3f2: Hilltop Rptr</text>
+    <text x="452" y="294">7c10: Pine Hill RPT 🌲</text>
+    <text x="452" y="311">on my way 🚶</text>
+    <text x="452" y="328">☀ 18 °C, light wind, clear sky</text>
+  </g>
+  <g class="c-m" text-anchor="end">
+    <text x="944" y="56">#eu</text><text x="944" y="73">#eu</text><text x="944" y="90">#eu</text><text x="944" y="107">#eu</text><text x="944" y="124">#eu</text>
+    <text x="944" y="141">#?</text><text x="944" y="158">#eu</text><text x="944" y="209">#eu</text><text x="944" y="226">#eu</text><text x="944" y="243">#eu</text>
+    <text x="944" y="294">#eu</text><text x="944" y="311">#eu</text><text x="944" y="328">#eu-se</text>
+  </g>
+  <rect class="c-box" x="222.5" y="376.5" width="731" height="38"/>
+  <rect class="c-bg" x="230" y="370" width="74" height="14"/><text class="c-d" x="232" y="380"> to #hiking </text>
+  <text class="c-d" x="232" y="402">› press i to write a message</text>
+  <g class="c-b"><text x="10" y="434">q</text><text x="68" y="434">Tab</text><text x="150" y="434">&lt; &gt;</text><text x="208" y="434">i</text><text x="258" y="434">↑↓</text>
+    <text x="320" y="434">Home/End</text><text x="482" y="434">g</text><text x="594" y="434">n</text><text x="690" y="434">x</text><text x="806" y="434">m</text></g>
+  <g class="c-d"><text x="24" y="434">quit</text><text x="94" y="434">switch</text><text x="176" y="434">chat</text><text x="222" y="434">write</text><text x="276" y="434">scroll</text>
+    <text x="378" y="434">oldest / newest</text><text x="496" y="434">channel region</text><text x="608" y="434">new channel</text><text x="704" y="434">remove channel</text><text x="820" y="434">send again</text>
+    <text x="10" y="451">show: d details · b id size · r regions · s delivery</text><text x="380" y="451">updated 19:42:10</text></g>
+</svg>
+<figcaption>The Chat tab. Left: the chats, with each channel's region. Right: the messages (path id size, hops, sender, text, region); "»4" under yours: heard repeated by 4 repeaters. Bottom: the box to write in. Example data.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Part</th><th>What it tells you</th></tr>
+<tr><td>Id size badge</td><td class="w">The path id size of the message's packet: <b>1B</b> grey, <b>2B</b> blue, <b>3B</b> green.</td></tr>
+<tr><td>Hops</td><td class="w">How many repeaters it came over (0 = heard directly), coloured.</td></tr>
+<tr><td>Region</td><td class="w">The region (flood scope) of the channel, in the list and the header: its own, the companion's "(companion)", or "everywhere".
+  On a message: the region it was sent in, or <code>#?</code> when it had one the proxy doesn't know.</td></tr>
+<tr><td>Details</td><td class="w">At the end of each message: how often it was heard, the repeater it came through, its SNR. Ours: how often it was heard back.</td></tr>
+</table></div>
+<div class="wrap"><table>
+<tr><th>Key</th><th>Action</th></tr>
+<tr><td><kbd>&lt;</kbd> <kbd>&gt;</kbd> (or <kbd>,</kbd> <kbd>.</kbd>, <kbd>←</kbd> <kbd>→</kbd>)</td><td class="w">Previous / next chat.</td></tr>
+<tr><td><kbd>↑</kbd> <kbd>↓</kbd>, <kbd>PgUp</kbd> <kbd>PgDn</kbd>, <kbd>Home</kbd> <kbd>End</kbd></td><td class="w">Scroll; oldest / newest.</td></tr>
+<tr><td><kbd>i</kbd> (or <kbd>Enter</kbd>)</td><td class="w">Write. <kbd>Enter</kbd> sends (once, never repeated) and the box stays open for the next one; <kbd>Esc</kbd> stops writing.</td></tr>
+<tr><td><kbd>m</kbd></td><td class="w">Send again (shown only when one of yours can go out again): picks your newest DM that was not delivered (<code>×</code>) or may not have gone out (<code>?</code>), or channel message no repeater was heard passing on (from 30 s to 10 min after sending). <kbd>↑</kbd> <kbd>↓</kbd> pick another, <kbd>Enter</kbd> sends it again, <kbd>d</kbd> direct, <kbd>f</kbd> flood (DMs), <kbd>Esc</kbd> back.
+  It is the same message, not a new one: it stays one line. On a channel it is the very same packet: a radio that already has it ignores it. A DM goes as its next attempt: if only the ACK was lost, the recipient's app may show it twice.</td></tr>
+<tr><td><kbd>n</kbd></td><td class="w">New hashtag channel: type its name (letters, digits, <code>-</code> <code>_</code>) and <kbd>Enter</kbd>. It goes in the companion's first empty slot as <code>#name</code>; anyone who adds the same name reads it.</td></tr>
+<tr><td><kbd>x</kbd></td><td class="w">On a channel: removes it from the companion, after <kbd>y</kbd> / <kbd>n</kbd>; a second question asks whether its stored messages are deleted from the proxy too. On a direct chat: deletes that conversation from the proxy, after <kbd>y</kbd> / <kbd>n</kbd> (the contact stays).</td></tr>
+<tr><td><kbd>d</kbd></td><td class="w">Show / hide the details (off at start).</td></tr>
+<tr><td><kbd>b</kbd></td><td class="w">Show / hide the id size badges (on at start).</td></tr>
+<tr><td><kbd>r</kbd></td><td class="w">Show / hide the regions (on at start).</td></tr>
+<tr><td><kbd>s</kbd></td><td class="w">Show / hide the delivery of your messages, next to the id size badge (on at start): <code>..</code> on its way, <code>√</code> sent, <code>√√</code> delivered (direct message: the recipient confirmed it), <code>»3</code> repeated by 3 repeaters (channel), <code>2/3</code> sent again (attempt 2 of 3), <code>×</code> not delivered, <code>?</code> not known whether it went out (the companion did not answer; it can be sent again).</td></tr>
+<tr><td><kbd>g</kbd></td><td class="w">The selected channel's region: type its name and <kbd>Enter</kbd> (empty = the companion's region, <code>*</code> = no region). Saved in the proxy: every app and frontend uses it, and the last one set wins.
+  When a MeshCore app sends in a channel with its own region, the proxy learns that region by itself (names up to 4 characters; a longer one is set here once).</td></tr>
+</table></div>
+
+<h3 id="colours">Colours</h3>
+<p>Values are coloured by how good they are, everywhere in the console and the apps.</p>
+<div class="wrap"><table>
+<tr><th>Value</th><th><span class="good">Good</span></th><th><span class="warn">Fair</span></th><th><span class="bad">Poor</span></th><th>Meaning</th></tr>
+<tr><td>SNR</td><td>≥ 5 dB</td><td>−5 to 5 dB</td><td>&lt; −5 dB</td><td class="w">How far above the background noise a packet was. LoRa still decodes below 0.</td></tr>
+<tr><td>RSSI</td><td>≥ −100 dBm</td><td>−115 to −100</td><td>&lt; −115 dBm</td><td class="w">Raw received strength.</td></tr>
+<tr><td>Noise floor</td><td>≤ −110 dBm</td><td>−110 to −95</td><td>&gt; −95 dBm</td><td class="w">Background noise at your radio: lower is better.</td></tr>
+<tr><td>Battery</td><td>≥ 3.9 V</td><td>3.6 to 3.9 V</td><td>&lt; 3.6 V</td><td class="w">Lithium cell voltage.</td></tr>
+</table></div>
+</section>
+
+<section class="panel" id="api" role="tabpanel">
+<h2>Apps &amp; API</h2>
+
+<div class="wrap"><table>
+<tr><th>App</th><th>Port</th><th>How</th></tr>
+<tr><td>MeshCore apps, meshcore-cli, Home Assistant</td><td><code>5000</code></td><td class="w">Their usual <b>TCP</b> connection: the proxy speaks the radio's own protocol.</td></tr>
+<tr><td>mcproxy desk, Android, web pages, scripts</td><td><code>5080</code></td><td class="w">The <b>data API</b>: HTTPS + live events, with the history the proxy keeps. Every endpoint is described in <code>API.md</code>, next to this guide.</td></tr>
+</table></div>
+
+<ol class="steps">
+<li>
+  <h4>Get the address and fingerprint <span class="where pi">on the proxy machine</span></h4>
+  <div class="cmd"><pre>mcproxy api</pre></div>
+  <p>Shows the address (e.g. <code>https://192.168.1.50:5080/api/v1</code>), the certificate fingerprint and whether a token is set.
+  The proxy makes its own certificate on first start.</p>
+</li>
+<li>
+  <h4>Connect the app</h4>
+  <p>Enter the address in the app (<span class="where pc">on your computer</span> the desk app, <span class="where phone">on the phone</span> the Android app). On the first connection the app shows the
+  certificate's fingerprint: <b>compare it with the one from step 1</b> and accept it. The app remembers it.</p>
+  <div class="alert"><b>Changed fingerprint</b> Accept a new fingerprint only after reinstalling the proxy or deleting its key. Otherwise, another device is answering at that address.</div>
+</li>
+</ol>
+
+<h3>Settings</h3>
+<p>In <code>config/config.toml</code> (in the install folder), section <code>[api]</code>, then <code>sudo systemctl restart mcproxy</code>:</p>
+<div class="wrap"><table>
+<tr><th>Setting</th><th>Default</th><th>Meaning</th></tr>
+<tr><td><code>enabled</code></td><td><code>true</code></td><td class="w">The data API on or off.</td></tr>
+<tr><td><code>listen</code></td><td><code>0.0.0.0:5080</code></td><td class="w">Where it answers.</td></tr>
+<tr><td><code>token</code></td><td><code>""</code></td><td class="w">Empty = no token. Set one to ask every app for it.</td></tr>
+<tr><td><code>[server] allow</code></td><td><code>[]</code></td><td class="w">Empty = everyone, or e.g. <code>["192.168.1.0/24"]</code>: who may connect (both ports).</td></tr>
+</table></div>
+</section>
+
+<section class="panel" id="update" role="tabpanel">
+<h2>Update</h2>
+<p class="sub">An update replaces the program file only. Configuration, data and pairing are kept.</p>
+
+<ol class="steps">
+<li>
+  <h4>Replace the program <span class="where pi">on the proxy machine</span></h4>
+  <p>Put the new <code>mcproxy</code> file next to the old one under another name, then rename it: this works even while the service runs.</p>
+  <div class="cmd"><pre>cd ~/mcproxy
+cp /path/to/new/mcproxy mcproxy.new &amp;&amp; chmod +x mcproxy.new &amp;&amp; mv mcproxy.new mcproxy</pre></div>
+  <p>A new <code>deploy/</code> folder or <code>GUIDE.html</code> replaces the old one.</p>
+</li>
+<li>
+  <h4>Restart <span class="where pi">on the proxy machine</span></h4>
+  <div class="cmd"><pre>sudo systemctl restart mcproxy
+mcproxy status</pre></div>
+  <p>Until the restart, the service runs the old version.</p>
+</li>
+</ol>
+
+<div class="note"><b>New settings</b> are added to your config with their defaults when the new version starts; existing values are never changed.</div>
+</section>
+
+<section class="panel" id="remove" role="tabpanel">
+<h2>Remove</h2>
+<p class="sub"><span class="where pi">on the proxy machine</span> Each step reverts one installation step. Run them in order, or only those you need.</p>
+
+<div class="note"><b>Before you start</b> Set the install folder in the terminal; the commands below use it.</div>
+<div class="cmd"><pre>DIR="$(dirname "$(readlink -f /usr/local/bin/mcproxy)")"; echo "$DIR"</pre></div>
+<p>If the link is already gone, set it by hand: <code>DIR=/path/to/the/folder</code>.</p>
+
+<ol class="steps">
+<li>
+  <h4>Stop and remove the service</h4>
+  <div class="cmd"><pre>sudo systemctl disable --now mcproxy
+sudo rm /etc/systemd/system/mcproxy.service
+sudo systemctl daemon-reload
+sudo systemctl reset-failed mcproxy 2>/dev/null || true</pre></div>
+</li>
+<li>
+  <h4>Forget the companion in Bluetooth</h4>
+  <p>Before deleting the program (it uses the address and adapter from the config). Skip it if another program still needs the pairing.</p>
+  <div class="cmd"><pre>mcproxy unpair</pre></div>
+</li>
+<li>
+  <h4>Remove the <code>mcproxy</code> command</h4>
+  <div class="cmd"><pre>sudo rm /usr/local/bin/mcproxy</pre></div>
+</li>
+<li>
+  <h4>Groups (only those the installer added)</h4>
+  <div class="cmd"><pre>[ -f "$DIR/deploy/.added-bluetooth-group" ] &amp;&amp; sudo gpasswd -d "$(cat "$DIR/deploy/.added-bluetooth-group")" bluetooth
+[ -f "$DIR/deploy/.added-dialout-group" ] &amp;&amp; sudo gpasswd -d "$(cat "$DIR/deploy/.added-dialout-group")" dialout</pre></div>
+  <p>No marker file = you were already in the group before: it stays.</p>
+</li>
+<li>
+  <h4>Delete the files</h4>
+  <p>Only mcproxy's own files (program, guide, config, install files, database, logs). To keep a language you translated, copy its folder from <code>config/locales/</code> first.</p>
+  <div class="cmd"><pre>cd "$DIR" &amp;&amp; rm -f mcproxy mcproxy.new GUIDE.html GUIDE.fr.html API.md &amp;&amp; rm -rf config deploy data logs
+cd ~ &amp;&amp; rmdir "$DIR"     <span class="c"># if the folder is now empty</span></pre></div>
+</li>
+<li>
+  <h4>Delete the message key and the API certificate</h4>
+  <div class="cmd"><pre>rm -rf ~/.config/mcproxy</pre></div>
+  <div class="alert"><b>Without the key</b>, the stored message texts can never be read again. The apps will ask you to accept a new certificate after a reinstall.</div>
+</li>
+</ol>
+<div class="tip"><b>Nothing else to undo:</b> no packages are installed and no system config file is edited.</div>
+</section>
+
+<section class="panel" id="trouble" role="tabpanel">
+<h2>Problems</h2>
+<p class="sub"><span class="where pi">on the proxy machine</span> <code>mcproxy doctor</code> checks the configuration, the radio link, the pairing and the service, and suggests a fix for each problem.</p>
+<div class="cmd"><pre>mcproxy doctor
+mcproxy logs --problems</pre></div>
+<div class="wrap"><table>
+<tr><th>You see</th><th>Do this</th></tr>
+<tr><td><span class="bad">● radio DOWN</span> (Bluetooth)</td><td class="w">The radio takes one Bluetooth connection: disconnect your phone from it (or stop another proxy), then wait or run <code>mcproxy reconnect</code>.</td></tr>
+<tr><td>"not paired" after changing adapter</td><td class="w"><code>mcproxy setup</code>: pairing is per adapter.</td></tr>
+<tr><td>USB: "no permission"</td><td class="w">Log out and back in once after the install (it added you to the <code>dialout</code> group).</td></tr>
+<tr><td>USB: "in use by another program"</td><td class="w">A serial monitor is open, or on desktop Linux ModemManager took it: <code>sudo systemctl stop ModemManager</code>.</td></tr>
+<tr><td>USB: "no answer"</td><td class="w">The radio needs the <b>USB</b> companion firmware (not the Bluetooth one).</td></tr>
+<tr><td>TCP: "another program connected to it directly"</td><td class="w">An app or tool is set to the companion's own address: point it to mcproxy instead. mcproxy takes the companion back after 5 s, then waits longer each time it is taken.</td></tr>
+<tr><td>TCP: "no answer in … s" / "cannot find"</td><td class="w">The companion is off, out of Wi-Fi range, or got another address: give it a fixed one in the router (DHCP reservation). Its own console shows it: <code>get wifi.ip</code>.</td></tr>
+<tr><td>An app keeps disconnecting</td><td class="w">Console, Logs tab, <kbd>f</kbd> to "apps": each disconnect with its reason.</td></tr>
+<tr><td>"The mcproxy service is not running"</td><td class="w"><code>sudo systemctl start mcproxy</code>; why it stopped: <code>mcproxy logs --problems</code>.</td></tr>
+<tr><td>Port 5000 or 5080 in use</td><td class="w">Another proxy is still running: <code>ss -ltnp | grep -E '5000|5080'</code>.</td></tr>
+<tr><td>An added language shows in English, or partly</td><td class="w"><code>mcproxy language</code> names its file and the lines with a mistake (see <a href="#language">Language</a>).</td></tr>
+<tr><td>Chat texts "not readable here"</td><td class="w">Run the console as the service's user: the message key is in that user's home.</td></tr>
+</table></div>
+</section>
+
+<footer>mcproxy · by FED1291</footer>
+</main>
+
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('nav.tabs button'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('section.panel'));
+  function show(id, target) {
+    var found = false;
+    panels.forEach(function (p) { var on = p.id === id; p.classList.toggle('on', on); found = found || on; });
+    if (!found) { return false; }
+    tabs.forEach(function (b) { b.setAttribute('aria-selected', b.dataset.tab === id ? 'true' : 'false'); });
+    if (target) { target.scrollIntoView(); } else { window.scrollTo(0, 0); }
+    return true;
+  }
+  function go(hash) {
+    var el = hash && document.getElementById(hash.slice(1));
+    var panel = el && (el.classList.contains('panel') ? el : el.closest('section.panel'));
+    if (!panel) { return show('overview'); }
+    show(panel.id, el === panel ? null : el);
+  }
+  tabs.forEach(function (b) {
+    b.addEventListener('click', function () { history.replaceState(null, '', '#' + b.dataset.tab); show(b.dataset.tab); });
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href^="#"]');
+    if (!a) { return; }
+    e.preventDefault();
+    history.replaceState(null, '', a.getAttribute('href'));
+    go(a.getAttribute('href'));
+  });
+  window.addEventListener('hashchange', function () { go(location.hash); });
+  go(location.hash);
+  document.querySelector('.lang a').addEventListener('click', function () { this.hash = location.hash; });
+
+  document.querySelectorAll('.cmd').forEach(function (box) {
+    var pre = box.querySelector('pre');
+    var b = document.createElement('button');
+    b.className = 'copy'; b.type = 'button'; b.textContent = 'Copy';
+    b.addEventListener('click', function () {
+      var clone = pre.cloneNode(true);
+      clone.querySelectorAll('.c, .where').forEach(function (n) { n.remove(); });
+      var text = clone.textContent.split('\n').map(function (l) { return l.replace(/\s+$/, ''); })
+        .filter(function (l) { return l.length; }).join('\n');
+      var done = function () { b.textContent = 'Copied'; b.classList.add('done');
+        setTimeout(function () { b.textContent = 'Copy'; b.classList.remove('done'); }, 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); });
+      } else { fallback(text); done(); }
+    });
+    box.appendChild(b);
+  });
+  function fallback(text) {
+    var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t);
+    t.select(); try { document.execCommand('copy'); } catch (e) {} t.remove();
+  }
+})();
+</script>
+</body>
+</html>

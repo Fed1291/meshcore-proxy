@@ -1,0 +1,1178 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guide mcproxy Android</title>
+<style>
+:root {
+  --bg: #f7f7f4; --panel: #ffffff; --ink: #1d1f21; --dim: #6b6f75; --line: #dcdcd6;
+  --accent: #b7791f; --accent-soft: #fbf1dc; --cyan: #127a8a; --cyan-soft: #e1f2f4;
+  --good: #2f8a3e; --good-soft: #e5f3e7; --warn: #b7791f; --bad: #c0392b; --bad-soft: #fbe6e3;
+  --violet: #6b4fbb; --violet-soft: #eee9fa;
+  --term: #15171a; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #3a3f45;
+  --code-bg: #efefea;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+    --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+    --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+    --violet: #a993f0; --violet-soft: #231d36;
+    --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+    --code-bg: #24272b;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+  --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+  --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+  --violet: #a993f0; --violet-soft: #231d36;
+  --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+  --code-bg: #24272b;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+a { color: var(--cyan); }
+code, kbd, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: .92em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+kbd { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 5px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); white-space: nowrap; }
+main { max-width: 1000px; margin: 0 auto; padding: 0 16px 64px; }
+
+header.top { padding: 24px 0 14px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); margin: 0; }
+.lang { float: right; margin: 0 0 0 16px; color: var(--dim); font-size: .95rem; }
+nav.tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; scrollbar-width: none; }
+nav.tabs::-webkit-scrollbar { display: none; }
+@media (min-width: 601px) { nav.tabs { flex-wrap: wrap; } }
+nav.tabs button { font: inherit; font-size: .95rem; color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: 8px 10px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button .n { display: inline-block; width: 1.4em; color: var(--accent); font-weight: 700; }
+section.panel { padding-top: 26px; }
+.js section.panel:not(.on) { display: none; }
+
+h2 { font-size: 1.5rem; margin: 0 0 4px; }
+h3 { font-size: 1.12rem; margin: 30px 0 8px; padding-left: 10px; border-left: 4px solid var(--accent); }
+h4 { font-size: 1rem; margin: 20px 0 6px; }
+p { margin: 8px 0; }
+.sub { color: var(--dim); margin: 0 0 14px; }
+.good { color: var(--good); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+
+.note, .tip, .alert { border-left: 4px solid; padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+.note { background: var(--accent-soft); border-color: var(--accent); }
+.tip { background: var(--good-soft); border-color: var(--good); }
+.alert { background: var(--bad-soft); border-color: var(--bad); }
+.note b:first-child, .tip b:first-child, .alert b:first-child { margin-right: 4px; }
+
+.where { display: inline-block; font: 600 .72rem/1 "IBM Plex Sans", "Segoe UI", sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 999px; vertical-align: middle; }
+.where.pi { background: var(--cyan-soft); color: var(--cyan); }
+.where.pc { background: var(--accent-soft); color: var(--accent); }
+.where.phone { background: var(--violet-soft); color: var(--violet); }
+
+.cmd { position: relative; margin: 8px 0; }
+.cmd pre { background: var(--term); color: var(--term-ink); padding: 12px 70px 12px 14px; border-radius: 8px;
+  overflow-x: auto; margin: 0; line-height: 1.5; }
+.cmd pre .c { color: var(--term-dim); }
+.cmd button.copy { position: absolute; top: 8px; right: 8px; font: 600 .75rem "IBM Plex Sans", sans-serif;
+  background: #2a2e33; color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+.cmd button.copy:hover { border-color: var(--accent); }
+.cmd button.copy.done { color: #111; background: var(--good); border-color: var(--good); }
+
+ol.steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+ol.steps > li { counter-increment: step; position: relative; padding: 14px 16px 14px 60px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); color: #111; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps > li > h4 { margin: 3px 0 6px; }
+ol.steps > li > h4 .where { margin-left: 6px; }
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card b { display: block; margin-bottom: 4px; }
+.card p { margin: 0; color: var(--dim); font-size: .94rem; }
+
+.wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--code-bg); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.w { white-space: normal; }
+#trouble td:first-child { white-space: normal; min-width: 180px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips a { font-family: "IBM Plex Mono", monospace; font-size: .85rem; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); padding: 3px 10px; border-radius: 4px; }
+.chips a:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+figure { margin: 16px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--dim); font-size: .88rem; margin-top: 6px; }
+footer { margin-top: 56px; color: var(--dim); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+.s-term { fill: var(--term); }
+.s-box { fill: none; stroke: var(--term-line); stroke-width: 1.5; }
+.s-t { fill: var(--term-ink); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-td { fill: var(--term-dim); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-ta { fill: var(--accent); font: 600 13px "IBM Plex Mono", Consolas, monospace; }
+.s-tc { fill: var(--cyan); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-tab { fill: var(--accent); }
+.s-tabt { fill: #111; font: 700 12px "IBM Plex Mono", Consolas, monospace; }
+.s-good { fill: var(--good); } .s-warn { fill: var(--warn); } .s-bad { fill: var(--bad); }
+.s-goodt { fill: var(--good); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-warnt { fill: var(--warn); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-badt { fill: var(--bad); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-lc { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.s-ink { fill: var(--ink); font: 600 14px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-dim { fill: var(--dim); font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-line { stroke: var(--dim); stroke-width: 2; fill: none; }
+.s-acc { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.s-node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+.s-hub { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.s-pill { fill: #6b4fbb; } .s-pillt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+.s-reg { fill: #b04fa0; } .s-regt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+figure.phone svg { border-radius: 14px; border: 1px solid var(--line); max-width: 420px; margin: 0 auto; }
+figure.menu svg { border-radius: 14px; border: 1px solid var(--line); }
+.p-bg { fill: #000000; } .p-c { fill: #171717; } .p-ch { fill: #2a2a2a; } .p-chh { fill: #3a3a3a; }
+.p-pri { fill: #e5574c; } .p-pc { fill: #e5574c; } .p-line { stroke: #2e2e2e; stroke-width: 1; fill: none; }
+.p-ic { stroke: #9a9a9a; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icp { stroke: #e5574c; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icg { stroke: #4cb87a; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icb { stroke: #f0a7a1; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-t, .p-tl, .p-ts, .p-m, .p-n, .p-h, .p-on, .p-b, .p-bad, .p-good { font-family: Roboto, "Segoe UI", system-ui, sans-serif; }
+.p-t { fill: #fafafa; font-size: 15px; } .p-tl { fill: #fafafa; font-size: 15.5px; } .p-ts { fill: #fafafa; font-size: 12px; }
+.p-m { fill: #9a9a9a; font-size: 11px; } .p-n { font-size: 12px; font-weight: 600; } .p-h { fill: #fafafa; font-size: 16px; font-weight: 600; }
+.p-on { fill: #ffffff; font-size: 15px; } .p-b { fill: #fafafa; font-size: 12px; font-weight: 600; }
+.p-bad { fill: #f0a7a1; font-size: 15.5px; } .p-good { fill: #4cb87a; font-size: 11px; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  ol.steps > li { padding-left: 52px; }
+  ol.steps > li::before { left: 12px; }
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js');</script>
+<main>
+
+<header class="top">
+  <p class="lang"><a href="GUIDE.html" lang="en">English</a> · Français</p>
+  <h1>mc<span>proxy</span> pour Android</h1>
+  <p class="lead">Client Android de l'API de données de mcproxy : canaux, messages directs, contacts et régions du compagnon MeshCore que mcproxy partage.</p>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="Sections du guide">
+  <button role="tab" data-tab="overview"><span class="n">1</span>Aperçu</button>
+  <button role="tab" data-tab="connect"><span class="n">2</span>Connecter</button>
+  <button role="tab" data-tab="using"><span class="n">3</span>Utiliser</button>
+  <button role="tab" data-tab="trouble"><span class="n">4</span>Problèmes</button>
+</nav>
+
+<section class="panel" id="overview" role="tabpanel">
+<h2>Aperçu</h2>
+
+<p>L'app se connecte à l'<b>API de données</b> du proxy (HTTPS, port <code>5080</code>). Elle ne se connecte pas à la radio : elle affiche
+les données que le proxy relaie et stocke, et envoie les messages par le proxy. La radio reste connectée au proxy pendant que le
+téléphone se connecte et se déconnecte.</p>
+<div class="note"><b>Facultative</b> mcproxy est le programme principal et se suffit à lui-même, avec sa console et ses commandes. L'app Android est une vue de plus des mêmes données, sur le téléphone. Les apps officielles MeshCore peuvent se connecter en même temps au même proxy, sur le port <code>5000</code>.</div>
+
+<figure>
+<svg viewBox="0 0 900 200" role="img" aria-label="La radio se connecte à mcproxy, qui sert l'app Android en HTTPS">
+  <rect class="s-node" x="20" y="60" width="160" height="80" rx="10"/>
+  <text class="s-ink" x="100" y="96" text-anchor="middle">Companion</text>
+  <text class="s-dim" x="100" y="116" text-anchor="middle">MeshCore radio</text>
+  <path class="s-line" d="M180 100 H 330"/>
+  <text class="s-dim" x="255" y="90" text-anchor="middle">Bluetooth or USB</text>
+  <rect class="s-hub" x="330" y="45" width="230" height="110" rx="12"/>
+  <text class="s-ink" x="445" y="88" text-anchor="middle">mcproxy</text>
+  <text class="s-dim" x="445" y="110" text-anchor="middle">relays and keeps the history</text>
+  <path class="s-acc" d="M560 100 H 700"/>
+  <text class="s-dim" x="630" y="90" text-anchor="middle">HTTPS 5080</text>
+  <rect class="s-node" x="700" y="55" width="180" height="90" rx="14"/>
+  <text class="s-ink" x="790" y="94" text-anchor="middle">mcproxy</text>
+  <text class="s-dim" x="790" y="114" text-anchor="middle">on the phone</text>
+</svg>
+<figcaption>Les réglages radio restent sur la radio. Le proxy relaie le trafic et stocke l'historique ; l'app l'affiche et envoie par le proxy.</figcaption>
+</figure>
+
+<h3>Fonctions</h3>
+<div class="cards">
+  <div class="card"><b>Chats</b><p>Canaux (public, hashtag, privés) et messages directs, en direct, avec réponses, liens et état de remise.</p></div>
+  <div class="card"><b>Pas de double envoi</b><p>Chaque message a un seul id. Après une erreur réseau, l'app répète la demande avec le même id ; le proxy n'envoie chaque id qu'une fois.</p></div>
+  <div class="card"><b>Contacts</b><p>Chaque noeud que le proxy connaît : recherche, filtres, une fiche par contact avec sa route et sa clé.</p></div>
+  <div class="card"><b>Régions</b><p>Voir et régler la région de chaque canal, et demander aux répéteurs proches quelles régions ils desservent.</p></div>
+  <div class="card"><b>Console des noeuds</b><p>Se connecter à des répéteurs, capteurs et salons, envoyer des commandes, lire ce qu'ils rapportent.</p></div>
+  <div class="card"><b>Notifications</b><p>Par chat : tous les messages, les mentions seulement, ou aucune. En option, app fermée aussi.</p></div>
+  <div class="card"><b>Apparence</b><p>Material You sur la plupart des téléphones, One UI sur Samsung ; clair et sombre suivent le téléphone. En option, des accents rouges suisses.</p></div>
+</div>
+
+<h3>Il faut</h3>
+<div class="wrap"><table>
+<tr><th>Élément</th><th>Détails</th></tr>
+<tr><td>Un mcproxy en marche</td><td class="w">Avec son API de données active (par défaut). Voir le guide du proxy, onglet <b>Apps et API</b>.</td></tr>
+<tr><td>Un téléphone</td><td class="w">Android 10 ou plus récent avec l'app mcproxy, sur le même réseau que le proxy (ou qui le joint par un VPN).</td></tr>
+</table></div>
+
+</section>
+
+<section class="panel" id="connect" role="tabpanel">
+<h2>Connecter</h2>
+<p class="sub">À faire une fois par proxy. L'app garde la connexion et se reconnecte toute seule.</p>
+
+<ol class="steps">
+<li>
+  <h4>Obtenir l'adresse et l'empreinte <span class="where pi">sur la machine du proxy</span></h4>
+  <div class="cmd"><pre>mcproxy api</pre></div>
+  <p>La commande affiche l'adresse (par ex. <code>https://192.168.1.50:5080/api/v1</code>), l'empreinte du certificat, et si un jeton est défini.</p>
+</li>
+<li>
+  <h4>Entrer l'adresse <span class="where phone">sur le téléphone</span></h4>
+  <div class="wrap"><table>
+  <tr><th>Champ</th><th>Valeur</th></tr>
+  <tr><td>Adresse API</td><td class="w">Par exemple <code>https://192.168.1.50:5080</code>. Sans préfixe, l'app ajoute <code>https://</code> ; un <code>/api/v1</code> final est accepté.
+  <code>http://</code> ne sert que si le proxy fonctionne sans TLS ; l'app indique alors que la connexion n'est pas chiffrée.</td></tr>
+  <tr><td>Jeton</td><td class="w">Nécessaire seulement si le proxy définit <code>[api] token</code>. Sinon, laissez vide.</td></tr>
+  </table></div>
+  <p>Touchez <b>Connecter</b>.</p>
+</li>
+<li>
+  <h4>Comparer l'empreinte <span class="where phone">sur le téléphone</span></h4>
+  <p>À la première connexion, l'app affiche <b>« Est-ce le bon proxy ? »</b> avec l'empreinte du certificat. Comparez-la avec celle de l'étape 1.
+  Si elles sont identiques, touchez <b>Approuver</b>. L'app épingle le certificat ; ensuite, seul ce certificat est accepté à cette adresse.</p>
+  <div class="alert"><b>Certificat changé</b> L'app affiche « Le certificat du proxy a changé » quand un autre certificat répond. Ne touchez
+  <b>Approuver le nouveau</b> qu'après avoir réinstallé le proxy ou supprimé sa clé. Sinon, un autre appareil répond à cette adresse.</div>
+</li>
+</ol>
+
+<div class="note"><b>Certificats publics</b> Un certificat signé par une autorité connue est accepté sans l'étape de l'empreinte.</div>
+<p>Les réglages du proxy (port, jeton, adresses autorisées) sont décrits dans le guide du proxy, onglet <b>Apps et API</b>.</p>
+</section>
+
+<section class="panel" id="using" role="tabpanel">
+<h2>Utiliser</h2>
+<p class="sub"><span class="where phone">sur le téléphone</span> Les écrans, leurs éléments, et les actions possibles sur chacun.</p>
+
+<div class="chips">
+  <a href="#u-status">Carte d'état</a><a href="#u-chats">Chat</a><a href="#u-chat">Un chat</a><a href="#u-send">Envoyer</a>
+  <a href="#u-menu">Menu du chat</a><a href="#u-regions">Régions</a><a href="#u-contacts">Contacts</a><a href="#u-stats">Stats</a><a href="#u-console">Console des noeuds</a>
+  <a href="#u-settings">Réglages</a><a href="#u-notify">Notifications</a><a href="#colours">Couleurs</a>
+</div>
+
+<h3 id="u-status">Carte d'état</h3>
+<p>Affichée en haut de Chat, Contacts et Stats.</p>
+<div class="wrap"><table>
+<tr><th>Partie</th><th>Signification</th></tr>
+<tr><td>Point</td><td class="w"><span class="good">vert</span> en ligne, <span class="warn">ambre</span> connexion en cours, <span class="bad">rouge</span> hors ligne : la liaison en direct de l'app avec le proxy.</td></tr>
+<tr><td>Nom</td><td class="w">Le nom de votre noeud. Une étiquette rouge <span class="bad">radio non connectée</span> quand le proxy a perdu la radio, ou une étiquette « Connexion… » / « Hors ligne » tant que la liaison en direct est coupée.</td></tr>
+<tr><td>👥 <code>1250 / 350</code></td><td class="w">Contacts connus du proxy / contacts sur le compagnon.</td></tr>
+<tr><td>🕒 <code>marche 2 j 4 h</code></td><td class="w">Depuis combien de temps le proxy tourne.</td></tr>
+<tr><td>Icône de liaison</td><td class="w">À côté du nom du noeud, comment le proxy est connecté au compagnon : Bluetooth, USB ou réseau. Estompée tant que la radio n'est pas connectée. Toucher la carte nomme la liaison, avec son port ou son adresse Bluetooth.</td></tr>
+<tr><td>Ligne de la carte radio</td><td class="w">Le compagnon : sa carte (ou son propre nom de modèle quand le proxy ne connaît pas la carte), sa puce et son firmware,
+par ex. <code>RAK WisBlock 4631 · nRF52840 · v1.17.1</code>.</td></tr>
+<tr><td>🔋 <code>87 %</code> <code>4.08 V</code></td><td class="w">La batterie du compagnon : le pourcentage est calculé d'après la tension (voir <a href="#colours">Couleurs</a>).</td></tr>
+</table></div>
+<p>Toucher la carte ouvre les détails de la connexion : état de la liaison en direct, version du proxy, liaison radio, taille des ids de chemin, nombre d'apps MeshCore connectées,
+état du certificat (épinglé ou HTTP simple), et <b>Déconnecter</b>.</p>
+
+<h3 id="u-chats">Chat</h3>
+<p>La barre du bas a trois pages : <b>Chat</b> (avec le total des non lus), <b>Contacts</b> et <a href="#u-stats">Stats</a>. Sur Chat, deux onglets, chacun avec son nombre de non lus : <b>Canaux</b> et <b>Contacts</b>. L'icône des curseurs, en haut à droite, ouvre <a href="#u-settings">Réglages</a>. Sur les tablettes et les appareils pliables, un rail latéral remplace la barre du bas.</p>
+<figure class="phone">
+<svg viewBox="0 0 400 736" role="img" aria-label="La page Chat : la carte d'état avec le nom du noeud, la liaison, les contacts, la durée de marche et la batterie, les onglets Canaux et Contacts avec leurs nombres de non lus, les canaux groupés en Public, Canaux et Privé avec leur dernier message, leur région, l'heure et la pastille des non lus, et la barre du bas avec Chat, Contacts et Stats">
+  <rect class="p-bg" x="0" y="0" width="400" height="736"/>
+  <text class="p-ts" x="20" y="18">19:14</text>
+  <path class="p-ic" d="M340 14 l4 -4 M346 14 l4 -6 M352 14 l4 -8" style="stroke:#fafafa"/><rect x="364" y="7" width="18" height="9" rx="2" fill="none" stroke="#fafafa" stroke-width="1.3"/><rect x="366" y="9" width="12" height="5" fill="#fafafa"/>
+  <rect class="p-c" x="10" y="28" width="380" height="74" rx="26"/>
+  <circle cx="32" cy="53" r="4.5" fill="#4cb87a"/>
+  <text class="p-h" x="44" y="59" style="font-size:17px">Ridge Base</text>
+  <path class="p-ic" d="M140 47 l8 7 l-4 3.5 v-14 l4 3.5 l-8 7" style="stroke-width:1.4"/>
+  <text class="p-h" x="312" y="59" style="font-size:15px">85 %</text>
+  <rect x="352" y="46" width="26" height="14" rx="4" fill="none" stroke="#9a9a9a" stroke-width="1.5"/><rect x="378" y="50" width="2.5" height="6" rx="1" fill="#9a9a9a"/><rect x="354.5" y="48.5" width="18" height="9" rx="2" fill="#4cb87a"/>
+  <circle class="p-ic" cx="32" cy="76" r="3.5" style="stroke-width:1.3"/><path class="p-ic" d="M26 87 a6 6 0 0 1 12 0 M38 73 a3.5 3.5 0 0 1 0 6 M40 87 a6 6 0 0 0 -3 -5" style="stroke-width:1.3"/>
+  <text class="p-m" x="48" y="86" style="font-size:13px">412 / 350</text>
+  <circle class="p-ic" cx="132" cy="81" r="6.5" style="stroke-width:1.3"/><path class="p-ic" d="M132 77 v4 l3 2" style="stroke-width:1.3"/>
+  <text class="p-m" x="145" y="86" style="font-size:13px">up 2 d 4 h</text>
+  <text class="p-m" x="365" y="86" text-anchor="middle" style="font-size:13px">4.07 V</text>
+  <text x="200" y="158" text-anchor="middle" style="fill:#fafafa;font:400 30px Roboto,'Segoe UI',sans-serif">Chats</text>
+  <path class="p-ic" d="M356 136 h22 M356 146 h22 M356 156 h22" style="stroke:#fafafa;stroke-width:1.8"/><path d="M371 132 v8 M362 142 v8 M371 152 v8" stroke="#fafafa" stroke-width="1.8"/>
+  <text x="88" y="202" text-anchor="middle" style="fill:#e5574c;font:500 15px Roboto,sans-serif">Channels</text>
+  <rect x="124" y="190" width="34" height="17" rx="8.5" fill="#ffdad6"/><text x="141" y="203" text-anchor="middle" style="fill:#c62e24;font:600 11px Roboto,sans-serif">99+</text>
+  <text x="296" y="202" text-anchor="middle" style="fill:#e5574c;font:500 15px Roboto,sans-serif">Contacts</text>
+  <rect x="332" y="190" width="24" height="17" rx="8.5" fill="#ffdad6"/><text x="344" y="203" text-anchor="middle" style="fill:#c62e24;font:600 11px Roboto,sans-serif">3</text>
+  <path d="M0 220 H 400" stroke="#4a4a4a" stroke-width="1"/><path d="M0 219 H 200" stroke="#e5574c" stroke-width="3"/>
+  <circle class="p-icp" cx="31" cy="250" r="7"/><path class="p-icp" d="M24 250 h14 M31 243 c-4 4 -4 10 0 14 c4 -4 4 -10 0 -14" style="stroke-width:1.4"/>
+  <text x="48" y="255" style="fill:#e5574c;font:500 15px Roboto,sans-serif">Public</text>
+  <circle cx="44" cy="296" r="24" fill="#e5574c" fill-opacity=".16"/>
+  <circle class="p-icp" cx="44" cy="296" r="10"/><path class="p-icp" d="M34 296 h20 M44 286 c-5.5 5.5 -5.5 14.5 0 20 c5.5 -5.5 5.5 -14.5 0 -20" style="stroke-width:1.5"/>
+  <text class="p-h" x="82" y="283">Public</text>
+  <text class="p-t" x="82" y="304" style="font-size:14px">Valley Node: @[Mara] see you at the…</text>
+  <path class="p-ic" d="M86 324 c-3 -3.5 -4.5 -5.5 -4.5 -7.5 a4.5 4.5 0 0 1 9 0 c0 2 -1.5 4 -4.5 7.5 z" style="stroke-width:1.2"/><text class="p-m" x="96" y="323" style="font-size:12px">eu-se</text>
+  <text x="388" y="283" text-anchor="end" style="fill:#e5574c;font:12px Roboto,sans-serif">19:05</text>
+  <rect class="p-pri" x="352" y="292" width="36" height="20" rx="10"/><text x="370" y="306" text-anchor="middle" style="fill:#fff;font:700 11.5px Roboto,sans-serif">99+</text>
+  <path class="p-line" d="M82 340.5 H 388"/>
+  <path class="p-icp" d="M26 362 h12 M25 370 h12 M30 357 l-2 18 M35 357 l-2 18" style="stroke-width:1.5"/>
+  <text x="48" y="371" style="fill:#e5574c;font:500 15px Roboto,sans-serif">Channels</text>
+  <circle cx="44" cy="412" r="24" fill="#e5574c" fill-opacity=".16"/><path class="p-icp" d="M37 406 h15 M36 418 h15 M41 401 l-2 22 M49 401 l-2 22"/>
+  <text class="p-h" x="82" y="399">hiking</text>
+  <text class="p-t" x="82" y="420" style="font-size:14px">Mara: three bars here, all good</text>
+  <path class="p-ic" d="M86 440 c-3 -3.5 -4.5 -5.5 -4.5 -7.5 a4.5 4.5 0 0 1 9 0 c0 2 -1.5 4 -4.5 7.5 z" style="stroke-width:1.2"/><text class="p-m" x="96" y="439" style="font-size:12px">eu-se</text>
+  <text x="388" y="399" text-anchor="end" style="fill:#e5574c;font:12px Roboto,sans-serif">19:12</text>
+  <rect class="p-pri" x="364" y="408" width="24" height="20" rx="10"/><text x="376" y="422" text-anchor="middle" style="fill:#fff;font:700 11.5px Roboto,sans-serif">4</text>
+  <path class="p-line" d="M82 456.5 H 388"/>
+  <circle cx="44" cy="490" r="24" fill="#e5574c" fill-opacity=".16"/><path class="p-icp" d="M37 484 h15 M36 496 h15 M41 479 l-2 22 M49 479 l-2 22"/>
+  <text class="p-h" x="82" y="483">bots</text>
+  <text class="p-t" x="82" y="504" style="font-size:14px">EchoBot: 🤖 Copy, Mara! 2 hops @ 18:11</text>
+  <text x="388" y="483" text-anchor="end" style="fill:#e5574c;font:12px Roboto,sans-serif">18:40</text>
+  <rect class="p-pri" x="360" y="492" width="28" height="20" rx="10"/><text x="374" y="506" text-anchor="middle" style="fill:#fff;font:700 11.5px Roboto,sans-serif">21</text>
+  <path class="p-line" d="M82 524.5 H 388"/>
+  <circle cx="44" cy="556" r="24" fill="#e5574c" fill-opacity=".16"/><path class="p-icp" d="M37 550 h15 M36 562 h15 M41 545 l-2 22 M49 545 l-2 22"/>
+  <text class="p-h" x="82" y="551">weather</text>
+  <text class="p-m" x="82" y="572" style="font-size:14px">No message yet</text>
+  <path class="p-line" d="M82 590.5 H 388"/>
+  <rect x="25" y="606" width="12" height="9" rx="2" fill="none" stroke="#e5574c" stroke-width="1.5"/><path class="p-icp" d="M27.5 606 v-3 a3.5 3.5 0 0 1 7 0 v3" style="stroke-width:1.5"/>
+  <text x="48" y="615" style="fill:#e5574c;font:500 15px Roboto,sans-serif">Private</text>
+  <circle cx="44" cy="652" r="22" fill="#e8a317" fill-opacity=".16"/><rect x="37" y="652" width="14" height="10" rx="2" fill="none" stroke="#e8a317" stroke-width="1.6"/><path d="M40 652 v-4 a4 4 0 0 1 8 0 v4" fill="none" stroke="#e8a317" stroke-width="1.6"/>
+  <text class="p-h" x="82" y="647">team-ops</text>
+  <text class="p-t" x="82" y="666" style="font-size:14px;fill:#9a9a9a">You: meeting point moved to the hut</text>
+  <text x="388" y="647" text-anchor="end" style="fill:#9a9a9a;font:12px Roboto,sans-serif">17:02</text>
+  <rect class="p-c" x="0" y="680" width="400" height="56"/><path class="p-line" d="M0 680.5 H 400"/>
+  <rect x="6" y="684" width="122" height="48" rx="18" fill="#2e2e2e"/>
+  <path d="M58 692 h18 a2 2 0 0 1 2 2 v10 a2 2 0 0 1 -2 2 h-11 l-5 4 v-4 h-2 a2 2 0 0 1 -2 -2 v-10 a2 2 0 0 1 2 -2 z" fill="none" stroke="#fafafa" stroke-width="1.6" stroke-linejoin="round"/>
+  <rect x="68" y="685" width="26" height="14" rx="7" fill="#f2b8b5"/><text x="81" y="695.5" text-anchor="middle" style="fill:#601410;font:700 9.5px Roboto,sans-serif">99+</text>
+  <text x="67" y="727" text-anchor="middle" style="fill:#fafafa;font:700 12.5px Roboto,sans-serif">Chats</text>
+  <g fill="none" stroke="#9a9a9a" stroke-width="1.5"><rect x="196" y="690" width="8" height="6" rx="1.5"/><rect x="190" y="704" width="8" height="6" rx="1.5"/><rect x="202" y="704" width="8" height="6" rx="1.5"/><path d="M200 696 v4 M194 704 v-4 h12 v4"/></g>
+  <text x="200" y="727" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Contacts</text>
+  <path d="M323 691 v18 h20 M328 705 v-6 M333 705 v-11 M338 705 v-4" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-linecap="round"/>
+  <text x="333" y="727" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Stats</text>
+</svg>
+<figcaption>La page Chat : la carte d'état, les onglets Canaux et Contacts, et les canaux par groupe avec leur dernier message, leur région, l'heure et le nombre de non lus. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Partie</th><th>Signification</th></tr>
+<tr><td>Canaux</td><td class="w">Groupés : <b>Public</b> (🌐, tout le monde peut le lire), <b>Canaux</b> (#, canaux hashtag : toute personne qui connaît le nom peut les lire), <b>Privé</b> (🔒, seulement les radios qui ont reçu la clé). Un canal sans nom connu s'affiche « Canal inconnu » ; un message dont le canal ne peut pas être déterminé n'est dans aucun chat.</td></tr>
+<tr><td>Contacts</td><td class="w">Vos messages directs, les plus récents d'abord. Une conversation suit la clé du contact : deux contacts du même nom ont deux chats, et une personne qui n'est pas un noeud connu s'affiche par le début de sa clé. Une ★ marque un favori.</td></tr>
+<tr><td>Une ligne</td><td class="w">Nom, dernier message (« Moi : … » ou « Expéditeur : … »), heure (dans la couleur d'accent s'il y a des non lus), pastille des non lus. Sous un canal qui a une région, une épingle et sa région.</td></tr>
+<tr><td>Toucher</td><td class="w">Ouvre le chat.</td></tr>
+<tr><td>Appui long</td><td class="w">Le menu du chat (voir <a href="#u-menu">Menu du chat</a>).</td></tr>
+<tr><td>Nouveau canal</td><td class="w">À la fin de l'onglet Canaux, quand la radio est connectée. Ajoute un canal au compagnon (voir <a href="#u-channels">Canaux du compagnon</a>).</td></tr>
+</table></div>
+
+<h4 id="u-channels">Canaux du compagnon</h4>
+<p>Le proxy ne règle les canaux du compagnon que sur demande. Un nouveau canal prend le premier emplacement vide du compagnon ; un canal existant n'est jamais remplacé.
+Retirer un canal vide son emplacement ; vous choisissez ensuite si ses messages sont effacés du proxy ou gardés.</p>
+<div class="wrap"><table>
+<tr><th>Action</th><th>Où</th><th>Détails</th></tr>
+<tr><td>Nouveau canal</td><td>Onglet Canaux</td><td class="w">Canal hashtag (le nom seul, après le <code>#</code> : lettres, chiffres, <code>-</code> et <code>_</code>, 30 caractères au plus ; la clé vient du nom, donc toute personne qui ajoute le même nom lit le canal), canal public, ou canal privé (nom et clé hexadécimale de 32 caractères). Il prend le premier emplacement vide du compagnon, et son chat s'ouvre.</td></tr>
+<tr><td><span class="bad">Retirer du compagnon…</span></td><td>Menu du chat</td><td class="w">Pour un canal du compagnon. Demande confirmation, puis s'il faut aussi effacer ses messages du proxy.</td></tr>
+</table></div>
+<p>L'onglet Canaux montre les canaux du compagnon connecté, y compris ceux sans message. Un canal retiré n'y figure pas ;
+ses messages gardés réapparaissent si le canal est ajouté de nouveau. Le proxy garde des données séparées pour chaque compagnon et ne copie rien de l'un à l'autre. Quand un autre compagnon se connecte, l'app recharge tout
+et affiche les messages, canaux et contacts de ce compagnon.</p>
+
+<h3 id="u-chat">Un chat</h3>
+<figure class="phone">
+<svg viewBox="0 0 400 710" role="img" aria-label="Un chat de canal sur le téléphone : l'en-tête avec le canal et sa région, les messages des autres avec leurs noms, une réponse avec, estompé au-dessus, le message auquel elle répond, la ligne sous le dernier message de chaque série, un de vos messages avec la pastille Aucun répéteur, et le champ de saisie avec son compteur d'octets et le bouton d'envoi">
+  <rect class="p-bg" x="0" y="0" width="400" height="710"/>
+  <text class="p-ts" x="20" y="18">19:12</text>
+  <path class="p-ic" d="M340 14 l4 -4 M346 14 l4 -6 M352 14 l4 -8" style="stroke:#fafafa"/><rect x="364" y="7" width="18" height="9" rx="2" fill="none" stroke="#fafafa" stroke-width="1.3"/><rect x="366" y="9" width="12" height="5" fill="#fafafa"/>
+  <path class="p-ic" d="M30 48 l-8 8 l8 8" style="stroke:#fafafa;stroke-width:2"/>
+  <circle cx="70" cy="56" r="20" fill="#e5574c" fill-opacity=".16"/>
+  <path class="p-icp" d="M64 50 h13 M63 61 h13 M67 46 l-2 20 M75 46 l-2 20"/>
+  <text class="p-h" x="100" y="52">hiking</text>
+  <path class="p-ic" d="M104 72 c-3 -3.5 -4.5 -5.5 -4.5 -7.5 a4.5 4.5 0 0 1 9 0 c0 2 -1.5 4 -4.5 7.5 z" style="stroke-width:1.3"/>
+  <text class="p-m" x="113" y="71">eu-se</text><path class="p-ic" d="M148 66 l3 3 l3 -3" style="stroke-width:1.3"/>
+  <circle cx="378" cy="47" r="1.9" fill="#fafafa"/><circle cx="378" cy="56" r="1.9" fill="#fafafa"/><circle cx="378" cy="65" r="1.9" fill="#fafafa"/>
+  <path class="p-line" d="M0 88.5 H 400"/>
+  <rect class="p-ch" x="170" y="100" width="60" height="22" rx="11"/><text class="p-m" x="200" y="115" text-anchor="middle">Today</text>
+  <text class="p-n" x="24" y="146" style="fill:#8ab4f8">Valley Node</text>
+  <path class="p-ch" d="M32 152 H254 a20 20 0 0 1 20 20 a20 20 0 0 1 -20 20 H17 a5 5 0 0 1 -5 -5 V172 a20 20 0 0 1 20 -20 z"/>
+  <text class="p-t" x="26" y="177">Anyone near the ridge tonight?</text>
+  <path class="p-ch" d="M17 194 H224 a20 20 0 0 1 20 20 a20 20 0 0 1 -20 20 H32 a20 20 0 0 1 -20 -20 V199 a5 5 0 0 1 5 -5 z"/>
+  <text class="p-t" x="26" y="219">Testing a new antenna.</text>
+  <text class="p-m" x="20" y="252">19:06</text>
+  <circle class="p-ic" cx="58" cy="249" r="1.6" style="stroke-width:1.2"/><circle class="p-ic" cx="66" cy="241" r="1.6" style="stroke-width:1.2"/><path class="p-ic" d="M58 247 v-2 a3 3 0 0 1 3 -3 h3" style="stroke-width:1.2"/>
+  <text class="p-m" x="72" y="252">3</text>
+  <path class="p-ic" d="M86 252 v-2 M89 252 v-4 M92 252 v-6 M95 252 v-8" style="stroke-width:1.4"/>
+  <text class="p-m" x="100" y="252">7.5</text>
+  <rect class="p-ch" x="122" y="240" width="38" height="17" rx="8.5"/>
+  <path class="p-ic" d="M129 246 h10 l-2 -2 M139 251 h-10 l2 2" style="stroke-width:1.2"/><text class="p-b" x="144" y="252" style="font-size:11px">3</text>
+  <path class="p-ic" d="M172 253 c-3 -3.5 -4.5 -5.5 -4.5 -7.5 a4.5 4.5 0 0 1 9 0 c0 2 -1.5 4 -4.5 7.5 z" style="stroke-width:1.2"/>
+  <text class="p-m" x="181" y="252">eu-se</text>
+  <text class="p-n" x="24" y="282" style="fill:#81c995">Mara</text>
+  <rect class="p-ch" x="12" y="288" width="276" height="60" rx="20"/>
+  <text class="p-t" x="26" y="312">Signal check from the north side,</text>
+  <text class="p-t" x="26" y="332">three bars here.</text>
+  <text class="p-m" x="20" y="366">19:07</text>
+  <circle class="p-ic" cx="58" cy="363" r="1.6" style="stroke-width:1.2"/><circle class="p-ic" cx="66" cy="355" r="1.6" style="stroke-width:1.2"/><path class="p-ic" d="M58 361 v-2 a3 3 0 0 1 3 -3 h3" style="stroke-width:1.2"/>
+  <text class="p-m" x="72" y="366">2</text>
+  <path class="p-ic" d="M86 366 v-2 M89 366 v-4 M92 366 v-6 M95 366 v-8" style="stroke-width:1.4"/>
+  <text class="p-m" x="100" y="366">9.0</text>
+  <rect class="p-ch" x="122" y="354" width="38" height="17" rx="8.5"/>
+  <path class="p-ic" d="M129 360 h10 l-2 -2 M139 365 h-10 l2 2" style="stroke-width:1.2"/><text class="p-b" x="144" y="366" style="font-size:11px">5</text>
+  <path class="p-ic" d="M172 367 c-3 -3.5 -4.5 -5.5 -4.5 -7.5 a4.5 4.5 0 0 1 9 0 c0 2 -1.5 4 -4.5 7.5 z" style="stroke-width:1.2"/>
+  <text class="p-m" x="181" y="366">eu-se</text>
+  <path class="p-ic" d="M330 388 l-4 -4 l4 -4 M326 384 h7 a4 4 0 0 1 4 4 v2" style="stroke-width:1.2"/>
+  <text class="p-m" x="388" y="392" text-anchor="end">to Mara</text>
+  <rect x="116" y="398" width="272" height="40" rx="16" fill="#2a2a2a" fill-opacity=".55"/>
+  <text class="p-ts" x="130" y="418" fill-opacity=".55" style="fill-opacity:.55">Signal check from the north side, three…</text>
+  <rect class="p-pc" x="96" y="428" width="292" height="40" rx="20" stroke="#000000" stroke-width="3"/>
+  <text class="p-on" x="110" y="453">Received, three bars here too 👍</text>
+  <text class="p-m" x="326" y="486" text-anchor="end">19:08</text>
+  <rect class="p-ch" x="331" y="474" width="27" height="17" rx="8.5"/>
+  <path class="p-ic" d="M340 486 v-7 M337 486 l3 -7 l3 7 M336 477 a5 5 0 0 1 8 0" style="stroke-width:1.2"/>
+  <text class="p-b" x="348" y="486" style="font-size:11px">4</text>
+  <path class="p-icg" d="M360 482 l3 3 l6 -6 M366 485 l6 -6" style="stroke-width:1.6"/>
+  <rect class="p-pc" x="168" y="504" width="220" height="40" rx="20"/>
+  <text class="p-on" x="182" y="529">Heading up at 9 pm.</text>
+  <rect class="p-chh" x="138" y="536" width="250" height="32" rx="16" stroke="#000000" stroke-width="3"/>
+  <path class="p-ic" d="M154 560 v-9 M150 560 l4 -9 l4 9 M149 549 a6 6 0 0 1 10 0" style="stroke:#fafafa;stroke-width:1.4"/>
+  <text class="p-b" x="168" y="557">No repeater heard</text>
+  <circle cx="290" cy="552" r="9" fill="none" stroke="#9a9a9a" stroke-width="1.4"/><text x="290" y="556" text-anchor="middle" style="fill:#9a9a9a;font:700 11px Roboto,sans-serif">i</text>
+  <rect x="304" y="541" width="78" height="22" rx="11" fill="#fafafa"/><text x="343" y="556" text-anchor="middle" style="fill:#000000;font:600 11.5px Roboto,sans-serif">Send again</text>
+  <text class="p-m" x="372" y="588" text-anchor="end">19:12</text>
+  <path class="p-ic" d="M377 584 l3 3 l6 -6" style="stroke-width:1.5"/>
+  <rect class="p-c" x="0" y="604" width="400" height="106"/>
+  <rect class="p-chh" x="12" y="618" width="320" height="50" rx="24"/>
+  <text class="p-tl" x="30" y="648">On my way</text>
+  <text class="p-m" x="30" y="686">9 / 151 bytes</text>
+  <circle class="p-pri" cx="364" cy="643" r="24"/>
+  <path d="M354 634 l20 9 l-20 9 l3 -9 z M357 643 h10" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"/>
+</svg>
+<figcaption>Un chat de canal. Les autres à gauche avec leur nom, vos messages à droite ; une réponse montre, estompé, le message auquel elle répond. La ligne sous le dernier message d'une série donne l'heure, les sauts, le signal et la région ; sous les vôtres, les répéteurs entendus. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+
+<h4>L'en-tête</h4>
+<div class="wrap"><table>
+<tr><th>Partie</th><th>Signification</th></tr>
+<tr><td>Canal</td><td class="w">📍 sa région : <code>eu-se</code> (la sienne), <code>eu (compagnon)</code> (suit celle du compagnon), ou <code>partout</code>.
+<b>Touchez la région</b> pour la changer dans un menu : comme le compagnon, aucune région, ou une région connue du proxy. <b>Plus…</b> dans ce menu, ou toucher le nom, ouvre la feuille complète des régions (voir <a href="#u-regions">Régions</a>).</td></tr>
+<tr><td>Message direct</td><td class="w">🔒 chiffré de bout en bout · ⇄ <span class="good">vert</span> clés échangées (le contact peut vous lire) ou <span class="warn">ambre</span> pas encore confirmé · les sauts jusqu'au contact.
+Touchez les icônes pour leur signification ; <b>touchez le nom</b> pour la fiche du contact.</td></tr>
+<tr><td>⋮</td><td class="w">Le menu du chat (voir <a href="#u-menu">Menu du chat</a>).</td></tr>
+</table></div>
+
+<h4>Sous chaque message</h4>
+<p>La ligne sous le dernier message d'une série (messages d'un même expéditeur à quelques minutes d'intervalle), et sous un message direct non remis. Chaque élément peut être désactivé dans <a href="#u-settings">Réglages</a> › Sous chaque message. La feuille du message montre toujours tous les détails.</p>
+<div class="wrap"><table>
+<tr><th>Élément</th><th>Signification</th></tr>
+<tr><td>Heure</td><td class="w">Quand il a été envoyé.</td></tr>
+<tr><td>Sauts</td><td class="w">Par combien de répéteurs il est passé (<code>direct</code> = aucun).</td></tr>
+<tr><td>Signal (SNR)</td><td class="w">Avec quelle clarté votre radio l'a entendu.</td></tr>
+<tr><td>Copies reçues</td><td class="w">Combien de copies sont arrivées (le même message par d'autres répéteurs). Désactivé par défaut. Toucher le nombre liste qui a relayé chaque copie, la plus forte d'abord, avec signal, RSSI et sauts ; toucher une ligne ouvre ce noeud quand l'app le connaît.</td></tr>
+<tr><td>📍 Région</td><td class="w">La région à laquelle il a été envoyé : son nom, ou <code>?</code> pour une région que le proxy ne connaît pas.</td></tr>
+<tr><td>Vos messages de canal</td><td class="w">✓ envoyé, aucun répéteur entendu jusque-là ; <span class="good">✓✓</span> entendu relayé par des répéteurs, avec 📡 le nombre de répéteurs (l'élément « Répéteurs »). Toucher le nombre les liste, le plus fort d'abord, avec signal, RSSI, sauts et heure par copie.
+Quand aucun répéteur n'a été entendu le relayer après 30 secondes, une pastille <b>Aucun répéteur</b> avec <b>Renvoyer</b> apparaît sur le message, pendant 10 minutes après l'envoi. Elle envoie exactement le même paquet : les radios qui l'ont déjà l'ignorent, donc personne ne le voit deux fois.</td></tr>
+<tr><td><span class="warn">Envoi incertain</span></td><td class="w">Le compagnon n'a pas répondu quand le message lui a été donné (envoyé ici ou par une autre app) : il est peut-être parti, ou non. Cela change tout seul dès que c'est connu. <b>Renvoyer</b> est proposé comme pour un message non remis (canal : non entendu).</td></tr>
+<tr><td>Vos messages directs</td><td class="w">Affiché même quand les autres éléments sont désactivés : 🕒 envoi, ✓ en attente de l'ACK du destinataire, <span class="good">✓✓</span> remis. <span class="bad">Non remis</span> devient une pastille sur le bord inférieur du message, avec un bouton <b>Renvoyer</b>. Un message direct envoyé depuis une autre app n'est plus suivi après une minute. Au premier toucher, <b>Direct</b> et <b>Flood</b> s'affichent à côté ; toucher l'un des trois l'envoie de cette façon, toucher ailleurs les masque. <b>Renvoyer</b> utilise le chemin enregistré pour le contact (après 3 essais échoués, ce chemin a été remis à zéro, donc l'envoi se fait par flood) ; <b>Direct</b> va droit au contact, sans répéteur, donc seulement s'il est à portée ; <b>Flood</b> passe par tous les répéteurs. Chacun est un nouvel essai du même message, le chat garde donc un seul message : la pastille affiche aussitôt <b>Envoi…</b>, et un refus est expliqué sous le message. Si seul l'ACK s'est perdu, l'app du destinataire peut tout de même l'afficher deux fois ; le (i) de la pastille le dit. Un message dont le texte n'est plus gardé sur le proxy n'a pas de pastille : il ne peut pas être renvoyé.
+De petits points montrent les essais d'envoi du proxy (il réessaie comme le fait l'app MeshCore).</td></tr>
+</table></div>
+
+<h4>Toucher un message</h4>
+<p>Un appui long ouvre un menu rapide : <b>Répondre</b> (canaux), <b>Copier</b>, <b>Détails</b>, <b>Effacer</b>. Toucher ouvre la feuille du message : expéditeur et heure, les tuiles Répondre / Copier / Effacer, puis les détails : pour vos messages directs, l'état de remise, la route et les essais ; pour vos messages de canal, les répéteurs entendus ; pour un message passé par des répéteurs, une ligne repliée avec le nombre de sauts et le signal. Ouvrir cette ligne montre le chemin de haut en bas, du premier répéteur jusqu'à vous, une pastille par noeud avec son id : pleine, dans la couleur d'accent de l'app, quand le nom est sûr, en pointillés quand il est probable, ambre et en pointillés avec « ? » quand c'est une supposition, grise et en pointillés avec son id seul quand le nom est inconnu. Les copies reçues s'ouvrent de la même façon : une ligne par copie, avec une bande de la couleur de son signal, le répéteur et l'heure, puis son signal et ses sauts.</p>
+<figure class="phone">
+<svg viewBox="0 0 400 440" role="img" aria-label="La feuille d'un message : expéditeur et heure, les tuiles Répondre, Copier et Effacer, les sauts avec le signal, combien de fois le message a été entendu avec la copie la plus forte, et une note sur Effacer">
+  <rect class="p-bg" x="0" y="0" width="400" height="440"/>
+  <rect x="200" y="14" width="188" height="40" rx="20" fill="#e5574c" fill-opacity=".55"/><text x="216" y="39" style="fill:#fff;fill-opacity:.6;font:15px Roboto,sans-serif">On my way up.</text>
+  <rect x="12" y="66" width="230" height="40" rx="20" fill="#2a2a2a" fill-opacity=".6"/><text x="26" y="91" style="fill:#fafafa;fill-opacity:.6;font:15px Roboto,sans-serif">Three bars here, all good</text>
+  <path d="M0 150 a28 28 0 0 1 28 -28 H372 a28 28 0 0 1 28 28 V440 H0 z" fill="#2a2a2a"/>
+  <rect x="184" y="134" width="32" height="4" rx="2" fill="#9a9a9a"/>
+  <text class="p-m" x="20" y="176" style="font-size:14px">Mara · 19:07</text>
+  <rect class="p-chh" x="20" y="192" width="86" height="74" rx="18"/><rect class="p-chh" x="114" y="192" width="86" height="74" rx="18"/><rect class="p-chh" x="208" y="192" width="86" height="74" rx="18"/>
+  <path class="p-icp" d="M60 214 l-6 6 l6 6 M54 220 h12 a6 6 0 0 1 6 6 v2"/>
+  <text x="63" y="252" text-anchor="middle" style="fill:#fafafa;font:600 12.5px Roboto,sans-serif">Reply</text>
+  <rect x="150" y="211" width="11" height="13" rx="2" fill="none" stroke="#e5574c" stroke-width="1.8"/><rect x="154" y="215" width="11" height="13" rx="2" fill="#3a3a3a" stroke="#e5574c" stroke-width="1.8"/>
+  <text x="157" y="252" text-anchor="middle" style="fill:#fafafa;font:600 12.5px Roboto,sans-serif">Copy</text>
+  <path class="p-icp" d="M243 214 h16 M247 214 v-2 h8 v2 M245 214 l1 14 h10 l1 -14"/>
+  <text x="251" y="252" text-anchor="middle" style="fill:#e5574c;font:600 12.5px Roboto,sans-serif">Delete</text>
+  <path class="p-line" d="M20 284.5 H 380" style="stroke:#3a3a3a"/>
+  <circle class="p-ic" cx="30" cy="318" r="2.5" style="stroke-width:1.5"/><circle class="p-ic" cx="40" cy="306" r="2.5" style="stroke-width:1.5"/><path class="p-ic" d="M30 315 v-2 a4 4 0 0 1 4 -4 h3" style="stroke-width:1.5"/>
+  <text class="p-tl" x="62" y="310" style="font-size:16px">2 hops</text>
+  <text class="p-m" x="62" y="330" style="font-size:13.5px">SNR 9.0 dB · RSSI -96 dBm</text>
+  <path class="p-ic" d="M366 314 l5 5 l5 -5" style="stroke-width:1.6"/>
+  <path class="p-ic" d="M26 362 h16 l-3 -3 M42 372 h-16 l3 3" style="stroke-width:1.6"/>
+  <text class="p-tl" x="62" y="364" style="font-size:16px">Heard 5 times</text>
+  <text class="p-m" x="62" y="384" style="font-size:13.5px">Strongest: Hilltop Rptr · 11.0 dB</text>
+  <path class="p-ic" d="M366 368 l5 5 l5 -5" style="stroke-width:1.6"/>
+  <text class="p-m" x="20" y="414" style="font-size:12.5px">Delete removes it from the proxy, for every app. To hide messages</text>
+  <text class="p-m" x="20" y="431" style="font-size:12.5px">in this app only, use Clear in the chat's menu.</text>
+</svg>
+<figcaption>La feuille d'un message de canal reçu. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+<div class="note"><b>Portée d'Effacer et de Vider</b> <b>Effacer</b> demande d'abord, puis efface le message du proxy, pour toutes les apps, sans retour possible. Un message que le proxy n'a jamais stocké disparaît de cette app seulement. <b>Vider</b>, dans le menu du chat, ne fait que masquer les messages dans cette app ; « Revoir les messages vidés » les rétablit.
+Les messages effacés par n'importe quelle app disparaissent aussi de celle-ci, avec leurs notifications.</div>
+
+<h4>Répondre</h4>
+<p>Dans un canal, touchez le nom de l'expéditeur au-dessus de ses messages, ou Répondre dans la feuille du message. Une barre au-dessus du champ de saisie montre le destinataire (✕ annule). Le message
+envoyé commence par <code>@[Nom]</code> (le format de réponse de MeshCore) ; la bulle affiche « à Nom » et, estompé au-dessus, le message auquel elle répond (le dernier message de l'expéditeur avant elle).</p>
+<p>Les liens dans les messages s'ouvrent dans le navigateur.</p>
+
+<h3 id="u-send">Envoyer</h3>
+<p>Sous le champ, dès qu'un texte est saisi : octets utilisés / limite (<span class="warn">ambre</span> à partir de 90 %, <span class="bad">rouge</span> au-delà de la limite, et Envoyer est alors désactivé). Un message direct peut contenir 160 octets. Un message de canal part sous la forme « &lt;nom de votre noeud&gt;: texte », sa limite est donc 160 moins la longueur du nom de votre noeud et 2.
+Dans un message direct, un <b>appui long sur Envoyer</b> (avec un texte à envoyer) propose <b>Envoi auto</b> (par le chemin actuel), <b>Envoi direct</b> (sans répéteur) et <b>Envoi flood</b> (par tous les répéteurs), comme dans l'app MeshCore. Direct et flood restent sur le compagnon pour les messages suivants.
+La ligne au-dessus du champ montre la route vers le contact, avec les répéteurs par leur nom. <b>Changer</b> ouvre une feuille : <b>Flood</b>, <b>Direct</b>, et jusqu'à trois <b>Routes suggérées</b> par des répéteurs, déduites des liens que le proxy a entendus ces 30 derniers jours, des chemins par lesquels les annonces du contact vous sont parvenues, et du sort réel de vos propres messages directs sur chaque route (combien ont été confirmés). Une route déjà utilisée l'indique (« 8 DM sur 10 avec ACK par là ») ; plus il y a de résultats mesurés, plus ils pèsent. Seuls les répéteurs entendus ces 3 derniers jours sont utilisés. Chaque suggestion indique pourquoi elle est proposée (la plus fiable, un secours avec un autre premier répéteur, la plus courte en sauts, la suivante), sa chance estimée d'aller-retour (le message à l'aller et son accusé au retour), ses sauts, son lien le plus faible, combien de fois les annonces du contact sont venues par là, et combien de ses ids de répéteur sont partagés par d'autres répéteurs (ils relaieraient tous le message). Une coche marque la route active. En choisir une la règle sur le compagnon. L'intérêt : le compagnon garde le premier chemin qui a atteint le contact, pas le plus fiable, et un message direct s'arrête au premier répéteur qui le manque.</p>
+<div class="wrap"><table>
+<tr><th>Sous votre message</th><th>Signification et action</th></tr>
+<tr><td>Pas de réponse du proxy, nouvelle demande…</td><td class="w">L'app répète la demande avec le même id ; le message n'est pas envoyé deux fois.</td></tr>
+<tr><td>Proxy injoignable</td><td class="w">Le message est peut-être parti, ou non. <b>Réessayer</b> utilise le même id et ne peut pas créer de doublon.</td></tr>
+<tr><td><span class="bad">Non envoyé : …</span></td><td class="w">Le message n'a pas été envoyé ; la raison est affichée (radio non connectée, occupé, trop long…). <b>Réessayer</b> si la raison le permet, ou <b>Jeter</b>.</td></tr>
+<tr><td><span class="warn">Peut-être envoyé</span></td><td class="w">La radio n'a pas répondu à temps. Quand le proxy a stocké le message, il s'affiche un instant plus tard comme <b>Envoi incertain</b>, et son <b>Renvoyer</b> est un nouvel essai de ce même message. Sinon, les boutons restent ici : <b>Renvoyer</b> demande d'abord au proxy s'il a le message et, si ce n'est pas le cas, en crée un nouveau, qui peut arriver deux fois ; <b>Jeter</b> l'abandonne.</td></tr>
+</table></div>
+<div class="note"><b>Condition des messages directs</b> MeshCore ne remet un message direct que si chaque côté a l'autre dans ses contacts.
+L'en-tête du chat indique quand ce n'est pas confirmé.</div>
+
+<h3 id="u-menu">Menu du chat</h3>
+<p>Un menu contextuel ouvert par ⋮ dans un chat, ou par un appui long sur le chat dans la liste.</p>
+<figure class="menu">
+<svg viewBox="0 0 880 340" role="img" aria-label="Le menu du chat : Notifications, Messages gardés, Revoir les messages vidés, Retirer du compagnon en rouge, Vider la discussion ; et sa page Notifications avec quatre choix, Mentions seules sélectionné">
+  <rect class="p-bg" x="0" y="0" width="880" height="340"/>
+  <rect x="42" y="30" width="320" height="288" rx="16" fill="#000" fill-opacity=".35"/>
+  <rect class="p-chh" x="40" y="24" width="320" height="288" rx="16"/>
+  <path class="p-ic" d="M55 58 a7 7 0 0 1 14 0 v5 l2 3 h-18 l2 -3 z M59 69 a3 3 0 0 0 6 0"/>
+  <text class="p-tl" x="92" y="50">Notifications</text><text class="p-m" x="92" y="68" style="font-size:12px">Mentions only</text>
+  <path class="p-ic" d="M55 108 a8 8 0 1 0 2.5 -5.8 M55 101 v4 h4 M63 104 v4 l3 2"/>
+  <text class="p-tl" x="92" y="106">Keep messages</text><text class="p-m" x="92" y="124" style="font-size:12px">everything</text>
+  <path class="p-ic" d="M60 166 l-5 -5 l5 -5 M55 161 h9 a5 5 0 0 1 5 5 v3"/>
+  <text class="p-tl" x="92" y="166">Show cleared messages again (4)</text>
+  <path class="p-line" d="M56 192.5 H 344"/>
+  <circle class="p-icb" cx="62" cy="224" r="8"/><path class="p-icb" d="M58 224 h8"/>
+  <text class="p-bad" x="92" y="229">Remove from the companion…</text>
+  <path class="p-ic" d="M57 267 l10 10 M67 267 l-10 10"/>
+  <text class="p-tl" x="92" y="277">Clear this chat…</text>
+  <rect x="482" y="30" width="340" height="264" rx="16" fill="#000" fill-opacity=".35"/>
+  <rect class="p-chh" x="480" y="24" width="340" height="264" rx="16"/>
+  <path class="p-ic" d="M504 48 l-6 6 l6 6"/>
+  <text class="p-tl" x="528" y="59">Notifications</text>
+  <path class="p-line" d="M496 78.5 H 804"/>
+  <circle cx="504" cy="108" r="9" fill="none" stroke="#9a9a9a" stroke-width="2"/><text class="p-tl" x="528" y="113">Like all chats (Mentions only)</text>
+  <circle cx="504" cy="156" r="9" fill="none" stroke="#9a9a9a" stroke-width="2"/><text class="p-tl" x="528" y="161">All messages</text>
+  <circle cx="504" cy="204" r="9" fill="none" stroke="#e5574c" stroke-width="2"/><circle class="p-pri" cx="504" cy="204" r="4.2"/><text class="p-tl" x="528" y="209">Mentions only</text>
+  <circle cx="504" cy="252" r="9" fill="none" stroke="#9a9a9a" stroke-width="2"/><text class="p-tl" x="528" y="257">None</text>
+</svg>
+<figcaption>Le menu du chat d'un canal, et sa page Notifications. Messages gardés ouvre une page du même genre ; un chat direct a <i>Effacer la discussion…</i> au lieu de <i>Retirer du compagnon…</i>. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Élément</th><th>Effet</th></tr>
+<tr><td>Notifications</td><td class="w">Le choix propre à ce chat, ou « Par défaut » (le choix fait dans Réglages).</td></tr>
+<tr><td>Messages gardés</td><td class="w">Jusqu'où ce chat remonte : par défaut (comme tous les chats), ou 1 heure, 3 h, 12 h, 1 jour, 2 jours, 3 jours, tout. Ne s'applique qu'à cette app ; une durée plus longue réaffiche les messages plus anciens.</td></tr>
+<tr><td>Revoir les messages vidés</td><td class="w">Affiché quand il y en a. Ramène ce que Vider a masqué dans cette app (et les messages que seule cette app avait). Les messages effacés du proxy ne peuvent pas revenir.</td></tr>
+<tr><td><span class="bad">Retirer du compagnon…</span></td><td class="w">Canaux du compagnon. Vide l'emplacement après confirmation, puis demande quoi faire de ses messages : <b>Les effacer</b> les efface du proxy pour toutes les apps, un instant plus tard, une fois que le compagnon a confirmé le retrait (sans cette confirmation, ils sont gardés) ; <b>Les garder</b> les garde, et ils réapparaissent si le canal est ajouté de nouveau.</td></tr>
+<tr><td>Vider la discussion…</td><td class="w">Masque tous les messages affichés dans cette app, après confirmation (grisé quand le chat est vide). Rien n'est effacé ; les nouveaux messages s'affichent toujours.</td></tr>
+<tr><td><span class="bad">Effacer la discussion…</span></td><td class="w">Messages directs avec une personne dont la clé est connue. Après confirmation, efface du proxy tous les messages échangés avec ce contact, dans les deux sens, pour toutes les apps. Le contact reste. Refusé, sans rien effacer, quand les clés de plusieurs contacts commencent de la même façon ; non proposé quand seul un nom est connu.</td></tr>
+</table></div>
+
+<h3 id="u-regions">Régions</h3>
+<p>Une région limite un message de canal aux répéteurs qui la desservent, ce qui réduit le trafic au loin. Le compagnon a une région par défaut ;
+un canal peut avoir la sienne. Le proxy garde la région du canal et l'applique à chaque message envoyé par lui.
+Toucher la région sous le nom du canal la change dans un menu ; la feuille complète des régions s'ouvre avec <b>Plus…</b> dans ce menu, ou en touchant le nom du canal :</p>
+<div class="wrap"><table>
+<tr><th>Choix</th><th>Signification</th></tr>
+<tr><td>Comme le compagnon</td><td class="w">Suit la région par défaut du compagnon (affichée en dessous, ou « aucune région sur le compagnon »).</td></tr>
+<tr><td>Aucune</td><td class="w">Tous les répéteurs relaient le message. Indisponible quand le firmware du compagnon ne le permet pas.</td></tr>
+<tr><td>Une étiquette de région</td><td class="w">Les régions que le proxy connaît, groupées par les répéteurs qui les desservent (« Par … »). L'étiquette pleine avec une coche est la région du canal.</td></tr>
+<tr><td>Nom de région</td><td class="w">Lettres minuscules, chiffres et <code>-</code>, 29 caractères au plus (par ex. <code>eu-se</code> ; un <code>#</code> initial est retiré). Validez avec <b>OK</b>.</td></tr>
+<tr><td>Demander aux répéteurs</td><td class="w">Le proxy découvre les répéteurs à portée directe (environ 10 s), puis demande à chacun quelles régions il dessert. Les résultats s'ajoutent aux étiquettes.</td></tr>
+</table></div>
+<p>Un choix s'affiche une fois confirmé par le proxy. Si le compagnon refuse la région d'un canal à l'envoi d'un message, le message part dans la région du compagnon.</p>
+<div class="note"><b>Répéteurs non interrogés</b> Le proxy n'interroge que les répéteurs dont la route sur le compagnon est déjà directe ; il ne change aucune route pour cela. La feuille indique combien ont été laissés de côté.</div>
+
+<h3 id="u-contacts">Contacts</h3>
+<div class="wrap"><table>
+<tr><th>Partie</th><th>Signification</th></tr>
+<tr><td>Ligne du haut</td><td class="w">Combien de noeuds le proxy connaît, et combien sont sur le compagnon.</td></tr>
+<tr><td>Recherche</td><td class="w">Par nom ou par clé.</td></tr>
+<tr><td>Filtres</td><td class="w">Miens, Favoris, Du compagnon, Chat, Répéteur, Salon, Capteur.</td></tr>
+<tr><td>Miens</td><td class="w">Vos propres répéteurs, salons et capteurs, avec votre rôle et quand chacun a été entendu en dernier. Toucher une ligne ouvre l'écran de console du noeud. L'icône de signet, sur la fiche d'un noeud et dans sa console, l'ajoute ou le retire : pleine quand le noeud est dans la liste, en contour discret sinon. Une connexion admin ajoute un noeud automatiquement ; le retirer le laisse hors de la liste. Le proxy garde cette liste pour tous vos appareils. Elle est distincte du favori ★, qui est enregistré sur le compagnon.</td></tr>
+<tr><td>Toucher un noeud</td><td class="w">Sa fiche : type, quand il a été entendu, clés échangées ou non (noeuds chat), sur le compagnon, les tuiles Route (sauts et par quel répéteur), signal (SNR), Entendu (en dernier) et
+taille des ids de chemin, sa clé publique avec Copier, <b>Message</b> pour un noeud chat ou un salon du compagnon, et pour un répéteur, un capteur ou un salon du compagnon, votre rôle d'après la dernière connexion, s'il est dans votre liste Miens, <b>Accès invité</b>, <b>Accès admin</b>, et <b>Infos</b>, ou <b>Console</b> après une connexion admin.</td></tr>
+</table></div>
+
+<h3 id="u-stats">Stats</h3>
+<p>La troisième page de la barre du bas : comment va le mesh autour de votre compagnon, lu sur le proxy. Choisissez la durée en haut (1 h, 24 h, 7 j, 30 j) ; tirez vers le bas pour tout relire. Chaque durée est lue une fois et gardée tant que l'app tourne. Tant que l'onglet Stats est à l'écran, les nouveaux paquets et messages s'ajoutent à mesure qu'ils arrivent (la ligne du bas affiche « En direct ») ; sur un autre onglet, dans une autre app ou écran éteint, rien n'est lu pour Stats, et au retour seules les minutes manquées sont lues. Sur une longue session, les moyennes, « Entendu via » et « Conversations » peuvent s'écarter un peu des chiffres exacts ; tirer vers le bas les rend exacts. La page ne fait que lire ; elle n'envoie jamais rien.</p>
+<p>Stats a des pages, en onglets sous son titre (balayez vers la gauche ou la droite pour passer de l'une à l'autre). La durée choisie s'applique à toutes les pages. Une carte avec un › dans son titre ouvre sa page.</p>
+<p><b>Aperçu</b> : tout d'un coup d'oeil.</p>
+<figure class="menu">
+<svg viewBox="0 0 840 840" role="img" aria-label="L'onglet Aperçu des Stats, en haut et plus bas : la carte d'état, les onglets Aperçu et Mesh, le choix de la durée avec 24 h sélectionné, Activité mesh avec les paquets entendus, une courbe par heure, le SNR et le RSSI moyens et la part des messages ; les tuiles Noeuds captés, Portée directe, Messages et Apps connectées ; Contenu du mesh par type ; Compagnon avec les tendances de la batterie, du bruit de fond et de la température ; Entendu via avec les répéteurs les plus actifs">
+  <defs>
+    <linearGradient id="stArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e5574c" stop-opacity=".32"/><stop offset="1" stop-color="#e5574c" stop-opacity="0"/></linearGradient>
+    <clipPath id="stBody"><rect x="0" y="252" width="400" height="532"/></clipPath>
+    <clipPath id="stBar"><rect x="34" y="212" width="332" height="10" rx="5"/></clipPath>
+    <g id="stHead">
+  <text class="p-ts" x="20" y="18">21:07</text>
+  <path class="p-ic" d="M340 14 l4 -4 M346 14 l4 -6 M352 14 l4 -8" style="stroke:#fafafa"/><rect x="364" y="7" width="18" height="9" rx="2" fill="none" stroke="#fafafa" stroke-width="1.3"/><rect x="366" y="9" width="12" height="5" fill="#fafafa"/>
+  <rect class="p-c" x="10" y="28" width="380" height="74" rx="26"/>
+  <circle cx="32" cy="53" r="4.5" fill="#4cb87a"/>
+  <text class="p-h" x="44" y="59" style="font-size:17px">Ridge Base</text>
+  <path class="p-ic" d="M140 47 l8 7 l-4 3.5 v-14 l4 3.5 l-8 7" style="stroke-width:1.4"/>
+  <text class="p-h" x="312" y="59" style="font-size:15px">85 %</text>
+  <rect x="352" y="46" width="26" height="14" rx="4" fill="none" stroke="#9a9a9a" stroke-width="1.5"/><rect x="378" y="50" width="2.5" height="6" rx="1" fill="#9a9a9a"/><rect x="354.5" y="48.5" width="18" height="9" rx="2" fill="#4cb87a"/>
+  <circle class="p-ic" cx="32" cy="76" r="3.5" style="stroke-width:1.3"/><path class="p-ic" d="M26 87 a6 6 0 0 1 12 0 M38 73 a3.5 3.5 0 0 1 0 6 M40 87 a6 6 0 0 0 -3 -5" style="stroke-width:1.3"/>
+  <text class="p-m" x="48" y="86" style="font-size:13px">412 / 350</text>
+  <circle class="p-ic" cx="132" cy="81" r="6.5" style="stroke-width:1.3"/><path class="p-ic" d="M132 77 v4 l3 2" style="stroke-width:1.3"/>
+  <text class="p-m" x="145" y="86" style="font-size:13px">up 2 d 4 h</text>
+  <text class="p-m" x="365" y="86" text-anchor="middle" style="font-size:13px">4.07 V</text>
+  <text x="200" y="140" text-anchor="middle" style="fill:#fafafa;font:400 30px Roboto,'Segoe UI',sans-serif">Stats</text>
+  <text x="100" y="182" text-anchor="middle" style="fill:#e5574c;font:600 15px Roboto,sans-serif">Overview</text>
+  <text x="300" y="182" text-anchor="middle" style="fill:#e5574c;font:400 15px Roboto,sans-serif">Mesh</text>
+  <path d="M0 198.5 H 400" stroke="#4a4a4a" stroke-width="1"/><rect x="0" y="196" width="200" height="3" fill="#e5574c"/>
+  <rect x="108" y="208" width="92" height="36" fill="#4a2622"/>
+  <rect x="16" y="208" width="368" height="36" rx="18" fill="none" stroke="#8a8a8a" stroke-width="1.2"/>
+  <path d="M108 208 v36 M200 208 v36 M292 208 v36" stroke="#8a8a8a" stroke-width="1.2"/>
+  <g style="font:500 14px Roboto,sans-serif" text-anchor="middle"><text x="62" y="231" fill="#d8d8d8">1 h</text><text x="164" y="231" fill="#f6d5d0">24 h</text><text x="246" y="231" fill="#d8d8d8">7 days</text><text x="338" y="231" fill="#d8d8d8">30 days</text></g>
+  <path d="M128 226 l4 4 l8 -9" fill="none" stroke="#f6d5d0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect class="p-c" x="0" y="784" width="400" height="56"/><path class="p-line" d="M0 784.5 H 400"/>
+  <rect x="272" y="788" width="122" height="48" rx="18" fill="#2e2e2e"/>
+  <path d="M58 796 h18 a2 2 0 0 1 2 2 v10 a2 2 0 0 1 -2 2 h-11 l-5 4 v-4 h-2 a2 2 0 0 1 -2 -2 v-10 a2 2 0 0 1 2 -2 z" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-linejoin="round"/>
+  <rect x="68" y="789" width="26" height="14" rx="7" fill="#f2b8b5"/><text x="81" y="799.5" text-anchor="middle" style="fill:#601410;font:700 9.5px Roboto,sans-serif">99+</text>
+  <text x="67" y="831" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Chats</text>
+  <g fill="none" stroke="#9a9a9a" stroke-width="1.5"><rect x="196" y="794" width="8" height="6" rx="1.5"/><rect x="190" y="808" width="8" height="6" rx="1.5"/><rect x="202" y="808" width="8" height="6" rx="1.5"/><path d="M200 800 v4 M194 808 v-4 h12 v4"/></g>
+  <text x="200" y="831" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Contacts</text>
+  <path d="M323 795 v18 h20 M328 809 v-6 M333 809 v-11 M338 809 v-4" fill="none" stroke="#fafafa" stroke-width="1.8" stroke-linecap="round"/>
+  <text x="333" y="831" text-anchor="middle" style="fill:#fafafa;font:700 12.5px Roboto,sans-serif">Stats</text>
+    </g>
+  </defs>
+  <rect class="p-bg" x="0" y="0" width="840" height="840"/>
+  <path d="M420 0 V 840" stroke="#2e2e2e" stroke-width="1"/>
+
+  <use href="#stHead"/>
+  <g clip-path="url(#stBody)"><g transform="translate(0 32)">
+  <rect class="p-c" x="10" y="224" width="380" height="258" rx="26"/>
+  <path class="p-icp" d="M34 252 h5 l4 -9 l6 18 l4 -9 h5"/>
+  <text class="p-h" x="64" y="258">Mesh activity</text><path class="p-ic" d="M358 244 l6 6 l-6 6" style="stroke-width:1.8"/>
+  <text x="34" y="306" style="fill:#fafafa;font:300 34px Roboto,'Segoe UI',sans-serif">15,302</text>
+  <text x="150" y="304" style="fill:#9a9a9a;font:15px Roboto,sans-serif">packets heard</text>
+  <text class="p-m" x="34" y="326" style="font-size:12px">812 this hour</text>
+  <path d="M34 364.3 L48.4 366.6 L62.9 370.6 L77.3 375.1 L91.7 379.1 L106.2 380.3 L120.6 379.7 L135 376.9 L149.4 370 L163.9 362 L178.3 354.6 L192.7 350.6 L207.2 348.3 L221.6 349.4 L236 347.1 L250.5 345.4 L264.9 346.6 L279.3 343.7 L293.7 342 L308.2 344.3 L322.6 346 L337 344.9 L351.5 346.6 L366 347.6 L366 394 L34 394 Z" fill="url(#stArea)"/>
+  <path d="M34 364.3 L48.4 366.6 L62.9 370.6 L77.3 375.1 L91.7 379.1 L106.2 380.3 L120.6 379.7 L135 376.9 L149.4 370 L163.9 362 L178.3 354.6 L192.7 350.6 L207.2 348.3 L221.6 349.4 L236 347.1 L250.5 345.4 L264.9 346.6 L279.3 343.7 L293.7 342 L308.2 344.3 L322.6 346 L337 344.9 L351.5 346.6 L366 347.6" fill="none" stroke="#e5574c" stroke-width="2" stroke-linejoin="round"/>
+  <text class="p-m" x="34" y="410">Mar 14, 22:00</text><text class="p-m" x="366" y="410" text-anchor="end">now</text>
+  <path class="p-line" d="M34 420.5 H 366"/>
+  <g style="fill:#fafafa;font:500 16px Roboto,sans-serif"><text x="34" y="448">4.8 dB</text><text x="145" y="448">-108 dBm</text><text x="256" y="448">24 %</text></g>
+  <g class="p-m" style="font-size:12.5px"><text x="34" y="466">average SNR</text><text x="145" y="466">average RSSI</text><text x="256" y="466">are messages</text></g>
+  <rect class="p-c" x="10" y="494" width="184" height="104" rx="26"/><rect class="p-c" x="206" y="494" width="184" height="104" rx="26"/>
+  <rect class="p-c" x="10" y="610" width="184" height="104" rx="26"/><rect class="p-c" x="206" y="610" width="184" height="104" rx="26"/>
+  <g fill="none" stroke="#5aae8a" stroke-width="1.5"><rect x="34" y="511" width="6" height="5" rx="1"/><rect x="29" y="523" width="6" height="5" rx="1"/><rect x="39" y="523" width="6" height="5" rx="1"/><path d="M37 516 v3 M32 523 v-4 h10 v4"/></g>
+  <text x="52" y="525" style="fill:#d8d8d8;font:500 14px Roboto,sans-serif">Nodes heard</text>
+  <text x="30" y="560" style="fill:#fafafa;font:300 30px Roboto,sans-serif">287</text>
+  <text class="p-m" x="30" y="578" style="font-size:12px">193 repeaters · 350 / 350</text><text class="p-m" x="30" y="592" style="font-size:12px">contacts</text>
+  <g fill="none" stroke="#5aae8a" stroke-width="1.5" stroke-linecap="round"><circle cx="232" cy="517" r="2.2"/><path d="M232 520 l-4 9 M232 520 l4 9 M226 512 a8 8 0 0 0 0 10 M238 512 a8 8 0 0 1 0 10"/></g>
+  <text x="248" y="525" style="fill:#d8d8d8;font:500 14px Roboto,sans-serif">Heard directly</text>
+  <text x="226" y="560" style="fill:#fafafa;font:300 30px Roboto,sans-serif">23</text>
+  <text class="p-m" x="226" y="578" style="font-size:12px">repeaters in range</text>
+  <path d="M30 637 a8 7 0 1 1 3 5.5 l-4 2 z" fill="none" stroke="#6a9ad6" stroke-width="1.5" stroke-linejoin="round"/>
+  <text x="52" y="641" style="fill:#d8d8d8;font:500 14px Roboto,sans-serif">Messages</text>
+  <text x="30" y="676" style="fill:#fafafa;font:300 30px Roboto,sans-serif">1,946</text>
+  <text class="p-m" x="30" y="694" style="font-size:12px">1,604 in channels · 342</text><text class="p-m" x="30" y="708" style="font-size:12px">direct</text>
+  <g fill="none" stroke="#d2a64c" stroke-width="1.5" stroke-linecap="round"><circle cx="231" cy="630" r="3.5"/><path d="M224 642 a7 7 0 0 1 14 0 M237 627 a3.5 3.5 0 0 1 0 6.5 M240 642 a6 6 0 0 0 -2.5 -5"/></g>
+  <text x="248" y="641" style="fill:#d8d8d8;font:500 14px Roboto,sans-serif">Apps connected</text>
+  <text x="226" y="676" style="fill:#fafafa;font:300 30px Roboto,sans-serif">1</text>
+  <text class="p-m" x="226" y="694" style="font-size:12px">meshcore-cli</text>
+  <rect class="p-c" x="10" y="726" width="380" height="250" rx="26"/>
+  <path class="p-icp" d="M34 750 l10 -5 l10 5 l-10 5 z M34 756 l10 5 l10 -5 M34 762 l10 5 l10 -5" style="stroke-width:1.5"/>
+  <text class="p-h" x="64" y="760">What the mesh carries</text><path class="p-ic" d="M358 746 l6 6 l-6 6" style="stroke-width:1.8"/>
+  </g></g>
+
+  <g transform="translate(440 0)">
+  <use href="#stHead"/>
+  <g clip-path="url(#stBody)"><g transform="translate(0 40)">
+  <rect class="p-c" x="10" y="112" width="380" height="260" rx="26"/>
+  <path class="p-icp" d="M34 136 l10 -5 l10 5 l-10 5 z M34 142 l10 5 l10 -5 M34 148 l10 5 l10 -5" style="stroke-width:1.5"/>
+  <text class="p-h" x="64" y="146">What the mesh carries</text>
+  <rect x="34" y="164" width="80" height="32" rx="8" fill="#4a2622"/><text x="74" y="185" text-anchor="middle" style="fill:#f6d5d0;font:500 14px Roboto,sans-serif">By type</text>
+  <rect x="122" y="164.5" width="152" height="31" rx="8" fill="none" stroke="#8a8a8a" stroke-width="1.2"/><text x="198" y="185" text-anchor="middle" style="fill:#d8d8d8;font:500 14px Roboto,sans-serif">Messages vs traffic</text>
+  <g clip-path="url(#stBar)"><rect x="34" y="212" width="112" height="10" fill="#6a9ad6"/><rect x="148" y="212" width="62" height="10" fill="#5aae8a"/><rect x="212" y="212" width="52" height="10" fill="#d2a64c"/><rect x="266" y="212" width="15" height="10" fill="#d48a6c"/><rect x="283" y="212" width="83" height="10" fill="#5a6070"/></g>
+  <circle cx="40" cy="243" r="4" fill="#6a9ad6"/><circle cx="40" cy="269" r="4" fill="#5aae8a"/><circle cx="40" cy="295" r="4" fill="#d2a64c"/><circle cx="40" cy="321" r="4" fill="#d48a6c"/><circle cx="40" cy="347" r="4" fill="#5a6070"/>
+  <g style="fill:#fafafa;font:15px Roboto,sans-serif"><text x="54" y="248">Requests</text><text x="54" y="274">Channel messages</text><text x="54" y="300">Adverts</text><text x="54" y="326">Direct messages</text><text x="54" y="352" fill="#9a9a9a">9 more types</text></g>
+  <g style="fill:#fafafa;font:15px Roboto,sans-serif" text-anchor="end"><text x="300" y="248">5,204</text><text x="300" y="274">2,906</text><text x="300" y="300">2,448</text><text x="300" y="326">766</text><text x="300" y="352">3,978</text></g>
+  <g class="p-m" style="font-size:12px" text-anchor="end"><text x="366" y="248">34 %</text><text x="366" y="274">19 %</text><text x="366" y="300">16 %</text><text x="366" y="326">5 %</text><text x="366" y="352">26 %</text></g>
+  <rect class="p-c" x="10" y="384" width="380" height="232" rx="26"/>
+  <g class="p-icp" style="stroke-width:1.5"><rect x="36" y="404" width="15" height="15" rx="2.5"/><rect x="40.5" y="408.5" width="6" height="6" rx="1"/><path d="M40 401 v3 M47 401 v3 M40 419 v3 M47 419 v3 M33 408 h3 M33 415 h3 M51 408 h3 M51 415 h3"/></g>
+  <text class="p-h" x="64" y="418">Your companion</text>
+  <text x="34" y="452" style="fill:#fafafa;font:500 17px Roboto,sans-serif">4.07 V</text><text class="p-m" x="34" y="470" style="font-size:12.5px">battery · 85 %</text>
+  <path d="M240 446 L262 446.5 L284 447.5 L306 449 L320 450 L330 444 L346 444.5 L366 445.5" fill="none" stroke="#5aae8a" stroke-width="2" stroke-linejoin="round"/>
+  <path class="p-line" d="M34 484.5 H 366"/>
+  <text x="34" y="516" style="fill:#fafafa;font:500 17px Roboto,sans-serif">-112 dBm</text><text class="p-m" x="34" y="534" style="font-size:12.5px">noise floor</text>
+  <path d="M240 516 L246 510 L252 519 L258 512 L264 522 L270 508 L276 517 L282 514 L288 524 L294 511 L300 518 L306 509 L312 520 L318 515 L324 523 L330 512 L336 517 L342 510 L348 521 L354 514 L360 519 L366 513" fill="none" stroke="#6a9ad6" stroke-width="1.8" stroke-linejoin="round"/>
+  <path class="p-line" d="M34 548.5 H 366"/>
+  <text x="34" y="580" style="fill:#fafafa;font:500 17px Roboto,sans-serif">18.5 °C</text><text class="p-m" x="34" y="598" style="font-size:12.5px">temperature</text>
+  <path d="M240 594 L249.7 592 L259.4 590 L269.1 586 L278.8 580 L288.5 574 L298.2 570 L307.9 568 L317.6 570 L327.3 574 L337 580 L346.7 586 L356.4 590 L366 592" fill="none" stroke="#d2a64c" stroke-width="2" stroke-linejoin="round"/>
+  <rect class="p-c" x="10" y="628" width="380" height="250" rx="26"/>
+  <g class="p-icp" style="stroke-width:1.5"><circle cx="44" cy="651" r="2.2"/><path d="M44 654 l-4 10 M44 654 l4 10 M38 646 a8 8 0 0 0 0 10 M50 646 a8 8 0 0 1 0 10 M34 643 a13 13 0 0 0 0 16 M54 643 a13 13 0 0 1 0 16"/></g>
+  <text class="p-h" x="64" y="662">Heard through</text>
+  <text class="p-m" x="34" y="688" style="font-size:12.5px">The repeaters your companion hears floods from</text>
+  <text class="p-t" x="34" y="718">Hilltop Rpt</text><text class="p-m" x="366" y="718" text-anchor="end" style="font-size:12.5px">2,114 · 6.3 dB</text>
+  <rect x="34" y="728" width="332" height="7" rx="3.5" fill="#2e2e2e"/><rect x="34" y="728" width="332" height="7" rx="3.5" fill="#5aae8a"/>
+  <text class="p-t" x="34" y="762">Tower 7?</text><text class="p-m" x="366" y="762" text-anchor="end" style="font-size:12.5px">1,786 · 2.4 dB</text>
+  <rect x="34" y="772" width="332" height="7" rx="3.5" fill="#2e2e2e"/><rect x="34" y="772" width="280" height="7" rx="3.5" fill="#5aae8a"/>
+  <text class="p-t" x="34" y="806">RPT-North-02</text>
+  </g></g>
+  </g>
+</svg>
+<figcaption>L'onglet Aperçu sur 24 h, en haut et plus bas : l'activité du mesh, les quatre tuiles, les paquets par type, les relevés du compagnon et les répéteurs par lesquels il entend. Le titre, les onglets et la durée restent en place quand les cartes défilent. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Carte</th><th>Signification</th></tr>
+<tr><td>Activité mesh</td><td class="w">Chaque paquet entendu par le compagnon sur cette durée, une courbe par heure, le SNR et le RSSI moyens, et la part des paquets qui portent des messages.</td></tr>
+<tr><td>Noeuds captés</td><td class="w">Les noeuds entendus sur cette durée, combien sont des répéteurs, et les contacts du compagnon par rapport à sa limite.</td></tr>
+<tr><td>Portée directe</td><td class="w">Les répéteurs que votre compagnon entend sans autre répéteur entre les deux.</td></tr>
+<tr><td>Messages</td><td class="w">Les messages stockés par le proxy sur cette durée, en canal et directs.</td></tr>
+<tr><td>Apps connectées</td><td class="w">Les apps MeshCore connectées en ce moment par le port MeshCore du proxy (cette app utilise l'API de données et n'est pas comptée).</td></tr>
+<tr><td>Contenu du mesh</td><td class="w">Les paquets par type, ou <b>Messages / trafic</b> : les paquets écrits par des personnes face à ceux qui font marcher le mesh (annonces, accusés, mises à jour de chemin et autres).</td></tr>
+<tr><td>Compagnon</td><td class="w">Batterie, bruit de fond et température, chacun avec sa tendance sur la durée.</td></tr>
+<tr><td>Entendu via</td><td class="w">Les répéteurs d'où votre compagnon entend les paquets flood, le plus actif d'abord, avec leur SNR moyen. Un nom qui finit par « ? » est une supposition : plusieurs répéteurs partagent cet id.</td></tr>
+<tr><td>Conversations</td><td class="w">Les canaux les plus actifs, ou les expéditeurs les plus actifs.</td></tr>
+</table></div>
+<p><b>Mesh</b> : les paquets au fil du temps. Chaque graphique a une barre ou un point par heure sur 24 heures, toutes les 6 heures sur 7 jours, par jour sur 30 jours.</p>
+<figure class="menu">
+<svg viewBox="0 0 840 840" role="img" aria-label="L'onglet Mesh des Stats sur 24 h : Paquets par type, en barres empilées par heure avec le nombre et la part de chaque type ; SNR moyen en ligne avec la moyenne, le dernier et le minimum ; Part des messages en ligne avec les paquets de messages et de trafic du mesh ; le haut de Messages par heure">
+  <defs>
+    <clipPath id="maBody"><rect x="0" y="252" width="400" height="532"/></clipPath>
+    <path id="maD" d="M35 230v-80h11.5v80z M48.8 230v-73.8h11.5v73.8z M145.6 230v-64.6h11.5v64.6z M173.3 230v-106.2h11.5v106.2z M187.1 230v-116.9h11.5v116.9z M201 230v-123.1h11.5v123.1z M228.6 230v-126.2h11.5v126.2z M242.5 230v-130.8h11.5v130.8z M256.3 230v-127.7h11.5v127.7z M284 230v-140h11.5v140z M297.8 230v-133.8h11.5v133.8z M311.6 230v-129.2h11.5v129.2z M339.3 230v-127.7h11.5v127.7z M353.1 230v-124.9h11.5v124.9z"/>
+    <path id="maN" d="M62.7 230v-63.1h11.5v63.1z M76.5 230v-50.8h11.5v50.8z M90.3 230v-40h11.5v40z M104.2 230v-36.9h11.5v36.9z M118 230v-38.5h11.5v38.5z M131.8 230v-46.2h11.5v46.2z"/>
+    <path id="maC" d="M159.5 230v-86.2h11.5v86.2z M214.8 230v-120h11.5v120z M270.1 230v-135.4h11.5v135.4z M325.4 230v-132.3h11.5v132.3z"/>
+    <path id="maMA" d="M35 1180v-25.9h11.5v25.9z M62.7 1180v-11.6h11.5v11.6z M76.5 1180v-6.5h11.5v6.5z M118 1180v-4.5h11.5v4.5z M131.8 1180v-9.7h11.5v9.7z M145.6 1180v-29.1h11.5v29.1z M173.3 1180v-67.9h11.5v67.9z M187.1 1180v-71.2h11.5v71.2z M214.8 1180v-72.5h11.5v72.5z M228.6 1180v-77.6h11.5v77.6z M256.3 1180v-71.2h11.5v71.2z M270.1 1180v-97.1h11.5v97.1z M297.8 1180v-82.8h11.5v82.8z M311.6 1180v-74.4h11.5v74.4z M339.3 1180v-58.2h11.5v58.2z M353.1 1180v-43.3h11.5v43.3z"/>
+    <path id="maMB" d="M48.8 1180v-19.4h11.5v19.4z M159.5 1180v-51.8h11.5v51.8z M242.5 1180v-93.8h11.5v93.8z M325.4 1180v-97.1h11.5v97.1z"/>
+    <path id="maMC" d="M90.3 1180v-3.9h11.5v3.9z M104.2 1180v-3.2h11.5v3.2z M201 1180v-76.3h11.5v76.3z M284 1180v-110h11.5v110z"/>
+    <g id="maPage">
+      <rect class="p-c" x="10" y="0" width="380" height="410" rx="26"/>
+      <path class="p-icp" d="M34 24 l10 -5 l10 5 l-10 5 z M34 30 l10 5 l10 -5 M34 36 l10 5 l10 -5" style="stroke-width:1.5"/>
+      <text class="p-h" x="64" y="34">Packets heard, by type</text>
+      <text class="p-m" x="34" y="60" style="font-size:12.5px">One bar or point per hour</text>
+      <g fill="#5a6070"><use href="#maD"/><use href="#maN"/><use href="#maC"/></g>
+      <use href="#maD" fill="#d48a6c" transform="matrix(1 0 0 .74 0 59.8)"/><use href="#maN" fill="#d48a6c" transform="matrix(1 0 0 .72 0 64.4)"/><use href="#maC" fill="#d48a6c" transform="matrix(1 0 0 .74 0 59.8)"/>
+      <use href="#maD" fill="#d2a64c" transform="matrix(1 0 0 .69 0 71.3)"/><use href="#maN" fill="#d2a64c" transform="matrix(1 0 0 .68 0 73.6)"/><use href="#maC" fill="#d2a64c" transform="matrix(1 0 0 .70 0 69)"/>
+      <use href="#maD" fill="#5aae8a" transform="matrix(1 0 0 .53 0 108.1)"/><use href="#maN" fill="#5aae8a" transform="matrix(1 0 0 .48 0 119.6)"/><use href="#maC" fill="#5aae8a" transform="matrix(1 0 0 .56 0 101.2)"/>
+      <use href="#maD" fill="#6a9ad6" transform="matrix(1 0 0 .34 0 151.8)"/><use href="#maN" fill="#6a9ad6" transform="matrix(1 0 0 .40 0 138)"/><use href="#maC" fill="#6a9ad6" transform="matrix(1 0 0 .30 0 161)"/>
+      <text class="p-m" x="34" y="248">Mar 14, 22:00</text><text class="p-m" x="366" y="248" text-anchor="end">now</text>
+      <circle cx="40" cy="273" r="4" fill="#6a9ad6"/><circle cx="40" cy="301" r="4" fill="#5aae8a"/><circle cx="40" cy="329" r="4" fill="#d2a64c"/><circle cx="40" cy="357" r="4" fill="#d48a6c"/><circle cx="40" cy="385" r="4" fill="#5a6070"/>
+      <g style="fill:#fafafa;font:15px Roboto,sans-serif"><text x="54" y="278">Requests</text><text x="54" y="306">Channel messages</text><text x="54" y="334">Adverts</text><text x="54" y="362">Direct messages</text><text x="54" y="390" fill="#9a9a9a">Other types</text></g>
+      <g style="fill:#fafafa;font:15px Roboto,sans-serif" text-anchor="end"><text x="300" y="278">5,204</text><text x="300" y="306">2,906</text><text x="300" y="334">2,448</text><text x="300" y="362">766</text><text x="300" y="390">3,978</text></g>
+      <g class="p-m" style="font-size:12px" text-anchor="end"><text x="366" y="278">34 %</text><text x="366" y="306">19 %</text><text x="366" y="334">16 %</text><text x="366" y="362">5 %</text><text x="366" y="390">26 %</text></g>
+      <rect class="p-c" x="10" y="422" width="380" height="258" rx="26"/>
+      <path class="p-icp" d="M36 456 v-3 M41 456 v-6 M46 456 v-9 M51 456 v-12" style="stroke-width:2"/>
+      <text class="p-h" x="64" y="456">Average SNR</text>
+      <text class="p-m" x="34" y="482" style="font-size:12.5px">One bar or point per hour</text>
+      <path d="M40.9 545 L54.7 552.8 L68.6 566.5 L82.4 580.2 L96.2 590 L110.1 576.3 L123.9 562.6 L137.7 548.9 L151.6 537.2 L165.4 527.4 L179.2 521.6 L193.1 529.4 L206.9 513.7 L220.7 507.9 L234.6 519.6 L248.4 525.5 L262.2 511.8 L276.1 502 L289.9 515.7 L303.7 523.5 L317.6 531.3 L331.4 519.6 L345.2 513.7 L359.1 517.6" fill="none" stroke="#6a9ad6" stroke-width="2" stroke-linejoin="round"/>
+      <text class="p-m" x="34" y="608">Mar 14, 22:00</text><text class="p-m" x="366" y="608" text-anchor="end">now</text>
+      <g style="fill:#fafafa;font:500 16px Roboto,sans-serif"><text x="34" y="640">4.8 dB</text><text x="145" y="640">5.6 dB</text><text x="256" y="640">1.9 dB</text></g>
+      <g class="p-m" style="font-size:12.5px"><text x="34" y="658">average SNR</text><text x="145" y="658">latest</text><text x="256" y="658">lowest</text></g>
+      <rect class="p-c" x="10" y="692" width="380" height="282" rx="26"/>
+      <path class="p-icp" d="M36 722 a8 7 0 1 1 3 5.5 l-4 2 z" style="stroke-width:1.5"/>
+      <text class="p-h" x="64" y="726">Message share of the traffic</text>
+      <text class="p-m" x="34" y="752" style="font-size:12.5px">One bar or point per hour</text>
+      <path d="M40.9 814 L54.7 816 L68.6 822 L82.4 826 L96.2 830 L110.1 828 L123.9 824 L137.7 818 L151.6 810 L165.4 802 L179.2 796 L193.1 798 L206.9 800 L220.7 796 L234.6 794 L248.4 798 L262.2 792 L276.1 788 L289.9 790 L303.7 794 L317.6 796 L331.4 792 L345.2 798 L359.1 802" fill="none" stroke="#6a9ad6" stroke-width="2" stroke-linejoin="round"/>
+      <text class="p-m" x="34" y="868">Mar 14, 22:00</text><text class="p-m" x="366" y="868" text-anchor="end">now</text>
+      <circle cx="40" cy="895" r="4" fill="#6a9ad6"/><circle cx="40" cy="923" r="4" fill="#5a6070"/>
+      <g style="fill:#fafafa;font:15px Roboto,sans-serif"><text x="54" y="900">Message packets</text><text x="54" y="928">Mesh traffic packets</text></g>
+      <g style="fill:#fafafa;font:15px Roboto,sans-serif" text-anchor="end"><text x="300" y="900">3,672</text><text x="300" y="928">11,630</text></g>
+      <g class="p-m" style="font-size:12px" text-anchor="end"><text x="366" y="900">24 %</text><text x="366" y="928">76 %</text></g>
+      <text class="p-m" x="34" y="954" style="font-size:12.5px">3.2 mesh traffic packets for each message packet</text>
+      <rect class="p-c" x="10" y="986" width="380" height="292" rx="26"/>
+      <path class="p-icp" d="M36 1016 a8 7 0 1 1 3 5.5 l-4 2 z" style="stroke-width:1.5"/>
+      <text class="p-h" x="64" y="1020">Messages per hour</text>
+      <text class="p-m" x="34" y="1046" style="font-size:12.5px">One bar or point per hour</text>
+      <g fill="#d2a64c"><use href="#maMA"/><use href="#maMB"/></g>
+      <use href="#maMA" fill="#6a9ad6" transform="matrix(1 0 0 .82 0 212.4)"/><use href="#maMB" fill="#6a9ad6" transform="matrix(1 0 0 .65 0 413)"/><use href="#maMC" fill="#6a9ad6"/>
+    </g>
+    <g id="maHead">
+      <text class="p-ts" x="20" y="18">21:07</text>
+      <path class="p-ic" d="M340 14 l4 -4 M346 14 l4 -6 M352 14 l4 -8" style="stroke:#fafafa"/><rect x="364" y="7" width="18" height="9" rx="2" fill="none" stroke="#fafafa" stroke-width="1.3"/><rect x="366" y="9" width="12" height="5" fill="#fafafa"/>
+      <rect class="p-c" x="10" y="28" width="380" height="74" rx="26"/>
+      <circle cx="32" cy="53" r="4.5" fill="#4cb87a"/>
+      <text class="p-h" x="44" y="59" style="font-size:17px">Ridge Base</text>
+      <path class="p-ic" d="M140 47 l8 7 l-4 3.5 v-14 l4 3.5 l-8 7" style="stroke-width:1.4"/>
+      <text class="p-h" x="312" y="59" style="font-size:15px">85 %</text>
+      <rect x="352" y="46" width="26" height="14" rx="4" fill="none" stroke="#9a9a9a" stroke-width="1.5"/><rect x="378" y="50" width="2.5" height="6" rx="1" fill="#9a9a9a"/><rect x="354.5" y="48.5" width="18" height="9" rx="2" fill="#4cb87a"/>
+      <circle class="p-ic" cx="32" cy="76" r="3.5" style="stroke-width:1.3"/><path class="p-ic" d="M26 87 a6 6 0 0 1 12 0 M38 73 a3.5 3.5 0 0 1 0 6 M40 87 a6 6 0 0 0 -3 -5" style="stroke-width:1.3"/>
+      <text class="p-m" x="48" y="86" style="font-size:13px">412 / 350</text>
+      <circle class="p-ic" cx="132" cy="81" r="6.5" style="stroke-width:1.3"/><path class="p-ic" d="M132 77 v4 l3 2" style="stroke-width:1.3"/>
+      <text class="p-m" x="145" y="86" style="font-size:13px">up 2 d 4 h</text>
+      <text class="p-m" x="365" y="86" text-anchor="middle" style="font-size:13px">4.07 V</text>
+      <text x="200" y="140" text-anchor="middle" style="fill:#fafafa;font:400 30px Roboto,'Segoe UI',sans-serif">Stats</text>
+      <text x="100" y="182" text-anchor="middle" style="fill:#e5574c;font:400 15px Roboto,sans-serif">Overview</text>
+      <text x="300" y="182" text-anchor="middle" style="fill:#e5574c;font:600 15px Roboto,sans-serif">Mesh</text>
+      <path d="M0 198.5 H 400" stroke="#4a4a4a" stroke-width="1"/><rect x="200" y="196" width="200" height="3" fill="#e5574c"/>
+      <rect x="108" y="208" width="92" height="36" fill="#4a2622"/>
+      <rect x="16" y="208" width="368" height="36" rx="18" fill="none" stroke="#8a8a8a" stroke-width="1.2"/>
+      <path d="M108 208 v36 M200 208 v36 M292 208 v36" stroke="#8a8a8a" stroke-width="1.2"/>
+      <g style="font:500 14px Roboto,sans-serif" text-anchor="middle"><text x="62" y="231" fill="#d8d8d8">1 h</text><text x="164" y="231" fill="#f6d5d0">24 h</text><text x="246" y="231" fill="#d8d8d8">7 days</text><text x="338" y="231" fill="#d8d8d8">30 days</text></g>
+      <path d="M128 226 l4 4 l8 -9" fill="none" stroke="#f6d5d0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect class="p-c" x="0" y="784" width="400" height="56"/><path class="p-line" d="M0 784.5 H 400"/>
+      <rect x="272" y="788" width="122" height="48" rx="18" fill="#2e2e2e"/>
+      <path d="M58 796 h18 a2 2 0 0 1 2 2 v10 a2 2 0 0 1 -2 2 h-11 l-5 4 v-4 h-2 a2 2 0 0 1 -2 -2 v-10 a2 2 0 0 1 2 -2 z" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-linejoin="round"/>
+      <rect x="68" y="789" width="26" height="14" rx="7" fill="#f2b8b5"/><text x="81" y="799.5" text-anchor="middle" style="fill:#601410;font:700 9.5px Roboto,sans-serif">99+</text>
+      <text x="67" y="831" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Chats</text>
+      <g fill="none" stroke="#9a9a9a" stroke-width="1.5"><rect x="196" y="794" width="8" height="6" rx="1.5"/><rect x="190" y="808" width="8" height="6" rx="1.5"/><rect x="202" y="808" width="8" height="6" rx="1.5"/><path d="M200 800 v4 M194 808 v-4 h12 v4"/></g>
+      <text x="200" y="831" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Contacts</text>
+      <path d="M323 795 v18 h20 M328 809 v-6 M333 809 v-11 M338 809 v-4" fill="none" stroke="#fafafa" stroke-width="1.8" stroke-linecap="round"/>
+      <text x="333" y="831" text-anchor="middle" style="fill:#fafafa;font:700 12.5px Roboto,sans-serif">Stats</text>
+    </g>
+  </defs>
+  <rect class="p-bg" x="0" y="0" width="840" height="840"/>
+  <path d="M420 0 V 840" stroke="#2e2e2e" stroke-width="1"/>
+  <use href="#maHead"/>
+  <g clip-path="url(#maBody)"><use href="#maPage" transform="translate(0 252)"/></g>
+  <g transform="translate(440 0)">
+    <use href="#maHead"/>
+    <g clip-path="url(#maBody)"><use href="#maPage" transform="translate(0 -338)"/></g>
+  </g>
+</svg>
+<figcaption>L'onglet Mesh sur 24 h, en haut et plus bas : les paquets par type heure par heure, le SNR moyen, et la part du trafic qui porte des messages. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+<figure class="menu">
+<svg viewBox="0 0 840 840" role="img" aria-label="L'onglet Mesh des Stats plus bas : Messages par heure en barres empilées, en canal et directs ; Répéteurs ayant apporté des paquets, le plus actif d'abord, avec les paquets et le SNR moyen ; Journée type avec son résumé en mots et les courbes semaine, week-end et ce jour ; le haut de Rythme des annonces">
+  <defs>
+    <clipPath id="mbBody"><rect x="0" y="252" width="400" height="532"/></clipPath>
+    <path id="mbMA" d="M35 1180v-25.9h11.5v25.9z M62.7 1180v-11.6h11.5v11.6z M76.5 1180v-6.5h11.5v6.5z M118 1180v-4.5h11.5v4.5z M131.8 1180v-9.7h11.5v9.7z M145.6 1180v-29.1h11.5v29.1z M173.3 1180v-67.9h11.5v67.9z M187.1 1180v-71.2h11.5v71.2z M214.8 1180v-72.5h11.5v72.5z M228.6 1180v-77.6h11.5v77.6z M256.3 1180v-71.2h11.5v71.2z M270.1 1180v-97.1h11.5v97.1z M297.8 1180v-82.8h11.5v82.8z M311.6 1180v-74.4h11.5v74.4z M339.3 1180v-58.2h11.5v58.2z M353.1 1180v-43.3h11.5v43.3z"/>
+    <path id="mbMB" d="M48.8 1180v-19.4h11.5v19.4z M159.5 1180v-51.8h11.5v51.8z M242.5 1180v-93.8h11.5v93.8z M325.4 1180v-97.1h11.5v97.1z"/>
+    <path id="mbMC" d="M90.3 1180v-3.9h11.5v3.9z M104.2 1180v-3.2h11.5v3.2z M201 1180v-76.3h11.5v76.3z M284 1180v-110h11.5v110z"/>
+    <g id="mbPage">
+      <rect class="p-c" x="10" y="986" width="380" height="292" rx="26"/>
+      <path class="p-icp" d="M36 1016 a8 7 0 1 1 3 5.5 l-4 2 z" style="stroke-width:1.5"/>
+      <text class="p-h" x="64" y="1020">Messages per hour</text>
+      <text class="p-m" x="34" y="1046" style="font-size:12.5px">One bar or point per hour</text>
+      <g fill="#d2a64c"><use href="#mbMA"/><use href="#mbMB"/></g>
+      <use href="#mbMA" fill="#6a9ad6" transform="matrix(1 0 0 .82 0 212.4)"/><use href="#mbMB" fill="#6a9ad6" transform="matrix(1 0 0 .65 0 413)"/><use href="#mbMC" fill="#6a9ad6"/>
+      <text class="p-m" x="34" y="1198">Mar 14, 22:00</text><text class="p-m" x="366" y="1198" text-anchor="end">now</text>
+      <circle cx="40" cy="1225" r="4" fill="#6a9ad6"/><circle cx="40" cy="1253" r="4" fill="#d2a64c"/>
+      <g style="fill:#fafafa;font:15px Roboto,sans-serif"><text x="54" y="1230">In channels</text><text x="54" y="1258">Direct</text></g>
+      <g style="fill:#fafafa;font:15px Roboto,sans-serif" text-anchor="end"><text x="300" y="1230">1,604</text><text x="300" y="1258">342</text></g>
+      <g class="p-m" style="font-size:12px" text-anchor="end"><text x="366" y="1230">82 %</text><text x="366" y="1258">18 %</text></g>
+      <rect class="p-c" x="10" y="1290" width="380" height="370" rx="26"/>
+      <g class="p-icp" style="stroke-width:1.5"><circle cx="44" cy="1313" r="2.2"/><path d="M44 1316 l-4 10 M44 1316 l4 10 M38 1308 a8 8 0 0 0 0 10 M50 1308 a8 8 0 0 1 0 10 M34 1305 a13 13 0 0 0 0 16 M54 1305 a13 13 0 0 1 0 16"/></g>
+      <text class="p-h" x="64" y="1324">Repeaters that brought us packets</text>
+      <text class="p-m" x="34" y="1350" style="font-size:12.5px">The last repeater before us on each flood packet, the</text>
+      <text class="p-m" x="34" y="1368" style="font-size:12.5px">busiest first</text>
+      <g class="p-t"><text x="34" y="1400">Hilltop Rpt</text><text x="34" y="1444">Tower 7?</text><text x="34" y="1488">RPT-North-02</text><text x="34" y="1532">KX-Relay-3</text><text x="34" y="1576">Old Relay R</text><text x="34" y="1620">Summit-1</text></g>
+      <g class="p-m" style="font-size:12.5px" text-anchor="end"><text x="366" y="1400">2,114 · 6.3 dB</text><text x="366" y="1444">1,786 · 2.4 dB</text><text x="366" y="1488">1,402 · -1.2 dB</text><text x="366" y="1532">931 · 4.1 dB</text><text x="366" y="1576">655 · 8.8 dB</text><text x="366" y="1620">412 · 5.0 dB</text></g>
+      <g fill="#2e2e2e"><rect x="34" y="1410" width="332" height="7" rx="3.5"/><rect x="34" y="1454" width="332" height="7" rx="3.5"/><rect x="34" y="1498" width="332" height="7" rx="3.5"/><rect x="34" y="1542" width="332" height="7" rx="3.5"/><rect x="34" y="1586" width="332" height="7" rx="3.5"/><rect x="34" y="1630" width="332" height="7" rx="3.5"/></g>
+      <g fill="#5aae8a"><rect x="34" y="1410" width="332" height="7" rx="3.5"/><rect x="34" y="1454" width="280.5" height="7" rx="3.5"/><rect x="34" y="1498" width="220.2" height="7" rx="3.5"/><rect x="34" y="1542" width="146.2" height="7" rx="3.5"/><rect x="34" y="1586" width="102.9" height="7" rx="3.5"/><rect x="34" y="1630" width="64.7" height="7" rx="3.5"/></g>
+      <rect class="p-c" x="10" y="1672" width="380" height="396" rx="26"/>
+      <circle class="p-icp" cx="44" cy="1700" r="8" style="stroke-width:1.5"/><path class="p-icp" d="M44 1695 v5 l3 2" style="stroke-width:1.5"/>
+      <text class="p-h" x="64" y="1706">A typical day</text>
+      <g style="fill:#fafafa;font:15px Roboto,sans-serif"><text x="34" y="1736">On a usual weekday, busiest around 18:00</text><text x="34" y="1756">(+23 % against the day's average), quietest</text><text x="34" y="1776">around 04:00 (−68 %).</text></g>
+      <text class="p-m" x="34" y="1800" style="font-size:12.5px">Last hour (20:00): 830 packets, +1 % against a</text>
+      <text class="p-m" x="34" y="1816" style="font-size:12.5px">usual weekday.</text>
+      <g transform="translate(0 10)" fill="none" stroke-linejoin="round" stroke-linecap="round">
+        <path d="M40.9 1888.9 L54.7 1897.3 L68.6 1905.7 L82.4 1914 L96.2 1919.6 L110.1 1921 L123.9 1918.2 L137.7 1909.8 L151.6 1895.9 L165.4 1880.5 L179.2 1866.5 L193.1 1858.1 L206.9 1855.3 L220.7 1856.7 L234.6 1859.5 L248.4 1860.9 L262.2 1858.1 L276.1 1855.3 L289.9 1852.5 L303.7 1853.9 L317.6 1858.1 L331.4 1865.1 L345.2 1872.1 L359.1 1880.5" stroke="#d2a64c" stroke-opacity=".6" stroke-width="2"/>
+        <path d="M40.9 1897.3 L54.7 1905.7 L68.6 1914 L82.4 1921 L96.2 1923.8 L110.1 1919.6 L123.9 1908.4 L137.7 1888.9 L151.6 1872.1 L165.4 1863.7 L179.2 1858.1 L193.1 1855.3 L206.9 1852.5 L220.7 1853.9 L234.6 1849.7 L248.4 1845.5 L262.2 1841.3 L276.1 1837.1 L289.9 1832.9 L303.7 1835.7 L317.6 1841.3 L331.4 1849.7 L345.2 1866.5 L359.1 1883.3" stroke="#6a9ad6" stroke-width="2.5"/>
+        <path d="M40.9 1898.7 L54.7 1909.8 L68.6 1919.6 L82.4 1922.4 L96.2 1921 L110.1 1914 L123.9 1897.3 L137.7 1877.7 L151.6 1859.5 L165.4 1849.7 L179.2 1844.1 L193.1 1846.9 L206.9 1841.3 L220.7 1837.1 L234.6 1839.9 L248.4 1832.9 L262.2 1828.7 L276.1 1834.3 L289.9 1838.5 L303.7 1835.7 L317.6 1839.9 L331.4 1842.4" stroke="#fafafa" stroke-width="2"/>
+      </g>
+      <g class="p-m"><text x="34" y="1994">00:00</text><text x="117" y="1994">06:00</text><text x="200" y="1994">12:00</text><text x="283" y="1994">18:00</text></g>
+      <circle cx="39" cy="2014" r="4" fill="#6a9ad6"/><circle cx="117" cy="2014" r="4" fill="#d2a64c"/><circle cx="197" cy="2014" r="4" fill="#fafafa"/>
+      <g class="p-m" style="font-size:12.5px"><text x="48" y="2018">weekday</text><text x="126" y="2018">weekend</text><text x="206" y="2018">today</text></g>
+      <text class="p-m" x="34" y="2042" style="font-size:12.5px">Packets per hour, local time: the average of the last 30</text>
+      <text class="p-m" x="34" y="2058" style="font-size:12.5px">days, weekdays and weekends apart, and today so far.</text>
+      <rect class="p-c" x="10" y="2080" width="380" height="500" rx="26"/>
+      <g class="p-icp" style="stroke-width:1.5"><circle cx="44" cy="2103" r="2.2"/><path d="M44 2106 l-4 10 M44 2106 l4 10 M38 2098 a8 8 0 0 0 0 10 M50 2098 a8 8 0 0 1 0 10 M34 2095 a13 13 0 0 0 0 16 M54 2095 a13 13 0 0 1 0 16"/></g>
+      <text class="p-h" x="64" y="2114">How often repeaters advert</text>
+      <text class="p-m" x="34" y="2140" style="font-size:12.5px">Last 30 days. A repeater's timer sends its adverts</text>
+      <text class="p-m" x="34" y="2158" style="font-size:12.5px">on a steady beat, found here from the adverts heard.</text>
+      <text class="p-m" x="34" y="2176" style="font-size:12.5px">Adverts off the beat were sent by hand.</text>
+      <g style="font:500 12.5px Roboto,sans-serif;fill:#fafafa" text-anchor="middle"><text x="338.2" y="2204">82</text><text x="282.9" y="2236.5">46</text></g>
+      <rect x="320.5" y="2210" width="35.4" height="74" rx="3" fill="#5a6070"/><rect x="265.2" y="2242.5" width="35.4" height="41.5" rx="3" fill="#5a7075"/>
+    </g>
+    <g id="mbHead">
+      <text class="p-ts" x="20" y="18">21:07</text>
+      <path class="p-ic" d="M340 14 l4 -4 M346 14 l4 -6 M352 14 l4 -8" style="stroke:#fafafa"/><rect x="364" y="7" width="18" height="9" rx="2" fill="none" stroke="#fafafa" stroke-width="1.3"/><rect x="366" y="9" width="12" height="5" fill="#fafafa"/>
+      <rect class="p-c" x="10" y="28" width="380" height="74" rx="26"/>
+      <circle cx="32" cy="53" r="4.5" fill="#4cb87a"/>
+      <text class="p-h" x="44" y="59" style="font-size:17px">Ridge Base</text>
+      <path class="p-ic" d="M140 47 l8 7 l-4 3.5 v-14 l4 3.5 l-8 7" style="stroke-width:1.4"/>
+      <text class="p-h" x="312" y="59" style="font-size:15px">85 %</text>
+      <rect x="352" y="46" width="26" height="14" rx="4" fill="none" stroke="#9a9a9a" stroke-width="1.5"/><rect x="378" y="50" width="2.5" height="6" rx="1" fill="#9a9a9a"/><rect x="354.5" y="48.5" width="18" height="9" rx="2" fill="#4cb87a"/>
+      <circle class="p-ic" cx="32" cy="76" r="3.5" style="stroke-width:1.3"/><path class="p-ic" d="M26 87 a6 6 0 0 1 12 0 M38 73 a3.5 3.5 0 0 1 0 6 M40 87 a6 6 0 0 0 -3 -5" style="stroke-width:1.3"/>
+      <text class="p-m" x="48" y="86" style="font-size:13px">412 / 350</text>
+      <circle class="p-ic" cx="132" cy="81" r="6.5" style="stroke-width:1.3"/><path class="p-ic" d="M132 77 v4 l3 2" style="stroke-width:1.3"/>
+      <text class="p-m" x="145" y="86" style="font-size:13px">up 2 d 4 h</text>
+      <text class="p-m" x="365" y="86" text-anchor="middle" style="font-size:13px">4.07 V</text>
+      <text x="200" y="140" text-anchor="middle" style="fill:#fafafa;font:400 30px Roboto,'Segoe UI',sans-serif">Stats</text>
+      <text x="100" y="182" text-anchor="middle" style="fill:#e5574c;font:400 15px Roboto,sans-serif">Overview</text>
+      <text x="300" y="182" text-anchor="middle" style="fill:#e5574c;font:600 15px Roboto,sans-serif">Mesh</text>
+      <path d="M0 198.5 H 400" stroke="#4a4a4a" stroke-width="1"/><rect x="200" y="196" width="200" height="3" fill="#e5574c"/>
+      <rect x="108" y="208" width="92" height="36" fill="#4a2622"/>
+      <rect x="16" y="208" width="368" height="36" rx="18" fill="none" stroke="#8a8a8a" stroke-width="1.2"/>
+      <path d="M108 208 v36 M200 208 v36 M292 208 v36" stroke="#8a8a8a" stroke-width="1.2"/>
+      <g style="font:500 14px Roboto,sans-serif" text-anchor="middle"><text x="62" y="231" fill="#d8d8d8">1 h</text><text x="164" y="231" fill="#f6d5d0">24 h</text><text x="246" y="231" fill="#d8d8d8">7 days</text><text x="338" y="231" fill="#d8d8d8">30 days</text></g>
+      <path d="M128 226 l4 4 l8 -9" fill="none" stroke="#f6d5d0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <rect class="p-c" x="0" y="784" width="400" height="56"/><path class="p-line" d="M0 784.5 H 400"/>
+      <rect x="272" y="788" width="122" height="48" rx="18" fill="#2e2e2e"/>
+      <path d="M58 796 h18 a2 2 0 0 1 2 2 v10 a2 2 0 0 1 -2 2 h-11 l-5 4 v-4 h-2 a2 2 0 0 1 -2 -2 v-10 a2 2 0 0 1 2 -2 z" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-linejoin="round"/>
+      <rect x="68" y="789" width="26" height="14" rx="7" fill="#f2b8b5"/><text x="81" y="799.5" text-anchor="middle" style="fill:#601410;font:700 9.5px Roboto,sans-serif">99+</text>
+      <text x="67" y="831" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Chats</text>
+      <g fill="none" stroke="#9a9a9a" stroke-width="1.5"><rect x="196" y="794" width="8" height="6" rx="1.5"/><rect x="190" y="808" width="8" height="6" rx="1.5"/><rect x="202" y="808" width="8" height="6" rx="1.5"/><path d="M200 800 v4 M194 808 v-4 h12 v4"/></g>
+      <text x="200" y="831" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Contacts</text>
+      <path d="M323 795 v18 h20 M328 809 v-6 M333 809 v-11 M338 809 v-4" fill="none" stroke="#fafafa" stroke-width="1.8" stroke-linecap="round"/>
+      <text x="333" y="831" text-anchor="middle" style="fill:#fafafa;font:700 12.5px Roboto,sans-serif">Stats</text>
+    </g>
+  </defs>
+  <rect class="p-bg" x="0" y="0" width="840" height="840"/>
+  <path d="M420 0 V 840" stroke="#2e2e2e" stroke-width="1"/>
+  <use href="#mbHead"/>
+  <g clip-path="url(#mbBody)"><use href="#mbPage" transform="translate(0 -800)"/></g>
+  <g transform="translate(440 0)">
+    <use href="#mbHead"/>
+    <g clip-path="url(#mbBody)"><use href="#mbPage" transform="translate(0 -1462)"/></g>
+  </g>
+</svg>
+<figcaption>Plus bas dans l'onglet Mesh : les messages par heure, les répéteurs qui ont apporté des paquets (un nom qui finit par « ? » est une supposition), une journée type, et le début des minuteries d'annonce. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+<figure class="phone">
+<svg viewBox="0 0 400 840" role="img" aria-label="La fin de l'onglet Mesh : Rythme des annonces, avec le nombre de répéteurs par intervalle d'annonce en barres et les répéteurs, les plus rapides d'abord, avec leur intervalle et les annonces envoyées à la main ; la ligne En direct">
+  <defs>
+    <clipPath id="mcBody"><rect x="0" y="252" width="400" height="532"/></clipPath>
+  </defs>
+  <rect class="p-bg" x="0" y="0" width="400" height="840"/>
+  <text class="p-ts" x="20" y="18">21:07</text>
+  <path class="p-ic" d="M340 14 l4 -4 M346 14 l4 -6 M352 14 l4 -8" style="stroke:#fafafa"/><rect x="364" y="7" width="18" height="9" rx="2" fill="none" stroke="#fafafa" stroke-width="1.3"/><rect x="366" y="9" width="12" height="5" fill="#fafafa"/>
+  <rect class="p-c" x="10" y="28" width="380" height="74" rx="26"/>
+  <circle cx="32" cy="53" r="4.5" fill="#4cb87a"/>
+  <text class="p-h" x="44" y="59" style="font-size:17px">Ridge Base</text>
+  <path class="p-ic" d="M140 47 l8 7 l-4 3.5 v-14 l4 3.5 l-8 7" style="stroke-width:1.4"/>
+  <text class="p-h" x="312" y="59" style="font-size:15px">85 %</text>
+  <rect x="352" y="46" width="26" height="14" rx="4" fill="none" stroke="#9a9a9a" stroke-width="1.5"/><rect x="378" y="50" width="2.5" height="6" rx="1" fill="#9a9a9a"/><rect x="354.5" y="48.5" width="18" height="9" rx="2" fill="#4cb87a"/>
+  <circle class="p-ic" cx="32" cy="76" r="3.5" style="stroke-width:1.3"/><path class="p-ic" d="M26 87 a6 6 0 0 1 12 0 M38 73 a3.5 3.5 0 0 1 0 6 M40 87 a6 6 0 0 0 -3 -5" style="stroke-width:1.3"/>
+  <text class="p-m" x="48" y="86" style="font-size:13px">412 / 350</text>
+  <circle class="p-ic" cx="132" cy="81" r="6.5" style="stroke-width:1.3"/><path class="p-ic" d="M132 77 v4 l3 2" style="stroke-width:1.3"/>
+  <text class="p-m" x="145" y="86" style="font-size:13px">up 2 d 4 h</text>
+  <text class="p-m" x="365" y="86" text-anchor="middle" style="font-size:13px">4.07 V</text>
+  <text x="200" y="140" text-anchor="middle" style="fill:#fafafa;font:400 30px Roboto,'Segoe UI',sans-serif">Stats</text>
+  <text x="100" y="182" text-anchor="middle" style="fill:#e5574c;font:400 15px Roboto,sans-serif">Overview</text>
+  <text x="300" y="182" text-anchor="middle" style="fill:#e5574c;font:600 15px Roboto,sans-serif">Mesh</text>
+  <path d="M0 198.5 H 400" stroke="#4a4a4a" stroke-width="1"/><rect x="200" y="196" width="200" height="3" fill="#e5574c"/>
+  <rect x="108" y="208" width="92" height="36" fill="#4a2622"/>
+  <rect x="16" y="208" width="368" height="36" rx="18" fill="none" stroke="#8a8a8a" stroke-width="1.2"/>
+  <path d="M108 208 v36 M200 208 v36 M292 208 v36" stroke="#8a8a8a" stroke-width="1.2"/>
+  <g style="font:500 14px Roboto,sans-serif" text-anchor="middle"><text x="62" y="231" fill="#d8d8d8">1 h</text><text x="164" y="231" fill="#f6d5d0">24 h</text><text x="246" y="231" fill="#d8d8d8">7 days</text><text x="338" y="231" fill="#d8d8d8">30 days</text></g>
+  <path d="M128 226 l4 4 l8 -9" fill="none" stroke="#f6d5d0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <g clip-path="url(#mcBody)">
+    <rect class="p-c" x="10" y="200" width="380" height="430" rx="26"/>
+    <g style="font:500 12.5px Roboto,sans-serif;fill:#fafafa" text-anchor="middle"><text x="61.7" y="368">2</text><text x="117" y="357.4">14</text><text x="172.3" y="342">31</text><text x="227.6" y="353.8">18</text><text x="282.9" y="328.5">46</text><text x="338.2" y="296">82</text></g>
+    <rect x="44" y="374" width="35.4" height="2" rx="1" fill="#5aae8a"/><rect x="99.3" y="363.4" width="35.4" height="12.6" rx="3" fill="#5a9e85"/><rect x="154.6" y="348" width="35.4" height="28" rx="3" fill="#5a8f80"/>
+    <rect x="209.9" y="359.8" width="35.4" height="16.2" rx="3" fill="#5a7f7a"/><rect x="265.2" y="334.5" width="35.4" height="41.5" rx="3" fill="#5a7075"/><rect x="320.5" y="302" width="35.4" height="74" rx="3" fill="#5a6070"/>
+    <g class="p-m" style="font-size:11.5px" text-anchor="middle"><text x="61.7" y="394">≤ 1 h</text><text x="117" y="394">1–3 h</text><text x="172.3" y="394">3–6 h</text><text x="227.6" y="394">6–12 h</text><text x="282.9" y="394">12–24 h</text><text x="338.2" y="394">&gt; 24 h</text></g>
+    <text x="34" y="426" style="fill:#fafafa;font:600 14px Roboto,sans-serif">Repeaters, fastest first</text>
+    <g class="p-t"><text x="34" y="458">Summit-1</text><text x="34" y="502">Old Relay R</text><text x="34" y="546">Hilltop Rpt</text><text x="34" y="590">KX-Relay-3</text></g>
+    <g class="p-m" style="font-size:12.5px" text-anchor="end"><text x="366" y="458">every 45 min · 6 by hand</text><text x="366" y="502">every 58 min</text><text x="366" y="546">every 2 h 0 · 12 by hand</text><text x="366" y="590">every 2 h 30 · 3 by hand</text></g>
+    <g fill="#2e2e2e"><rect x="34" y="468" width="332" height="7" rx="3.5"/><rect x="34" y="512" width="332" height="7" rx="3.5"/><rect x="34" y="556" width="332" height="7" rx="3.5"/><rect x="34" y="600" width="332" height="7" rx="3.5"/></g>
+    <g fill="#5aae8a"><rect x="34" y="468" width="332" height="7" rx="3.5"/><rect x="34" y="512" width="257.6" height="7" rx="3.5"/><rect x="34" y="556" width="124.5" height="7" rx="3.5"/><rect x="34" y="600" width="99.6" height="7" rx="3.5"/></g>
+    <text class="p-m" x="200" y="662" text-anchor="middle" style="font-size:12px">Live · pull down to read it all again</text>
+  </g>
+  <rect class="p-c" x="0" y="784" width="400" height="56"/><path class="p-line" d="M0 784.5 H 400"/>
+  <rect x="272" y="788" width="122" height="48" rx="18" fill="#2e2e2e"/>
+  <path d="M58 796 h18 a2 2 0 0 1 2 2 v10 a2 2 0 0 1 -2 2 h-11 l-5 4 v-4 h-2 a2 2 0 0 1 -2 -2 v-10 a2 2 0 0 1 2 -2 z" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-linejoin="round"/>
+  <rect x="68" y="789" width="26" height="14" rx="7" fill="#f2b8b5"/><text x="81" y="799.5" text-anchor="middle" style="fill:#601410;font:700 9.5px Roboto,sans-serif">99+</text>
+  <text x="67" y="831" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Chats</text>
+  <g fill="none" stroke="#9a9a9a" stroke-width="1.5"><rect x="196" y="794" width="8" height="6" rx="1.5"/><rect x="190" y="808" width="8" height="6" rx="1.5"/><rect x="202" y="808" width="8" height="6" rx="1.5"/><path d="M200 800 v4 M194 808 v-4 h12 v4"/></g>
+  <text x="200" y="831" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Contacts</text>
+  <path d="M323 795 v18 h20 M328 809 v-6 M333 809 v-11 M338 809 v-4" fill="none" stroke="#fafafa" stroke-width="1.8" stroke-linecap="round"/>
+  <text x="333" y="831" text-anchor="middle" style="fill:#fafafa;font:700 12.5px Roboto,sans-serif">Stats</text>
+</svg>
+<figcaption>La fin de l'onglet Mesh : combien de répéteurs s'annoncent à chaque intervalle, puis les répéteurs, les plus rapides d'abord. « En direct » signifie que les nouveaux paquets s'ajoutent à mesure qu'ils arrivent. Données d'exemple, interface en anglais.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Carte</th><th>Signification</th></tr>
+<tr><td>Paquets par type</td><td class="w">Des barres des paquets entendus, réparties selon les quatre mêmes types et couleurs que l'Aperçu, le reste en gris, avec le nombre et la part de chaque type en dessous.</td></tr>
+<tr><td>SNR moyen</td><td class="w">Le signal des paquets entendus au fil du temps, avec la moyenne, la dernière valeur et la plus basse. Un trou dans la ligne est un moment où rien n'a été entendu.</td></tr>
+<tr><td>Part des messages</td><td class="w">Quelle part de ce qui a été entendu portait des messages, au fil du temps, et les totaux des paquets de messages face aux paquets de trafic du mesh.</td></tr>
+<tr><td>Messages par heure</td><td class="w">Les messages stockés au fil du temps, en canal et directs, avec les totaux.</td></tr>
+<tr><td>Répéteurs ayant apporté des paquets</td><td class="w">Chaque répéteur d'où votre compagnon a entendu des paquets flood (le dernier répéteur avant vous), le plus actif d'abord, avec les paquets et le SNR moyen. Les dix premiers s'affichent ; <b>Voir les …</b> montre les autres.</td></tr>
+<tr><td>Journée type</td><td class="w">Les paquets par heure de la journée, à votre heure locale : un jour de semaine habituel et un jour de week-end habituel sur les 30 derniers jours, et la journée en cours. Au-dessus, en mots : quand le mesh est le plus actif et le plus calme, et comment la dernière heure complète se compare à une heure habituelle. Toujours les 30 derniers jours, quelle que soit la durée choisie.</td></tr>
+<tr><td>Rythme des annonces</td><td class="w">La minuterie d'annonce de chaque répéteur, déduite des annonces entendues ces 30 derniers jours : combien de répéteurs tombent dans chaque intervalle (de 1 heure ou moins à plus d'un jour), puis les répéteurs, les plus rapides d'abord, avec leur intervalle et combien d'annonces ont été envoyées à la main. Lu une fois ; tirez vers le bas pour relire.</td></tr>
+</table></div>
+
+<h3 id="u-console">Console des noeuds</h3>
+<p>Les répéteurs, capteurs et salons prennent des commandes, pas des messages. Ouvrez <b>Infos</b> depuis la fiche du noeud. La console n'apparaît qu'après une connexion qui donne admin ; aucun noeud n'est supposé vous avoir dans sa liste d'admins. Les répéteurs et les capteurs ne sont pas dans Chat ; un salon garde son chat, et ceci est un écran de plus.</p>
+<div class="wrap"><table>
+<tr><th>Partie</th><th>Signification</th></tr>
+<tr><td>Rôle sous le nom</td><td class="w">Votre rôle sur le noeud, d'après la dernière connexion : Admin, Lecture-écriture, Lecture, Invité, ou Non connecté.</td></tr>
+<tr><td>Icône de signet</td><td class="w">Ajoute le noeud à la liste <a href="#u-contacts">Miens</a> ou l'en retire.</td></tr>
+<tr><td>Accès invité</td><td class="w">Sur un répéteur ou un capteur, une connexion sans mot de passe. Le noeud répond avec le rôle qu'il donne : Invité, ou Admin si ce compagnon est dans sa liste d'accès. Un noeud qui a un mot de passe invité ne répond pas. Sur un salon, le premier essai est aussi sans mot de passe, ce qui renvoie votre rôle si vous êtes dans sa liste. Quand un salon ne répond pas, le champ du mot de passe invité se remplit avec la valeur habituelle, <code>hello</code>, pour l'essai suivant ; changez-la si le salon en utilise une autre.</td></tr>
+<tr><td>Résultat de la connexion</td><td class="w">Le rôle donné par la dernière connexion, il y a combien de temps, et ce que ce rôle permet. Une fois un rôle connu, le bouton invité devient un bouton texte plus petit (<b>Se reconnecter</b> après une connexion invité). L'app affiche le temps écoulé pendant l'attente : sans réponse, la connexion est essayée 3 fois, cela peut donc prendre une minute ou plus, même avec un mauvais mot de passe.</td></tr>
+<tr><td>Accès avec passe enregistré</td><td class="w">Apparaît quand le proxy garde un mot de passe pour ce noeud : un seul toucher, rien à saisir. Une connexion échouée garde le mot de passe, car l'absence de réponse peut aussi vouloir dire hors de portée. <b>Oublier le passe</b> le retire pour tous vos appareils. Accès invité ne l'utilise jamais.</td></tr>
+<tr><td>Accès admin, icône de clé</td><td class="w">Une connexion avec un mot de passe. Si <b>Enregistrer le mot de passe</b> est coché, le proxy le garde chiffré une fois la connexion réussie, pour tous vos appareils ; il n'est jamais stocké sur le téléphone. Un noeud ne répond pas à un mauvais mot de passe, l'app affiche donc <i>Pas de réponse après 3 essais</i>, comme pour un noeud hors de portée.</td></tr>
+<tr><td>Onglet Console</td><td class="w">Un bloc par commande : la commande avec son heure, et la réponse en dessous. Le plus récent est en bas, et les commandes envoyées depuis d'autres appareils y sont aussi. Plusieurs exécutions de suite de la même commande forment un seul bloc marqué <code>×N</code>, avec la dernière réponse.</td></tr>
+<tr><td>Toucher un bloc</td><td class="w">Montre la réponse, qui peut être sélectionnée, et les exécutions précédentes avec leurs heures. <b>Relancer</b> envoie la commande et est indisponible tant qu'une commande vers ce noeud est en attente. <b>Modifier avant envoi</b> la met dans le champ. Une commande qui contient un secret ne garde aucune valeur : <b>Ressaisir la valeur</b> met ses mots dans le champ.</td></tr>
+<tr><td>⋮ Vider la console</td><td class="w">Masque les commandes affichées, après confirmation, sur ce téléphone seulement. Le proxy les garde, et les nouvelles commandes s'affichent comme d'habitude. <b>Réafficher</b>, en haut du log, les ramène. Les commandes récentes et la liste des voisins ne changent pas.</td></tr>
+<tr><td>Étiquettes au-dessus du champ</td><td class="w">Des commandes de lecture seule, envoyées d'un seul toucher et non ajoutées à Récent : <code>ver</code>, <code>clock</code> ; sur un répéteur aussi <code>neighbors</code>, <code>get radio</code>, <code>get tx</code>.</td></tr>
+<tr><td>Icône de liste</td><td class="w">Toutes les commandes de ce type de noeud, par section, avec recherche. Toucher une commande remplit le champ et sélectionne la première valeur à saisir. Les commandes avec l'icône USB ne marchent que sur la console USB du noeud, elles sont donc grisées et ne peuvent pas être envoyées. <b>Récent</b>, en haut, liste les 12 dernières commandes envoyées de ce téléphone à ce type de noeud, avec leurs valeurs ; en toucher une remplit le champ. Les commandes qui contiennent un secret ne sont pas gardées, et Vider efface la liste.</td></tr>
+<tr><td>Commandes à confirmer</td><td class="w">Les commandes qui redémarrent le noeud, le coupent ou changent sa façon d'émettre demandent confirmation avant l'envoi (« Envoyer la commande ? »), comme toute commande tant que la liste des commandes n'est pas encore chargée.</td></tr>
+<tr><td>Onglet Infos</td><td class="w">État, télémétrie, propriétaire et voisins tels que le noeud les a rapportés en dernier. <b>Demander</b> les redemande par le mesh et peut prendre une minute. Rien n'est demandé tout seul : chaque demande utilise du temps d'antenne.</td></tr>
+<tr><td>Voisins</td><td class="w">Sur un répéteur, <b>Voir la liste</b> ouvre ses voisins ; une réponse <code>neighbors</code> dans la console mène à la même liste. Tri : Récents, Anciens, Plus forts ou Plus faibles. <b>Relire</b> envoie la commande <code>neighbors</code> : un message, environ 8 noeuds, ceux entendus le plus récemment. Il faut une connexion admin et aucune commande en attente. <b>Relire tout</b> lit la table entière avec plusieurs requêtes LoRa. Les résultats s'additionnent : les noeuds de la liste restent, les données plus récentes les mettent à jour, et les nouveaux s'ajoutent.</td></tr>
+</table></div>
+<div class="wrap"><table>
+<tr><th>Rôle</th><th>Commandes</th><th>État, propriétaire, voisins</th><th>Télémétrie</th></tr>
+<tr><td>Admin</td><td>oui</td><td>oui</td><td>complète</td></tr>
+<tr><td>Lecture-écriture</td><td>non</td><td>oui</td><td>complète</td></tr>
+<tr><td>Lecture</td><td>non</td><td>oui</td><td>complète</td></tr>
+<tr><td>Invité</td><td>non</td><td>oui</td><td>batterie et température</td></tr>
+</table></div>
+<div class="alert"><b>Pas de réponse</b> Une réponse peut prendre des dizaines de secondes. Quand aucune n'arrive, la ligne indique <i>Elle a peut-être été exécutée</i>. L'app ne renvoie jamais une commande d'elle-même, car le noeud l'exécuterait une deuxième fois. Vérifiez le résultat, par exemple avec une commande de lecture, avant de la renvoyer.</div>
+
+<h3 id="u-settings">Réglages</h3>
+<p>S'ouvre avec l'icône des curseurs, en haut à droite de Chat. Le (i) de chaque carte explique ses réglages.</p>
+<figure class="phone">
+<svg viewBox="0 0 400 812" role="img" aria-label="Réglages : la carte Sous chaque message avec ses interrupteurs, la carte Notifications avec les messages directs, les canaux et l'écoute app fermée, et la carte Messages gardés avec ses choix">
+  <rect class="p-bg" x="0" y="0" width="400" height="812"/>
+  <rect class="p-c" x="10" y="10" width="380" height="232" rx="26"/>
+  <text x="34" y="44" style="fill:#e5574c;font:500 14px Roboto,sans-serif">Under each message</text>
+  <circle cx="364" cy="39" r="10" fill="none" stroke="#fafafa" stroke-width="1.4"/><text x="364" y="43.5" text-anchor="middle" style="fill:#fafafa;font:700 11px Roboto,sans-serif">i</text>
+  <circle class="p-ic" cx="44" cy="80" r="8" style="stroke:#fafafa;stroke-width:1.5"/><path class="p-ic" d="M44 75 v5 l3 2" style="stroke:#fafafa;stroke-width:1.5"/>
+  <text class="p-tl" x="70" y="86" style="font-size:16px">Time</text>
+  <circle class="p-ic" cx="38" cy="128" r="2.4" style="stroke:#fafafa;stroke-width:1.5"/><circle class="p-ic" cx="48" cy="116" r="2.4" style="stroke:#fafafa;stroke-width:1.5"/><path class="p-ic" d="M38 125 v-2 a4 4 0 0 1 4 -4 h3" style="stroke:#fafafa;stroke-width:1.5"/>
+  <text class="p-tl" x="70" y="128" style="font-size:16px">Hops</text>
+  <path class="p-ic" d="M36 168 h16 l-3 -3 M52 178 h-16 l3 3" style="stroke:#fafafa;stroke-width:1.5"/>
+  <text class="p-tl" x="70" y="178" style="font-size:16px">Copies heard</text>
+  <path class="p-ic" d="M44 224 c-4 -4.5 -6 -7 -6 -9.5 a6 6 0 0 1 12 0 c0 2.5 -2 5 -6 9.5 z" style="stroke:#fafafa;stroke-width:1.5"/><circle class="p-ic" cx="44" cy="214" r="2" style="stroke:#fafafa;stroke-width:1.5"/>
+  <text class="p-tl" x="70" y="220" style="font-size:16px">Region</text>
+  <g><rect x="318" y="68" width="48" height="26" rx="13" fill="#e5574c"/><circle cx="353" cy="81" r="10" fill="#fff"/>
+     <rect x="318" y="114" width="48" height="26" rx="13" fill="#e5574c"/><circle cx="353" cy="127" r="10" fill="#fff"/>
+     <rect x="318" y="160" width="48" height="26" rx="13" fill="#e5574c"/><circle cx="353" cy="173" r="10" fill="#fff"/>
+     <rect x="318" y="204" width="48" height="26" rx="13" fill="#e5574c"/><circle cx="353" cy="217" r="10" fill="#fff"/></g>
+  <rect class="p-c" x="10" y="256" width="380" height="252" rx="26"/>
+  <text x="34" y="290" style="fill:#e5574c;font:500 14px Roboto,sans-serif">Notifications</text>
+  <circle cx="364" cy="285" r="10" fill="none" stroke="#fafafa" stroke-width="1.4"/><text x="364" y="289.5" text-anchor="middle" style="fill:#fafafa;font:700 11px Roboto,sans-serif">i</text>
+  <path class="p-ic" d="M37 337 l2 -5 a8 8 0 1 1 3 3 z" style="stroke:#fafafa;stroke-width:1.5"/>
+  <text class="p-tl" x="70" y="328" style="font-size:16px">Direct messages</text><text x="70" y="347" style="fill:#e5574c;font:13px Roboto,sans-serif">All messages</text>
+  <path class="p-ic" d="M37 380 h14 M36 390 h14 M42 374 l-2 21 M48 374 l-2 21" style="stroke:#fafafa;stroke-width:1.5"/>
+  <text class="p-tl" x="70" y="382" style="font-size:16px">Channels</text><text x="70" y="401" style="fill:#e5574c;font:13px Roboto,sans-serif">Mentions only</text>
+  <path class="p-ic" d="M37 458 a7 7 0 0 1 14 0 v5 l2 3 h-18 l2 -3 z M41 469 a3 3 0 0 0 6 0" style="stroke:#fafafa;stroke-width:1.5"/>
+  <text class="p-tl" x="70" y="440" style="font-size:16px">Keep listening when the app is</text>
+  <text class="p-tl" x="70" y="460" style="font-size:16px">closed</text>
+  <text class="p-m" x="70" y="480" style="font-size:12.5px">Shows a quiet notification of its own</text>
+  <text class="p-m" x="70" y="496" style="font-size:12.5px">while it listens.</text>
+  <rect x="318" y="448" width="48" height="26" rx="13" fill="#2a2a2a" stroke="#9a9a9a" stroke-width="2"/><circle cx="331" cy="461" r="7" fill="#9a9a9a"/>
+  <rect class="p-c" x="10" y="520" width="380" height="282" rx="26"/>
+  <text x="34" y="554" style="fill:#e5574c;font:500 14px Roboto,sans-serif">Keep messages · all chats</text>
+  <circle cx="364" cy="549" r="10" fill="none" stroke="#fafafa" stroke-width="1.4"/><text x="364" y="553.5" text-anchor="middle" style="fill:#fafafa;font:700 11px Roboto,sans-serif">i</text>
+  <g fill="none" stroke="#9a9a9a" stroke-width="2"><circle cx="46" cy="586" r="9"/><circle cx="46" cy="616" r="9"/><circle cx="46" cy="646" r="9"/><circle cx="46" cy="676" r="9"/><circle cx="46" cy="736" r="9"/><circle cx="46" cy="766" r="9"/></g>
+  <circle cx="46" cy="706" r="9" fill="none" stroke="#e5574c" stroke-width="2"/><circle class="p-pri" cx="46" cy="706" r="4.5"/>
+  <g class="p-tl" style="font-size:16px"><text x="70" y="591">the last hour</text><text x="70" y="621">the last 3 hours</text><text x="70" y="651">the last 12 hours</text><text x="70" y="681">the last day</text><text x="70" y="711">the last 2 days</text><text x="70" y="741">the last 3 days</text><text x="70" y="771">everything</text></g>
+</svg>
+<figcaption>Réglages, partie basse : ce qui s'affiche sous chaque message, les notifications, et jusqu'où remontent les chats. Réglages d'exemple, interface en anglais.</figcaption>
+</figure>
+<div class="wrap"><table>
+<tr><th>Carte</th><th>Choix</th></tr>
+<tr><td>Thème</td><td class="w"><b>Comme ce téléphone</b> (sa propre couleur d'accent) ou <b>Suisse</b> (accents rouges sur la même page). Les deux suivent le mode clair ou sombre du téléphone.</td></tr>
+<tr><td>Sous chaque message</td><td class="w">Heure, Sauts, Signal (SNR), Copies reçues, Région, Répéteurs de mes messages de canal. La remise de vos messages directs s'affiche toujours.</td></tr>
+<tr><td>Notifications</td><td class="w">Voir <a href="#u-notify">Notifications</a>.</td></tr>
+<tr><td>Messages gardés · partout</td><td class="w">1 heure, 3 h, 12 h, 1 jour, 2 jours, 3 jours, ou tout. Le choix propre à un chat (dans son menu) l'emporte. Ne s'applique qu'à cette app ; le proxy garde tous les messages.</td></tr>
+</table></div>
+<p><b>Langue</b> L'app existe en anglais et en français et suit la langue du téléphone ; toute autre langue affiche l'anglais. À partir d'Android 13, elle peut avoir la sienne,
+dans les Paramètres du téléphone › Applications › mcproxy › Langue. Les dates, heures et nombres s'écrivent comme dans la langue du téléphone, ou celle choisie là.
+Ce que le proxy et les noeuds écrivent eux-mêmes (descriptions des commandes, réponses, certains détails d'erreur) s'affiche tel quel.</p>
+
+<h3 id="u-notify">Notifications</h3>
+<div class="wrap"><table>
+<tr><th>Réglage</th><th>Signification</th></tr>
+<tr><td>Messages directs</td><td class="w">Tout (par défaut), Mentions seules, ou Rien.</td></tr>
+<tr><td>Canaux</td><td class="w">Mentions seules (par défaut), Tout, ou Rien. Une mention est <code>@[nom de votre noeud]</code> dans le message.</td></tr>
+<tr><td>Continuer d'écouter app fermée</td><td class="w">Désactivé par défaut. Une fois activé, l'app reste connectée au proxy en arrière-plan, et Android affiche une notification
+« Écoute des messages » de faible priorité, avec <b>Stop</b>. Sinon, les notifications n'arrivent que si l'app est ouverte.</td></tr>
+</table></div>
+<p>Chaque chat a une seule notification, avec les noms des expéditeurs et les derniers messages. La toucher ouvre le chat ; <b>Marquer lu</b> la retire.
+Les messages directs s'affichent en notifications contextuelles ; les messages de canal s'affichent dans la liste des notifications, sans fenêtre contextuelle. Les sons se changent par type dans les paramètres de notification du téléphone.
+Il n'y a pas de notification pour vos propres messages, ni pour le chat affiché à l'écran.</p>
+<div class="note"><b>Autorisation</b> À partir d'Android 13, l'autorisation des notifications est demandée la première fois qu'elle est nécessaire. Si les notifications sont désactivées pour l'app,
+Réglages l'indique, avec <b>Activer</b>.</div>
+
+<h3 id="colours">Couleurs</h3>
+<div class="wrap"><table>
+<tr><th>Valeur</th><th><span class="good">Bon</span></th><th><span class="warn">Moyen</span></th><th><span class="bad">Mauvais</span></th><th>Signification</th></tr>
+<tr><td>Liaison en direct</td><td>en ligne</td><td>connexion en cours</td><td>hors ligne</td><td class="w">Le flux d'événements que l'app reçoit du proxy.</td></tr>
+<tr><td>Batterie</td><td>≥ 40 %</td><td>20 à 40 %</td><td>&lt; 20 %</td><td class="w">La batterie du compagnon, calculée d'après sa tension.</td></tr>
+<tr><td>Clés (DM)</td><td>échangées</td><td>non confirmées</td><td></td><td class="w">Si le contact vous a aussi dans ses contacts.</td></tr>
+<tr><td>Remise (DM)</td><td>remis</td><td></td><td>non remis</td><td class="w">L'ACK du destinataire.</td></tr>
+</table></div>
+</section>
+
+<section class="panel" id="trouble" role="tabpanel">
+<h2>Problèmes</h2>
+<div class="wrap"><table>
+<tr><th>Message ou état</th><th>Cause et action</th></tr>
+<tr><td>« Connexion impossible »</td><td class="w">La raison suit (refusée, pas de réponse à temps, nom introuvable, réseau inaccessible). Vérifiez l'adresse et le port (<code>mcproxy api</code> <span class="where pi">sur la machine du proxy</span>), que le téléphone est sur le même réseau, et que le proxy tourne.</td></tr>
+<tr><td>« Le proxy demande un jeton, ou celui-ci est faux »</td><td class="w">Entrez le jeton défini dans <code>[api] token</code> du proxy.</td></tr>
+<tr><td>« n'autorise pas l'adresse de ce téléphone »</td><td class="w">La liste <code>[server] allow</code> du proxy ne contient pas le réseau du téléphone (par ex. ajoutez <code>192.168.1.0/24</code>).</td></tr>
+<tr><td>« répond, mais ce n'est pas un mcproxy »</td><td class="w">Mauvaise adresse ou mauvais port : l'API utilise <code>5080</code>, pas le port radio <code>5000</code>.</td></tr>
+<tr><td><span class="bad">Le certificat du proxy a changé</span></td><td class="w">Ne l'acceptez qu'après avoir réinstallé le proxy ou supprimé sa clé (voir <a href="#connect">Connecter</a>).</td></tr>
+<tr><td>Point <span class="warn">connexion en cours</span> / <span class="bad">hors ligne</span></td><td class="w">L'app se reconnecte toute seule et recharge les messages manqués une fois la liaison revenue (par exemple après une coupure Wi-Fi ou un redémarrage du proxy). Les détails de la connexion, sur la carte d'état, donnent la raison.</td></tr>
+<tr><td><span class="bad">radio non connectée</span></td><td class="w">Le proxy a perdu la radio ; aucun message ne peut être envoyé. Voir le guide du proxy, onglet Problèmes.</td></tr>
+<tr><td>Un canal manque</td><td class="w">Il n'est pas sur le compagnon connecté. Ajoutez-le avec Nouveau canal dans l'onglet Canaux (un canal privé a besoin de sa clé).</td></tr>
+<tr><td>« Le compagnon n'a plus d'emplacement vide »</td><td class="w">Retirez d'abord un canal du compagnon (menu du chat).</td></tr>
+<tr><td>« Non modifié : le proxy lit encore les canaux du compagnon… »</td><td class="w">Réessayez dans un instant. Si cela persiste : le proxy ne stocke aucun message et aucune app n'est connectée à son port MeshCore, et les messages en attente sur le compagnon seraient perdus. Connectez-y une app, ou activez le stockage des messages du proxy.</td></tr>
+<tr><td>« Non envoyé : le compagnon est occupé »</td><td class="w">Sa file de paquets est restée pleine, ou ses canaux sont encore en lecture. Réessayez dans un instant.</td></tr>
+<tr><td>« Non effacé : les clés de plusieurs contacts commencent de la même façon »</td><td class="w">La clé complète du contact n'est pas connue, rien n'a donc été effacé. Effacez les messages un par un (touchez un message, <b>Effacer</b>).</td></tr>
+<tr><td>« Trop tard pour le renvoyer »</td><td class="w">Plus de 10 minutes après l'envoi, les radios ne se souviennent plus du paquet. Envoyez-le comme un nouveau message.</td></tr>
+<tr><td>Connexion : « Pas de réponse après 3 essais »</td><td class="w">Un mauvais mot de passe, ou le noeud est hors de portée : un noeud ne renvoie rien pour un mauvais mot de passe. Sur un répéteur ou un capteur, une connexion invité sans mot de passe et sans réponse peut aussi vouloir dire qu'il a un mot de passe invité.</td></tr>
+<tr><td>Pas de bouton Message sur un contact</td><td class="w">Le noeud n'est pas dans les contacts du compagnon, ou c'est un répéteur ou un capteur (utilisez <b>Infos</b>, ou <b>Console</b> après une connexion admin). Les messages directs MeshCore demandent que chacun ait l'autre dans ses contacts.</td></tr>
+<tr><td>Pas de notifications</td><td class="w">Dans Réglages › Notifications, vérifiez que les notifications sont autorisées et que le niveau n'est pas Rien. Pour une app fermée, activez <b>Continuer d'écouter app fermée</b>.</td></tr>
+<tr><td>📍 <code>?</code> sous les messages</td><td class="w">Le message a été envoyé à une région que le proxy ne connaît pas. Dans la feuille des régions d'un canal, demandez aux répéteurs proches ou entrez le nom de la région.</td></tr>
+<tr><td>« Le firmware de ce compagnon n'a pas de régions »</td><td class="w">Les régions demandent un firmware de compagnon plus récent.</td></tr>
+</table></div>
+</section>
+
+<footer>mcproxy pour Android · by FED1291</footer>
+</main>
+
+<script>
+(function () {
+  var tabs = Array.prototype.slice.call(document.querySelectorAll('nav.tabs button'));
+  var panels = Array.prototype.slice.call(document.querySelectorAll('section.panel'));
+  function show(id, target) {
+    var found = false;
+    panels.forEach(function (p) { var on = p.id === id; p.classList.toggle('on', on); found = found || on; });
+    if (!found) { return false; }
+    tabs.forEach(function (b) { b.setAttribute('aria-selected', b.dataset.tab === id ? 'true' : 'false'); });
+    if (target) { target.scrollIntoView(); } else { window.scrollTo(0, 0); }
+    return true;
+  }
+  function go(hash) {
+    var el = hash && document.getElementById(hash.slice(1));
+    var panel = el && (el.classList.contains('panel') ? el : el.closest('section.panel'));
+    if (!panel) { return show('overview'); }
+    show(panel.id, el === panel ? null : el);
+  }
+  tabs.forEach(function (b) {
+    b.addEventListener('click', function () { history.replaceState(null, '', '#' + b.dataset.tab); show(b.dataset.tab); });
+  });
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest('a[href^="#"]');
+    if (!a) { return; }
+    e.preventDefault();
+    history.replaceState(null, '', a.getAttribute('href'));
+    go(a.getAttribute('href'));
+  });
+  window.addEventListener('hashchange', function () { go(location.hash); });
+  go(location.hash);
+  document.querySelector('.lang a').addEventListener('click', function () { this.hash = location.hash; });
+
+  document.querySelectorAll('.cmd').forEach(function (box) {
+    var pre = box.querySelector('pre');
+    var b = document.createElement('button');
+    b.className = 'copy'; b.type = 'button'; b.textContent = 'Copier';
+    b.addEventListener('click', function () {
+      var clone = pre.cloneNode(true);
+      clone.querySelectorAll('.c, .where').forEach(function (n) { n.remove(); });
+      var text = clone.textContent.split('\n').map(function (l) { return l.replace(/\s+$/, ''); })
+        .filter(function (l) { return l.length; }).join('\n');
+      var done = function () { b.textContent = 'Copié'; b.classList.add('done');
+        setTimeout(function () { b.textContent = 'Copier'; b.classList.remove('done'); }, 1500); };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, function () { fallback(text); done(); });
+      } else { fallback(text); done(); }
+    });
+    box.appendChild(b);
+  });
+  function fallback(text) {
+    var t = document.createElement('textarea'); t.value = text; document.body.appendChild(t);
+    t.select(); try { document.execCommand('copy'); } catch (e) {} t.remove();
+  }
+})();
+</script>
+</body>
+</html>

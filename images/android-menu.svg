@@ -1,0 +1,186 @@
+<svg class="menu" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 340" role="img" aria-label="The chat menu: Notifications, Keep messages, Show cleared messages again, Remove from the companion in red, Clear this chat; and its Notifications page with four choices, Mentions only selected">
+<style>
+
+
+:root {
+  --bg: #f7f7f4; --panel: #ffffff; --ink: #1d1f21; --dim: #6b6f75; --line: #dcdcd6;
+  --accent: #b7791f; --accent-soft: #fbf1dc; --cyan: #127a8a; --cyan-soft: #e1f2f4;
+  --good: #2f8a3e; --good-soft: #e5f3e7; --warn: #b7791f; --bad: #c0392b; --bad-soft: #fbe6e3;
+  --violet: #6b4fbb; --violet-soft: #eee9fa;
+  --term: #15171a; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #3a3f45;
+  --code-bg: #efefea;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+    --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+    --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+    --violet: #a993f0; --violet-soft: #231d36;
+    --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+    --code-bg: #24272b;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+a { color: var(--cyan); }
+code, kbd, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: .92em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+kbd { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 5px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); white-space: nowrap; }
+main { max-width: 1000px; margin: 0 auto; padding: 0 16px 64px; }
+
+
+header.top { padding: 24px 0 14px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); margin: 0; }
+nav.tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; scrollbar-width: thin; }
+nav.tabs button { font: inherit; font-size: .95rem; color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: 8px 14px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button .n { display: inline-block; width: 1.4em; color: var(--accent); font-weight: 700; }
+section.panel { padding-top: 26px; }
+.js section.panel:not(.on) { display: none; }
+
+
+h2 { font-size: 1.5rem; margin: 0 0 4px; }
+h3 { font-size: 1.12rem; margin: 30px 0 8px; padding-left: 10px; border-left: 4px solid var(--accent); }
+h4 { font-size: 1rem; margin: 20px 0 6px; }
+p { margin: 8px 0; }
+.sub { color: var(--dim); margin: 0 0 14px; }
+.good { color: var(--good); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+
+
+.note, .tip, .alert { border-left: 4px solid; padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+.note { background: var(--accent-soft); border-color: var(--accent); }
+.tip { background: var(--good-soft); border-color: var(--good); }
+.alert { background: var(--bad-soft); border-color: var(--bad); }
+.note b:first-child, .tip b:first-child, .alert b:first-child { margin-right: 4px; }
+
+
+.where { display: inline-block; font: 600 .72rem/1 "IBM Plex Sans", "Segoe UI", sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 999px; vertical-align: middle; }
+.where.pi { background: var(--cyan-soft); color: var(--cyan); }
+.where.pc { background: var(--accent-soft); color: var(--accent); }
+.where.phone { background: var(--violet-soft); color: var(--violet); }
+
+
+.cmd { position: relative; margin: 8px 0; }
+.cmd pre { background: var(--term); color: var(--term-ink); padding: 12px 70px 12px 14px; border-radius: 8px;
+  overflow-x: auto; margin: 0; line-height: 1.5; }
+.cmd pre .c { color: var(--term-dim); }
+.cmd button.copy { position: absolute; top: 8px; right: 8px; font: 600 .75rem "IBM Plex Sans", sans-serif;
+  background: #2a2e33; color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+.cmd button.copy:hover { border-color: var(--accent); }
+.cmd button.copy.done { color: #111; background: var(--good); border-color: var(--good); }
+
+
+ol.steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+ol.steps > li { counter-increment: step; position: relative; padding: 14px 16px 14px 60px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); color: #111; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps > li > h4 { margin: 3px 0 6px; }
+ol.steps > li > h4 .where { margin-left: 6px; }
+
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card b { display: block; margin-bottom: 4px; }
+.card p { margin: 0; color: var(--dim); font-size: .94rem; }
+
+
+.wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--code-bg); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.w { white-space: normal; }
+
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips a { font-family: "IBM Plex Mono", monospace; font-size: .85rem; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); padding: 3px 10px; border-radius: 4px; }
+.chips a:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+figure { margin: 16px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--dim); font-size: .88rem; margin-top: 6px; }
+footer { margin-top: 56px; color: var(--dim); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+
+.s-term { fill: var(--term); }
+.s-box { fill: none; stroke: var(--term-line); stroke-width: 1.5; }
+.s-t { fill: var(--term-ink); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-td { fill: var(--term-dim); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-ta { fill: var(--accent); font: 600 13px "IBM Plex Mono", Consolas, monospace; }
+.s-tc { fill: var(--cyan); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-tab { fill: var(--accent); }
+.s-tabt { fill: #111; font: 700 12px "IBM Plex Mono", Consolas, monospace; }
+.s-good { fill: var(--good); } .s-warn { fill: var(--warn); } .s-bad { fill: var(--bad); }
+
+.s-goodt { fill: var(--good); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-warnt { fill: var(--warn); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-badt { fill: var(--bad); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-lc { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.s-ink { fill: var(--ink); font: 600 14px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-dim { fill: var(--dim); font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-line { stroke: var(--dim); stroke-width: 2; fill: none; }
+.s-acc { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.s-node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+.s-hub { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.s-pill { fill: #6b4fbb; } .s-pillt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+.s-reg { fill: #b04fa0; } .s-regt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+
+svg.phone { border-radius: 14px; border: 1px solid var(--line); max-width: 420px; margin: 0 auto; }
+svg.menu { border-radius: 14px; border: 1px solid var(--line); }
+.p-bg { fill: #000000; } .p-c { fill: #171717; } .p-ch { fill: #2a2a2a; } .p-chh { fill: #3a3a3a; }
+.p-pri { fill: #e5574c; } .p-pc { fill: #e5574c; } .p-line { stroke: #2e2e2e; stroke-width: 1; fill: none; }
+.p-ic { stroke: #9a9a9a; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icp { stroke: #e5574c; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icg { stroke: #4cb87a; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icb { stroke: #f0a7a1; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-t, .p-tl, .p-ts, .p-m, .p-n, .p-h, .p-on, .p-b, .p-bad, .p-good { font-family: Roboto, "Segoe UI", system-ui, sans-serif; }
+.p-t { fill: #fafafa; font-size: 15px; } .p-tl { fill: #fafafa; font-size: 15.5px; } .p-ts { fill: #fafafa; font-size: 12px; }
+.p-m { fill: #9a9a9a; font-size: 11px; } .p-n { font-size: 12px; font-weight: 600; } .p-h { fill: #fafafa; font-size: 16px; font-weight: 600; }
+.p-on { fill: #ffffff; font-size: 15px; } .p-b { fill: #fafafa; font-size: 12px; font-weight: 600; }
+.p-bad { fill: #f0a7a1; font-size: 15.5px; } .p-good { fill: #4cb87a; font-size: 11px; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  ol.steps > li { padding-left: 52px; }
+  ol.steps > li::before { left: 12px; }
+}
+
+</style>
+
+  <rect class="p-bg" x="0" y="0" width="880" height="340"/>
+  
+  <rect x="42" y="30" width="320" height="288" rx="16" fill="#000" fill-opacity=".35"/>
+  <rect class="p-chh" x="40" y="24" width="320" height="288" rx="16"/>
+  <path class="p-ic" d="M55 58 a7 7 0 0 1 14 0 v5 l2 3 h-18 l2 -3 z M59 69 a3 3 0 0 0 6 0"/>
+  <text class="p-tl" x="92" y="50">Notifications</text><text class="p-m" x="92" y="68" style="font-size:12px">Mentions only</text>
+  <path class="p-ic" d="M55 108 a8 8 0 1 0 2.5 -5.8 M55 101 v4 h4 M63 104 v4 l3 2"/>
+  <text class="p-tl" x="92" y="106">Keep messages</text><text class="p-m" x="92" y="124" style="font-size:12px">everything</text>
+  <path class="p-ic" d="M60 166 l-5 -5 l5 -5 M55 161 h9 a5 5 0 0 1 5 5 v3"/>
+  <text class="p-tl" x="92" y="166">Show cleared messages again (4)</text>
+  <path class="p-line" d="M56 192.5 H 344"/>
+  <circle class="p-icb" cx="62" cy="224" r="8"/><path class="p-icb" d="M58 224 h8"/>
+  <text class="p-bad" x="92" y="229">Remove from the companion…</text>
+  <path class="p-ic" d="M57 267 l10 10 M67 267 l-10 10"/>
+  <text class="p-tl" x="92" y="277">Clear this chat…</text>
+  
+  <rect x="482" y="30" width="340" height="264" rx="16" fill="#000" fill-opacity=".35"/>
+  <rect class="p-chh" x="480" y="24" width="340" height="264" rx="16"/>
+  <path class="p-ic" d="M504 48 l-6 6 l6 6"/>
+  <text class="p-tl" x="528" y="59">Notifications</text>
+  <path class="p-line" d="M496 78.5 H 804"/>
+  <circle cx="504" cy="108" r="9" fill="none" stroke="#9a9a9a" stroke-width="2"/><text class="p-tl" x="528" y="113">Like all chats (Mentions only)</text>
+  <circle cx="504" cy="156" r="9" fill="none" stroke="#9a9a9a" stroke-width="2"/><text class="p-tl" x="528" y="161">All messages</text>
+  <circle cx="504" cy="204" r="9" fill="none" stroke="#e5574c" stroke-width="2"/><circle class="p-pri" cx="504" cy="204" r="4.2"/><text class="p-tl" x="528" y="209">Mentions only</text>
+  <circle cx="504" cy="252" r="9" fill="none" stroke="#9a9a9a" stroke-width="2"/><text class="p-tl" x="528" y="257">None</text>
+</svg>

@@ -1,0 +1,283 @@
+<svg class="menu" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 840" role="img" aria-label="The Overview tab of Stats, top and further down: the status card, the Overview and Mesh tabs, the time span picker with 24 h selected, Mesh activity with packets heard, a curve per hour, average SNR and RSSI and the share of messages; the Nodes heard, Heard directly, Messages and Apps connected tiles; What the mesh carries by type; Your companion with battery, noise floor and temperature trends; Heard through with the busiest repeaters">
+<style>
+
+
+:root {
+  --bg: #f7f7f4; --panel: #ffffff; --ink: #1d1f21; --dim: #6b6f75; --line: #dcdcd6;
+  --accent: #b7791f; --accent-soft: #fbf1dc; --cyan: #127a8a; --cyan-soft: #e1f2f4;
+  --good: #2f8a3e; --good-soft: #e5f3e7; --warn: #b7791f; --bad: #c0392b; --bad-soft: #fbe6e3;
+  --violet: #6b4fbb; --violet-soft: #eee9fa;
+  --term: #15171a; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #3a3f45;
+  --code-bg: #efefea;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+    --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+    --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+    --violet: #a993f0; --violet-soft: #231d36;
+    --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+    --code-bg: #24272b;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+a { color: var(--cyan); }
+code, kbd, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: .92em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+kbd { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 5px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); white-space: nowrap; }
+main { max-width: 1000px; margin: 0 auto; padding: 0 16px 64px; }
+
+
+header.top { padding: 24px 0 14px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); margin: 0; }
+nav.tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; scrollbar-width: thin; }
+nav.tabs button { font: inherit; font-size: .95rem; color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: 8px 14px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button .n { display: inline-block; width: 1.4em; color: var(--accent); font-weight: 700; }
+section.panel { padding-top: 26px; }
+.js section.panel:not(.on) { display: none; }
+
+
+h2 { font-size: 1.5rem; margin: 0 0 4px; }
+h3 { font-size: 1.12rem; margin: 30px 0 8px; padding-left: 10px; border-left: 4px solid var(--accent); }
+h4 { font-size: 1rem; margin: 20px 0 6px; }
+p { margin: 8px 0; }
+.sub { color: var(--dim); margin: 0 0 14px; }
+.good { color: var(--good); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+
+
+.note, .tip, .alert { border-left: 4px solid; padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+.note { background: var(--accent-soft); border-color: var(--accent); }
+.tip { background: var(--good-soft); border-color: var(--good); }
+.alert { background: var(--bad-soft); border-color: var(--bad); }
+.note b:first-child, .tip b:first-child, .alert b:first-child { margin-right: 4px; }
+
+
+.where { display: inline-block; font: 600 .72rem/1 "IBM Plex Sans", "Segoe UI", sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 999px; vertical-align: middle; }
+.where.pi { background: var(--cyan-soft); color: var(--cyan); }
+.where.pc { background: var(--accent-soft); color: var(--accent); }
+.where.phone { background: var(--violet-soft); color: var(--violet); }
+
+
+.cmd { position: relative; margin: 8px 0; }
+.cmd pre { background: var(--term); color: var(--term-ink); padding: 12px 70px 12px 14px; border-radius: 8px;
+  overflow-x: auto; margin: 0; line-height: 1.5; }
+.cmd pre .c { color: var(--term-dim); }
+.cmd button.copy { position: absolute; top: 8px; right: 8px; font: 600 .75rem "IBM Plex Sans", sans-serif;
+  background: #2a2e33; color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+.cmd button.copy:hover { border-color: var(--accent); }
+.cmd button.copy.done { color: #111; background: var(--good); border-color: var(--good); }
+
+
+ol.steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+ol.steps > li { counter-increment: step; position: relative; padding: 14px 16px 14px 60px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); color: #111; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps > li > h4 { margin: 3px 0 6px; }
+ol.steps > li > h4 .where { margin-left: 6px; }
+
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card b { display: block; margin-bottom: 4px; }
+.card p { margin: 0; color: var(--dim); font-size: .94rem; }
+
+
+.wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--code-bg); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.w { white-space: normal; }
+
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips a { font-family: "IBM Plex Mono", monospace; font-size: .85rem; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); padding: 3px 10px; border-radius: 4px; }
+.chips a:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+figure { margin: 16px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--dim); font-size: .88rem; margin-top: 6px; }
+footer { margin-top: 56px; color: var(--dim); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+
+.s-term { fill: var(--term); }
+.s-box { fill: none; stroke: var(--term-line); stroke-width: 1.5; }
+.s-t { fill: var(--term-ink); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-td { fill: var(--term-dim); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-ta { fill: var(--accent); font: 600 13px "IBM Plex Mono", Consolas, monospace; }
+.s-tc { fill: var(--cyan); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-tab { fill: var(--accent); }
+.s-tabt { fill: #111; font: 700 12px "IBM Plex Mono", Consolas, monospace; }
+.s-good { fill: var(--good); } .s-warn { fill: var(--warn); } .s-bad { fill: var(--bad); }
+
+.s-goodt { fill: var(--good); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-warnt { fill: var(--warn); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-badt { fill: var(--bad); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-lc { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.s-ink { fill: var(--ink); font: 600 14px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-dim { fill: var(--dim); font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-line { stroke: var(--dim); stroke-width: 2; fill: none; }
+.s-acc { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.s-node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+.s-hub { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.s-pill { fill: #6b4fbb; } .s-pillt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+.s-reg { fill: #b04fa0; } .s-regt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+
+svg.phone { border-radius: 14px; border: 1px solid var(--line); max-width: 420px; margin: 0 auto; }
+svg.menu { border-radius: 14px; border: 1px solid var(--line); }
+.p-bg { fill: #000000; } .p-c { fill: #171717; } .p-ch { fill: #2a2a2a; } .p-chh { fill: #3a3a3a; }
+.p-pri { fill: #e5574c; } .p-pc { fill: #e5574c; } .p-line { stroke: #2e2e2e; stroke-width: 1; fill: none; }
+.p-ic { stroke: #9a9a9a; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icp { stroke: #e5574c; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icg { stroke: #4cb87a; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icb { stroke: #f0a7a1; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-t, .p-tl, .p-ts, .p-m, .p-n, .p-h, .p-on, .p-b, .p-bad, .p-good { font-family: Roboto, "Segoe UI", system-ui, sans-serif; }
+.p-t { fill: #fafafa; font-size: 15px; } .p-tl { fill: #fafafa; font-size: 15.5px; } .p-ts { fill: #fafafa; font-size: 12px; }
+.p-m { fill: #9a9a9a; font-size: 11px; } .p-n { font-size: 12px; font-weight: 600; } .p-h { fill: #fafafa; font-size: 16px; font-weight: 600; }
+.p-on { fill: #ffffff; font-size: 15px; } .p-b { fill: #fafafa; font-size: 12px; font-weight: 600; }
+.p-bad { fill: #f0a7a1; font-size: 15.5px; } .p-good { fill: #4cb87a; font-size: 11px; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  ol.steps > li { padding-left: 52px; }
+  ol.steps > li::before { left: 12px; }
+}
+
+</style>
+
+  <defs>
+    <linearGradient id="stArea" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e5574c" stop-opacity=".32"/><stop offset="1" stop-color="#e5574c" stop-opacity="0"/></linearGradient>
+    <clipPath id="stBody"><rect x="0" y="252" width="400" height="532"/></clipPath>
+    <clipPath id="stBar"><rect x="34" y="212" width="332" height="10" rx="5"/></clipPath>
+    
+    <g id="stHead">
+  <text class="p-ts" x="20" y="18">21:07</text>
+  <path class="p-ic" d="M340 14 l4 -4 M346 14 l4 -6 M352 14 l4 -8" style="stroke:#fafafa"/><rect x="364" y="7" width="18" height="9" rx="2" fill="none" stroke="#fafafa" stroke-width="1.3"/><rect x="366" y="9" width="12" height="5" fill="#fafafa"/>
+  <rect class="p-c" x="10" y="28" width="380" height="74" rx="26"/>
+  <circle cx="32" cy="53" r="4.5" fill="#4cb87a"/>
+  <text class="p-h" x="44" y="59" style="font-size:17px">Ridge Base</text>
+  <path class="p-ic" d="M140 47 l8 7 l-4 3.5 v-14 l4 3.5 l-8 7" style="stroke-width:1.4"/>
+  <text class="p-h" x="312" y="59" style="font-size:15px">85 %</text>
+  <rect x="352" y="46" width="26" height="14" rx="4" fill="none" stroke="#9a9a9a" stroke-width="1.5"/><rect x="378" y="50" width="2.5" height="6" rx="1" fill="#9a9a9a"/><rect x="354.5" y="48.5" width="18" height="9" rx="2" fill="#4cb87a"/>
+  <circle class="p-ic" cx="32" cy="76" r="3.5" style="stroke-width:1.3"/><path class="p-ic" d="M26 87 a6 6 0 0 1 12 0 M38 73 a3.5 3.5 0 0 1 0 6 M40 87 a6 6 0 0 0 -3 -5" style="stroke-width:1.3"/>
+  <text class="p-m" x="48" y="86" style="font-size:13px">412 / 350</text>
+  <circle class="p-ic" cx="132" cy="81" r="6.5" style="stroke-width:1.3"/><path class="p-ic" d="M132 77 v4 l3 2" style="stroke-width:1.3"/>
+  <text class="p-m" x="145" y="86" style="font-size:13px">up 2 d 4 h</text>
+  <text class="p-m" x="365" y="86" text-anchor="middle" style="font-size:13px">4.07 V</text>
+  <text x="200" y="140" text-anchor="middle" style="fill:#fafafa;font:400 30px Roboto,'Segoe UI',sans-serif">Stats</text>
+  <text x="100" y="182" text-anchor="middle" style="fill:#e5574c;font:600 15px Roboto,sans-serif">Overview</text>
+  <text x="300" y="182" text-anchor="middle" style="fill:#e5574c;font:400 15px Roboto,sans-serif">Mesh</text>
+  <path d="M0 198.5 H 400" stroke="#4a4a4a" stroke-width="1"/><rect x="0" y="196" width="200" height="3" fill="#e5574c"/>
+  <rect x="108" y="208" width="92" height="36" fill="#4a2622"/>
+  <rect x="16" y="208" width="368" height="36" rx="18" fill="none" stroke="#8a8a8a" stroke-width="1.2"/>
+  <path d="M108 208 v36 M200 208 v36 M292 208 v36" stroke="#8a8a8a" stroke-width="1.2"/>
+  <g style="font:500 14px Roboto,sans-serif" text-anchor="middle"><text x="62" y="231" fill="#d8d8d8">1 h</text><text x="164" y="231" fill="#f6d5d0">24 h</text><text x="246" y="231" fill="#d8d8d8">7 days</text><text x="338" y="231" fill="#d8d8d8">30 days</text></g>
+  <path d="M128 226 l4 4 l8 -9" fill="none" stroke="#f6d5d0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect class="p-c" x="0" y="784" width="400" height="56"/><path class="p-line" d="M0 784.5 H 400"/>
+  <rect x="272" y="788" width="122" height="48" rx="18" fill="#2e2e2e"/>
+  <path d="M58 796 h18 a2 2 0 0 1 2 2 v10 a2 2 0 0 1 -2 2 h-11 l-5 4 v-4 h-2 a2 2 0 0 1 -2 -2 v-10 a2 2 0 0 1 2 -2 z" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-linejoin="round"/>
+  <rect x="68" y="789" width="26" height="14" rx="7" fill="#f2b8b5"/><text x="81" y="799.5" text-anchor="middle" style="fill:#601410;font:700 9.5px Roboto,sans-serif">99+</text>
+  <text x="67" y="831" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Chats</text>
+  <g fill="none" stroke="#9a9a9a" stroke-width="1.5"><rect x="196" y="794" width="8" height="6" rx="1.5"/><rect x="190" y="808" width="8" height="6" rx="1.5"/><rect x="202" y="808" width="8" height="6" rx="1.5"/><path d="M200 800 v4 M194 808 v-4 h12 v4"/></g>
+  <text x="200" y="831" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Contacts</text>
+  <path d="M323 795 v18 h20 M328 809 v-6 M333 809 v-11 M338 809 v-4" fill="none" stroke="#fafafa" stroke-width="1.8" stroke-linecap="round"/>
+  <text x="333" y="831" text-anchor="middle" style="fill:#fafafa;font:700 12.5px Roboto,sans-serif">Stats</text>
+    </g>
+  </defs>
+  <rect class="p-bg" x="0" y="0" width="840" height="840"/>
+  <path d="M420 0 V 840" stroke="#2e2e2e" stroke-width="1"/>
+
+  
+  <use href="#stHead"/>
+  <g clip-path="url(#stBody)"><g transform="translate(0 32)">
+  
+  <rect class="p-c" x="10" y="224" width="380" height="258" rx="26"/>
+  <path class="p-icp" d="M34 252 h5 l4 -9 l6 18 l4 -9 h5"/>
+  <text class="p-h" x="64" y="258">Mesh activity</text><path class="p-ic" d="M358 244 l6 6 l-6 6" style="stroke-width:1.8"/>
+  <text x="34" y="306" style="fill:#fafafa;font:300 34px Roboto,'Segoe UI',sans-serif">15,302</text>
+  <text x="150" y="304" style="fill:#9a9a9a;font:15px Roboto,sans-serif">packets heard</text>
+  <text class="p-m" x="34" y="326" style="font-size:12px">812 this hour</text>
+  <path d="M34 364.3 L48.4 366.6 L62.9 370.6 L77.3 375.1 L91.7 379.1 L106.2 380.3 L120.6 379.7 L135 376.9 L149.4 370 L163.9 362 L178.3 354.6 L192.7 350.6 L207.2 348.3 L221.6 349.4 L236 347.1 L250.5 345.4 L264.9 346.6 L279.3 343.7 L293.7 342 L308.2 344.3 L322.6 346 L337 344.9 L351.5 346.6 L366 347.6 L366 394 L34 394 Z" fill="url(#stArea)"/>
+  <path d="M34 364.3 L48.4 366.6 L62.9 370.6 L77.3 375.1 L91.7 379.1 L106.2 380.3 L120.6 379.7 L135 376.9 L149.4 370 L163.9 362 L178.3 354.6 L192.7 350.6 L207.2 348.3 L221.6 349.4 L236 347.1 L250.5 345.4 L264.9 346.6 L279.3 343.7 L293.7 342 L308.2 344.3 L322.6 346 L337 344.9 L351.5 346.6 L366 347.6" fill="none" stroke="#e5574c" stroke-width="2" stroke-linejoin="round"/>
+  <text class="p-m" x="34" y="410">Mar 14, 22:00</text><text class="p-m" x="366" y="410" text-anchor="end">now</text>
+  <path class="p-line" d="M34 420.5 H 366"/>
+  <g style="fill:#fafafa;font:500 16px Roboto,sans-serif"><text x="34" y="448">4.8 dB</text><text x="145" y="448">-108 dBm</text><text x="256" y="448">24 %</text></g>
+  <g class="p-m" style="font-size:12.5px"><text x="34" y="466">average SNR</text><text x="145" y="466">average RSSI</text><text x="256" y="466">are messages</text></g>
+  
+  <rect class="p-c" x="10" y="494" width="184" height="104" rx="26"/><rect class="p-c" x="206" y="494" width="184" height="104" rx="26"/>
+  <rect class="p-c" x="10" y="610" width="184" height="104" rx="26"/><rect class="p-c" x="206" y="610" width="184" height="104" rx="26"/>
+  <g fill="none" stroke="#5aae8a" stroke-width="1.5"><rect x="34" y="511" width="6" height="5" rx="1"/><rect x="29" y="523" width="6" height="5" rx="1"/><rect x="39" y="523" width="6" height="5" rx="1"/><path d="M37 516 v3 M32 523 v-4 h10 v4"/></g>
+  <text x="52" y="525" style="fill:#d8d8d8;font:500 14px Roboto,sans-serif">Nodes heard</text>
+  <text x="30" y="560" style="fill:#fafafa;font:300 30px Roboto,sans-serif">287</text>
+  <text class="p-m" x="30" y="578" style="font-size:12px">193 repeaters · 350 / 350</text><text class="p-m" x="30" y="592" style="font-size:12px">contacts</text>
+  <g fill="none" stroke="#5aae8a" stroke-width="1.5" stroke-linecap="round"><circle cx="232" cy="517" r="2.2"/><path d="M232 520 l-4 9 M232 520 l4 9 M226 512 a8 8 0 0 0 0 10 M238 512 a8 8 0 0 1 0 10"/></g>
+  <text x="248" y="525" style="fill:#d8d8d8;font:500 14px Roboto,sans-serif">Heard directly</text>
+  <text x="226" y="560" style="fill:#fafafa;font:300 30px Roboto,sans-serif">23</text>
+  <text class="p-m" x="226" y="578" style="font-size:12px">repeaters in range</text>
+  <path d="M30 637 a8 7 0 1 1 3 5.5 l-4 2 z" fill="none" stroke="#6a9ad6" stroke-width="1.5" stroke-linejoin="round"/>
+  <text x="52" y="641" style="fill:#d8d8d8;font:500 14px Roboto,sans-serif">Messages</text>
+  <text x="30" y="676" style="fill:#fafafa;font:300 30px Roboto,sans-serif">1,946</text>
+  <text class="p-m" x="30" y="694" style="font-size:12px">1,604 in channels · 342</text><text class="p-m" x="30" y="708" style="font-size:12px">direct</text>
+  <g fill="none" stroke="#d2a64c" stroke-width="1.5" stroke-linecap="round"><circle cx="231" cy="630" r="3.5"/><path d="M224 642 a7 7 0 0 1 14 0 M237 627 a3.5 3.5 0 0 1 0 6.5 M240 642 a6 6 0 0 0 -2.5 -5"/></g>
+  <text x="248" y="641" style="fill:#d8d8d8;font:500 14px Roboto,sans-serif">Apps connected</text>
+  <text x="226" y="676" style="fill:#fafafa;font:300 30px Roboto,sans-serif">1</text>
+  <text class="p-m" x="226" y="694" style="font-size:12px">meshcore-cli</text>
+  
+  <rect class="p-c" x="10" y="726" width="380" height="250" rx="26"/>
+  <path class="p-icp" d="M34 750 l10 -5 l10 5 l-10 5 z M34 756 l10 5 l10 -5 M34 762 l10 5 l10 -5" style="stroke-width:1.5"/>
+  <text class="p-h" x="64" y="760">What the mesh carries</text><path class="p-ic" d="M358 746 l6 6 l-6 6" style="stroke-width:1.8"/>
+  </g></g>
+
+  
+  <g transform="translate(440 0)">
+  <use href="#stHead"/>
+  <g clip-path="url(#stBody)"><g transform="translate(0 40)">
+  
+  <rect class="p-c" x="10" y="112" width="380" height="260" rx="26"/>
+  <path class="p-icp" d="M34 136 l10 -5 l10 5 l-10 5 z M34 142 l10 5 l10 -5 M34 148 l10 5 l10 -5" style="stroke-width:1.5"/>
+  <text class="p-h" x="64" y="146">What the mesh carries</text>
+  <rect x="34" y="164" width="80" height="32" rx="8" fill="#4a2622"/><text x="74" y="185" text-anchor="middle" style="fill:#f6d5d0;font:500 14px Roboto,sans-serif">By type</text>
+  <rect x="122" y="164.5" width="152" height="31" rx="8" fill="none" stroke="#8a8a8a" stroke-width="1.2"/><text x="198" y="185" text-anchor="middle" style="fill:#d8d8d8;font:500 14px Roboto,sans-serif">Messages vs traffic</text>
+  <g clip-path="url(#stBar)"><rect x="34" y="212" width="112" height="10" fill="#6a9ad6"/><rect x="148" y="212" width="62" height="10" fill="#5aae8a"/><rect x="212" y="212" width="52" height="10" fill="#d2a64c"/><rect x="266" y="212" width="15" height="10" fill="#d48a6c"/><rect x="283" y="212" width="83" height="10" fill="#5a6070"/></g>
+  <circle cx="40" cy="243" r="4" fill="#6a9ad6"/><circle cx="40" cy="269" r="4" fill="#5aae8a"/><circle cx="40" cy="295" r="4" fill="#d2a64c"/><circle cx="40" cy="321" r="4" fill="#d48a6c"/><circle cx="40" cy="347" r="4" fill="#5a6070"/>
+  <g style="fill:#fafafa;font:15px Roboto,sans-serif"><text x="54" y="248">Requests</text><text x="54" y="274">Channel messages</text><text x="54" y="300">Adverts</text><text x="54" y="326">Direct messages</text><text x="54" y="352" fill="#9a9a9a">9 more types</text></g>
+  <g style="fill:#fafafa;font:15px Roboto,sans-serif" text-anchor="end"><text x="300" y="248">5,204</text><text x="300" y="274">2,906</text><text x="300" y="300">2,448</text><text x="300" y="326">766</text><text x="300" y="352">3,978</text></g>
+  <g class="p-m" style="font-size:12px" text-anchor="end"><text x="366" y="248">34 %</text><text x="366" y="274">19 %</text><text x="366" y="300">16 %</text><text x="366" y="326">5 %</text><text x="366" y="352">26 %</text></g>
+  
+  <rect class="p-c" x="10" y="384" width="380" height="232" rx="26"/>
+  <g class="p-icp" style="stroke-width:1.5"><rect x="36" y="404" width="15" height="15" rx="2.5"/><rect x="40.5" y="408.5" width="6" height="6" rx="1"/><path d="M40 401 v3 M47 401 v3 M40 419 v3 M47 419 v3 M33 408 h3 M33 415 h3 M51 408 h3 M51 415 h3"/></g>
+  <text class="p-h" x="64" y="418">Your companion</text>
+  <text x="34" y="452" style="fill:#fafafa;font:500 17px Roboto,sans-serif">4.07 V</text><text class="p-m" x="34" y="470" style="font-size:12.5px">battery · 85 %</text>
+  <path d="M240 446 L262 446.5 L284 447.5 L306 449 L320 450 L330 444 L346 444.5 L366 445.5" fill="none" stroke="#5aae8a" stroke-width="2" stroke-linejoin="round"/>
+  <path class="p-line" d="M34 484.5 H 366"/>
+  <text x="34" y="516" style="fill:#fafafa;font:500 17px Roboto,sans-serif">-112 dBm</text><text class="p-m" x="34" y="534" style="font-size:12.5px">noise floor</text>
+  <path d="M240 516 L246 510 L252 519 L258 512 L264 522 L270 508 L276 517 L282 514 L288 524 L294 511 L300 518 L306 509 L312 520 L318 515 L324 523 L330 512 L336 517 L342 510 L348 521 L354 514 L360 519 L366 513" fill="none" stroke="#6a9ad6" stroke-width="1.8" stroke-linejoin="round"/>
+  <path class="p-line" d="M34 548.5 H 366"/>
+  <text x="34" y="580" style="fill:#fafafa;font:500 17px Roboto,sans-serif">18.5 °C</text><text class="p-m" x="34" y="598" style="font-size:12.5px">temperature</text>
+  <path d="M240 594 L249.7 592 L259.4 590 L269.1 586 L278.8 580 L288.5 574 L298.2 570 L307.9 568 L317.6 570 L327.3 574 L337 580 L346.7 586 L356.4 590 L366 592" fill="none" stroke="#d2a64c" stroke-width="2" stroke-linejoin="round"/>
+  
+  <rect class="p-c" x="10" y="628" width="380" height="250" rx="26"/>
+  <g class="p-icp" style="stroke-width:1.5"><circle cx="44" cy="651" r="2.2"/><path d="M44 654 l-4 10 M44 654 l4 10 M38 646 a8 8 0 0 0 0 10 M50 646 a8 8 0 0 1 0 10 M34 643 a13 13 0 0 0 0 16 M54 643 a13 13 0 0 1 0 16"/></g>
+  <text class="p-h" x="64" y="662">Heard through</text>
+  <text class="p-m" x="34" y="688" style="font-size:12.5px">The repeaters your companion hears floods from</text>
+  <text class="p-t" x="34" y="718">Hilltop Rpt</text><text class="p-m" x="366" y="718" text-anchor="end" style="font-size:12.5px">2,114 · 6.3 dB</text>
+  <rect x="34" y="728" width="332" height="7" rx="3.5" fill="#2e2e2e"/><rect x="34" y="728" width="332" height="7" rx="3.5" fill="#5aae8a"/>
+  <text class="p-t" x="34" y="762">Tower 7?</text><text class="p-m" x="366" y="762" text-anchor="end" style="font-size:12.5px">1,786 · 2.4 dB</text>
+  <rect x="34" y="772" width="332" height="7" rx="3.5" fill="#2e2e2e"/><rect x="34" y="772" width="280" height="7" rx="3.5" fill="#5aae8a"/>
+  <text class="p-t" x="34" y="806">RPT-North-02</text>
+  </g></g>
+  </g>
+</svg>

@@ -1,0 +1,233 @@
+<svg class="phone" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 736" role="img" aria-label="The Chats page: the status card with the node name, link, contacts, uptime and battery, the Channels and Contacts tabs with unread counts, the channels grouped as Public, Channels and Private with their last message, region, time and unread badge, and the bottom bar with Chats, Contacts and Stats">
+<style>
+
+
+:root {
+  --bg: #f7f7f4; --panel: #ffffff; --ink: #1d1f21; --dim: #6b6f75; --line: #dcdcd6;
+  --accent: #b7791f; --accent-soft: #fbf1dc; --cyan: #127a8a; --cyan-soft: #e1f2f4;
+  --good: #2f8a3e; --good-soft: #e5f3e7; --warn: #b7791f; --bad: #c0392b; --bad-soft: #fbe6e3;
+  --violet: #6b4fbb; --violet-soft: #eee9fa;
+  --term: #15171a; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #3a3f45;
+  --code-bg: #efefea;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #131416; --panel: #1b1d20; --ink: #e4e5e6; --dim: #9a9ea4; --line: #2e3136;
+    --accent: #e0a63a; --accent-soft: #2b2416; --cyan: #4cc3d3; --cyan-soft: #142a2e;
+    --good: #5cc46c; --good-soft: #15291a; --warn: #e0a63a; --bad: #ef6b5b; --bad-soft: #321a17;
+    --violet: #a993f0; --violet-soft: #231d36;
+    --term: #0d0e10; --term-ink: #d8dadc; --term-dim: #7d8288; --term-line: #33373c;
+    --code-bg: #24272b;
+  }
+}
+
+* { box-sizing: border-box; }
+html { scroll-padding-top: 76px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.55 "IBM Plex Sans", "Segoe UI", system-ui, sans-serif; }
+a { color: var(--cyan); }
+code, kbd, pre { font-family: "IBM Plex Mono", ui-monospace, Consolas, monospace; font-size: .92em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+kbd { display: inline-block; min-width: 1.6em; text-align: center; padding: 0 6px; border-radius: 5px;
+  border: 1px solid var(--line); border-bottom-width: 2px; background: var(--panel); white-space: nowrap; }
+main { max-width: 1000px; margin: 0 auto; padding: 0 16px 64px; }
+
+
+header.top { padding: 24px 0 14px; }
+h1 { font-size: 2rem; margin: 0 0 4px; letter-spacing: -.01em; }
+h1 span { color: var(--accent); }
+.lead { color: var(--dim); margin: 0; }
+nav.tabs { position: sticky; top: 0; z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line);
+  display: flex; gap: 4px; overflow-x: auto; padding: 8px 0 0; scrollbar-width: thin; }
+nav.tabs button { font: inherit; font-size: .95rem; color: var(--dim); background: none; border: 0; cursor: pointer;
+  padding: 8px 14px 10px; border-bottom: 3px solid transparent; white-space: nowrap; }
+nav.tabs button:hover { color: var(--ink); }
+nav.tabs button[aria-selected="true"] { color: var(--ink); font-weight: 600; border-bottom-color: var(--accent); }
+nav.tabs button .n { display: inline-block; width: 1.4em; color: var(--accent); font-weight: 700; }
+section.panel { padding-top: 26px; }
+.js section.panel:not(.on) { display: none; }
+
+
+h2 { font-size: 1.5rem; margin: 0 0 4px; }
+h3 { font-size: 1.12rem; margin: 30px 0 8px; padding-left: 10px; border-left: 4px solid var(--accent); }
+h4 { font-size: 1rem; margin: 20px 0 6px; }
+p { margin: 8px 0; }
+.sub { color: var(--dim); margin: 0 0 14px; }
+.good { color: var(--good); font-weight: 600; } .warn { color: var(--warn); font-weight: 600; } .bad { color: var(--bad); font-weight: 600; }
+
+
+.note, .tip, .alert { border-left: 4px solid; padding: 10px 14px; border-radius: 6px; margin: 14px 0; }
+.note { background: var(--accent-soft); border-color: var(--accent); }
+.tip { background: var(--good-soft); border-color: var(--good); }
+.alert { background: var(--bad-soft); border-color: var(--bad); }
+.note b:first-child, .tip b:first-child, .alert b:first-child { margin-right: 4px; }
+
+
+.where { display: inline-block; font: 600 .72rem/1 "IBM Plex Sans", "Segoe UI", sans-serif; letter-spacing: .04em;
+  text-transform: uppercase; padding: 4px 8px; border-radius: 999px; vertical-align: middle; }
+.where.pi { background: var(--cyan-soft); color: var(--cyan); }
+.where.pc { background: var(--accent-soft); color: var(--accent); }
+.where.phone { background: var(--violet-soft); color: var(--violet); }
+
+
+.cmd { position: relative; margin: 8px 0; }
+.cmd pre { background: var(--term); color: var(--term-ink); padding: 12px 70px 12px 14px; border-radius: 8px;
+  overflow-x: auto; margin: 0; line-height: 1.5; }
+.cmd pre .c { color: var(--term-dim); }
+.cmd button.copy { position: absolute; top: 8px; right: 8px; font: 600 .75rem "IBM Plex Sans", sans-serif;
+  background: #2a2e33; color: var(--term-ink); border: 1px solid var(--term-line); border-radius: 5px; padding: 4px 9px; cursor: pointer; }
+.cmd button.copy:hover { border-color: var(--accent); }
+.cmd button.copy.done { color: #111; background: var(--good); border-color: var(--good); }
+
+
+ol.steps { list-style: none; padding: 0; margin: 12px 0; counter-reset: step; }
+ol.steps > li { counter-increment: step; position: relative; padding: 14px 16px 14px 60px; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 10px; margin: 10px 0; }
+ol.steps > li::before { content: counter(step); position: absolute; left: 16px; top: 14px; width: 30px; height: 30px;
+  border-radius: 50%; background: var(--accent); color: #111; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+ol.steps > li > h4 { margin: 3px 0 6px; }
+ol.steps > li > h4 .where { margin-left: 6px; }
+
+
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; margin: 12px 0; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+.card b { display: block; margin-bottom: 4px; }
+.card p { margin: 0; color: var(--dim); font-size: .94rem; }
+
+
+.wrap { overflow-x: auto; margin: 12px 0; }
+table { width: 100%; border-collapse: collapse; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+th { background: var(--code-bg); font-weight: 600; font-size: .9rem; white-space: nowrap; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { white-space: nowrap; }
+td.w { white-space: normal; }
+
+
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
+.chips a { font-family: "IBM Plex Mono", monospace; font-size: .85rem; text-decoration: none; color: var(--ink);
+  background: var(--panel); border: 1px solid var(--line); padding: 3px 10px; border-radius: 4px; }
+.chips a:hover { background: var(--accent); color: #111; border-color: var(--accent); }
+
+figure { margin: 16px 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { color: var(--dim); font-size: .88rem; margin-top: 6px; }
+footer { margin-top: 56px; color: var(--dim); font-size: .88rem; border-top: 1px solid var(--line); padding-top: 12px; }
+
+
+.s-term { fill: var(--term); }
+.s-box { fill: none; stroke: var(--term-line); stroke-width: 1.5; }
+.s-t { fill: var(--term-ink); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-td { fill: var(--term-dim); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-ta { fill: var(--accent); font: 600 13px "IBM Plex Mono", Consolas, monospace; }
+.s-tc { fill: var(--cyan); font: 12px "IBM Plex Mono", Consolas, monospace; }
+.s-tab { fill: var(--accent); }
+.s-tabt { fill: #111; font: 700 12px "IBM Plex Mono", Consolas, monospace; }
+.s-good { fill: var(--good); } .s-warn { fill: var(--warn); } .s-bad { fill: var(--bad); }
+
+.s-goodt { fill: var(--good); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-warnt { fill: var(--warn); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-badt { fill: var(--bad); font: 13px "IBM Plex Mono", Consolas, monospace; }
+.s-lc { stroke: var(--cyan); fill: none; stroke-width: 2; }
+.s-ink { fill: var(--ink); font: 600 14px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-dim { fill: var(--dim); font: 12.5px "IBM Plex Sans", "Segoe UI", sans-serif; }
+.s-line { stroke: var(--dim); stroke-width: 2; fill: none; }
+.s-acc { stroke: var(--accent); stroke-width: 2.5; fill: none; }
+.s-node { fill: var(--panel); stroke: var(--ink); stroke-width: 1.5; }
+.s-hub { fill: var(--accent-soft); stroke: var(--accent); stroke-width: 2; }
+.s-pill { fill: #6b4fbb; } .s-pillt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+.s-reg { fill: #b04fa0; } .s-regt { fill: #fff; font: 700 11px "IBM Plex Mono", Consolas, monospace; }
+
+svg.phone { border-radius: 14px; border: 1px solid var(--line); max-width: 420px; margin: 0 auto; }
+svg.menu { border-radius: 14px; border: 1px solid var(--line); }
+.p-bg { fill: #000000; } .p-c { fill: #171717; } .p-ch { fill: #2a2a2a; } .p-chh { fill: #3a3a3a; }
+.p-pri { fill: #e5574c; } .p-pc { fill: #e5574c; } .p-line { stroke: #2e2e2e; stroke-width: 1; fill: none; }
+.p-ic { stroke: #9a9a9a; stroke-width: 1.6; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icp { stroke: #e5574c; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icg { stroke: #4cb87a; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-icb { stroke: #f0a7a1; stroke-width: 1.8; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.p-t, .p-tl, .p-ts, .p-m, .p-n, .p-h, .p-on, .p-b, .p-bad, .p-good { font-family: Roboto, "Segoe UI", system-ui, sans-serif; }
+.p-t { fill: #fafafa; font-size: 15px; } .p-tl { fill: #fafafa; font-size: 15.5px; } .p-ts { fill: #fafafa; font-size: 12px; }
+.p-m { fill: #9a9a9a; font-size: 11px; } .p-n { font-size: 12px; font-weight: 600; } .p-h { fill: #fafafa; font-size: 16px; font-weight: 600; }
+.p-on { fill: #ffffff; font-size: 15px; } .p-b { fill: #fafafa; font-size: 12px; font-weight: 600; }
+.p-bad { fill: #f0a7a1; font-size: 15.5px; } .p-good { fill: #4cb87a; font-size: 11px; }
+@media (max-width: 600px) {
+  h1 { font-size: 1.6rem; }
+  ol.steps > li { padding-left: 52px; }
+  ol.steps > li::before { left: 12px; }
+}
+
+</style>
+
+  <rect class="p-bg" x="0" y="0" width="400" height="736"/>
+  <text class="p-ts" x="20" y="18">19:14</text>
+  <path class="p-ic" d="M340 14 l4 -4 M346 14 l4 -6 M352 14 l4 -8" style="stroke:#fafafa"/><rect x="364" y="7" width="18" height="9" rx="2" fill="none" stroke="#fafafa" stroke-width="1.3"/><rect x="366" y="9" width="12" height="5" fill="#fafafa"/>
+  
+  <rect class="p-c" x="10" y="28" width="380" height="74" rx="26"/>
+  <circle cx="32" cy="53" r="4.5" fill="#4cb87a"/>
+  <text class="p-h" x="44" y="59" style="font-size:17px">Ridge Base</text>
+  <path class="p-ic" d="M140 47 l8 7 l-4 3.5 v-14 l4 3.5 l-8 7" style="stroke-width:1.4"/>
+  <text class="p-h" x="312" y="59" style="font-size:15px">85 %</text>
+  <rect x="352" y="46" width="26" height="14" rx="4" fill="none" stroke="#9a9a9a" stroke-width="1.5"/><rect x="378" y="50" width="2.5" height="6" rx="1" fill="#9a9a9a"/><rect x="354.5" y="48.5" width="18" height="9" rx="2" fill="#4cb87a"/>
+  <circle class="p-ic" cx="32" cy="76" r="3.5" style="stroke-width:1.3"/><path class="p-ic" d="M26 87 a6 6 0 0 1 12 0 M38 73 a3.5 3.5 0 0 1 0 6 M40 87 a6 6 0 0 0 -3 -5" style="stroke-width:1.3"/>
+  <text class="p-m" x="48" y="86" style="font-size:13px">412 / 350</text>
+  <circle class="p-ic" cx="132" cy="81" r="6.5" style="stroke-width:1.3"/><path class="p-ic" d="M132 77 v4 l3 2" style="stroke-width:1.3"/>
+  <text class="p-m" x="145" y="86" style="font-size:13px">up 2 d 4 h</text>
+  <text class="p-m" x="365" y="86" text-anchor="middle" style="font-size:13px">4.07 V</text>
+  
+  <text x="200" y="158" text-anchor="middle" style="fill:#fafafa;font:400 30px Roboto,'Segoe UI',sans-serif">Chats</text>
+  <path class="p-ic" d="M356 136 h22 M356 146 h22 M356 156 h22" style="stroke:#fafafa;stroke-width:1.8"/><path d="M371 132 v8 M362 142 v8 M371 152 v8" stroke="#fafafa" stroke-width="1.8"/>
+  
+  <text x="88" y="202" text-anchor="middle" style="fill:#e5574c;font:500 15px Roboto,sans-serif">Channels</text>
+  <rect x="124" y="190" width="34" height="17" rx="8.5" fill="#ffdad6"/><text x="141" y="203" text-anchor="middle" style="fill:#c62e24;font:600 11px Roboto,sans-serif">99+</text>
+  <text x="296" y="202" text-anchor="middle" style="fill:#e5574c;font:500 15px Roboto,sans-serif">Contacts</text>
+  <rect x="332" y="190" width="24" height="17" rx="8.5" fill="#ffdad6"/><text x="344" y="203" text-anchor="middle" style="fill:#c62e24;font:600 11px Roboto,sans-serif">3</text>
+  <path d="M0 220 H 400" stroke="#4a4a4a" stroke-width="1"/><path d="M0 219 H 200" stroke="#e5574c" stroke-width="3"/>
+  
+  <circle class="p-icp" cx="31" cy="250" r="7"/><path class="p-icp" d="M24 250 h14 M31 243 c-4 4 -4 10 0 14 c4 -4 4 -10 0 -14" style="stroke-width:1.4"/>
+  <text x="48" y="255" style="fill:#e5574c;font:500 15px Roboto,sans-serif">Public</text>
+  <circle cx="44" cy="296" r="24" fill="#e5574c" fill-opacity=".16"/>
+  <circle class="p-icp" cx="44" cy="296" r="10"/><path class="p-icp" d="M34 296 h20 M44 286 c-5.5 5.5 -5.5 14.5 0 20 c5.5 -5.5 5.5 -14.5 0 -20" style="stroke-width:1.5"/>
+  <text class="p-h" x="82" y="283">Public</text>
+  <text class="p-t" x="82" y="304" style="font-size:14px">Valley Node: @[Mara] see you at the…</text>
+  <path class="p-ic" d="M86 324 c-3 -3.5 -4.5 -5.5 -4.5 -7.5 a4.5 4.5 0 0 1 9 0 c0 2 -1.5 4 -4.5 7.5 z" style="stroke-width:1.2"/><text class="p-m" x="96" y="323" style="font-size:12px">eu-se</text>
+  <text x="388" y="283" text-anchor="end" style="fill:#e5574c;font:12px Roboto,sans-serif">19:05</text>
+  <rect class="p-pri" x="352" y="292" width="36" height="20" rx="10"/><text x="370" y="306" text-anchor="middle" style="fill:#fff;font:700 11.5px Roboto,sans-serif">99+</text>
+  <path class="p-line" d="M82 340.5 H 388"/>
+  
+  <path class="p-icp" d="M26 362 h12 M25 370 h12 M30 357 l-2 18 M35 357 l-2 18" style="stroke-width:1.5"/>
+  <text x="48" y="371" style="fill:#e5574c;font:500 15px Roboto,sans-serif">Channels</text>
+  <circle cx="44" cy="412" r="24" fill="#e5574c" fill-opacity=".16"/><path class="p-icp" d="M37 406 h15 M36 418 h15 M41 401 l-2 22 M49 401 l-2 22"/>
+  <text class="p-h" x="82" y="399">hiking</text>
+  <text class="p-t" x="82" y="420" style="font-size:14px">Mara: three bars here, all good</text>
+  <path class="p-ic" d="M86 440 c-3 -3.5 -4.5 -5.5 -4.5 -7.5 a4.5 4.5 0 0 1 9 0 c0 2 -1.5 4 -4.5 7.5 z" style="stroke-width:1.2"/><text class="p-m" x="96" y="439" style="font-size:12px">eu-se</text>
+  <text x="388" y="399" text-anchor="end" style="fill:#e5574c;font:12px Roboto,sans-serif">19:12</text>
+  <rect class="p-pri" x="364" y="408" width="24" height="20" rx="10"/><text x="376" y="422" text-anchor="middle" style="fill:#fff;font:700 11.5px Roboto,sans-serif">4</text>
+  <path class="p-line" d="M82 456.5 H 388"/>
+  <circle cx="44" cy="490" r="24" fill="#e5574c" fill-opacity=".16"/><path class="p-icp" d="M37 484 h15 M36 496 h15 M41 479 l-2 22 M49 479 l-2 22"/>
+  <text class="p-h" x="82" y="483">bots</text>
+  <text class="p-t" x="82" y="504" style="font-size:14px">EchoBot: 🤖 Copy, Mara! 2 hops @ 18:11</text>
+  <text x="388" y="483" text-anchor="end" style="fill:#e5574c;font:12px Roboto,sans-serif">18:40</text>
+  <rect class="p-pri" x="360" y="492" width="28" height="20" rx="10"/><text x="374" y="506" text-anchor="middle" style="fill:#fff;font:700 11.5px Roboto,sans-serif">21</text>
+  <path class="p-line" d="M82 524.5 H 388"/>
+  <circle cx="44" cy="556" r="24" fill="#e5574c" fill-opacity=".16"/><path class="p-icp" d="M37 550 h15 M36 562 h15 M41 545 l-2 22 M49 545 l-2 22"/>
+  <text class="p-h" x="82" y="551">weather</text>
+  <text class="p-m" x="82" y="572" style="font-size:14px">No message yet</text>
+  <path class="p-line" d="M82 590.5 H 388"/>
+  
+  <rect x="25" y="606" width="12" height="9" rx="2" fill="none" stroke="#e5574c" stroke-width="1.5"/><path class="p-icp" d="M27.5 606 v-3 a3.5 3.5 0 0 1 7 0 v3" style="stroke-width:1.5"/>
+  <text x="48" y="615" style="fill:#e5574c;font:500 15px Roboto,sans-serif">Private</text>
+  <circle cx="44" cy="652" r="22" fill="#e8a317" fill-opacity=".16"/><rect x="37" y="652" width="14" height="10" rx="2" fill="none" stroke="#e8a317" stroke-width="1.6"/><path d="M40 652 v-4 a4 4 0 0 1 8 0 v4" fill="none" stroke="#e8a317" stroke-width="1.6"/>
+  <text class="p-h" x="82" y="647">team-ops</text>
+  <text class="p-t" x="82" y="666" style="font-size:14px;fill:#9a9a9a">You: meeting point moved to the hut</text>
+  <text x="388" y="647" text-anchor="end" style="fill:#9a9a9a;font:12px Roboto,sans-serif">17:02</text>
+  
+  <rect class="p-c" x="0" y="680" width="400" height="56"/><path class="p-line" d="M0 680.5 H 400"/>
+  <rect x="6" y="684" width="122" height="48" rx="18" fill="#2e2e2e"/>
+  <path d="M58 692 h18 a2 2 0 0 1 2 2 v10 a2 2 0 0 1 -2 2 h-11 l-5 4 v-4 h-2 a2 2 0 0 1 -2 -2 v-10 a2 2 0 0 1 2 -2 z" fill="none" stroke="#fafafa" stroke-width="1.6" stroke-linejoin="round"/>
+  <rect x="68" y="685" width="26" height="14" rx="7" fill="#f2b8b5"/><text x="81" y="695.5" text-anchor="middle" style="fill:#601410;font:700 9.5px Roboto,sans-serif">99+</text>
+  <text x="67" y="727" text-anchor="middle" style="fill:#fafafa;font:700 12.5px Roboto,sans-serif">Chats</text>
+  <g fill="none" stroke="#9a9a9a" stroke-width="1.5"><rect x="196" y="690" width="8" height="6" rx="1.5"/><rect x="190" y="704" width="8" height="6" rx="1.5"/><rect x="202" y="704" width="8" height="6" rx="1.5"/><path d="M200 696 v4 M194 704 v-4 h12 v4"/></g>
+  <text x="200" y="727" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Contacts</text>
+  <path d="M323 691 v18 h20 M328 705 v-6 M333 705 v-11 M338 705 v-4" fill="none" stroke="#9a9a9a" stroke-width="1.6" stroke-linecap="round"/>
+  <text x="333" y="727" text-anchor="middle" style="fill:#9a9a9a;font:12.5px Roboto,sans-serif">Stats</text>
+</svg>
